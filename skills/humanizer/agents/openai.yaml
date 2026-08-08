@@ -1,4 +1,4 @@
 interface:
   display_name: "Humanizer"
-  short_description: "Rewrite drafts in an engineering leader voice"
-  default_prompt: "Use $humanizer to rewrite this draft in a direct, grounded engineering leader voice."
+  short_description: "Rewrite drafts in a concise engineering leader voice"
+  default_prompt: "Use $humanizer to rewrite this draft in a direct, grounded engineering leader voice. Start with the rewrite and keep notes brief."

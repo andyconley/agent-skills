@@ -1,6 +1,6 @@
 # Agent Skills
 
-Portable skills for Codex, Claude Code, and other LLM agents. The first two separate document structure from prose cleanup:
+Portable skills for Codex, Claude Code, and other LLM agents. The first two separate document structure from prose cleanup and share a short-output discipline:
 
 | Skill | Use it for | Do not use it for |
 | --- | --- | --- |
@@ -8,6 +8,8 @@ Portable skills for Codex, Claude Code, and other LLM agents. The first two sepa
 | `humanizer` | Direct, concise prose in an experienced engineering-leader voice | Structural review or changing protected requirements |
 
 When a document needs both, run `doc-flow-review` first. Apply the structural decisions, then run `humanizer` on the prose.
+
+Both skills are intentionally host-agnostic. The optional `agents/openai.yaml` files provide Codex UI metadata, but the actual behavior lives in Markdown skill files and shared examples.
 
 ## Install
 
@@ -50,7 +52,11 @@ Start a new agent session afterward. A built-in skill resumes only if the host p
 
 ## Use with another LLM
 
-Give the model the relevant `SKILL.md` as task instructions. Include referenced supporting files when needed. `doc-flow-review` uses `assets/reviewer-block.md` only when generating a reviewer-request block.
+Give the model the relevant `SKILL.md` as task instructions. Include referenced supporting files when needed.
+
+The shared output discipline lives in `shared/agent-output-discipline.md`. The examples in `examples/` show bad and good agent output, plus manual regression prompts for checking whether an agent is getting wordy again.
+
+`doc-flow-review` uses `assets/reviewer-block.md` only when generating a reviewer-request block.
 
 The core skills need no scripts, network access, connectors, or product-specific tools. Optional `agents/openai.yaml` files add Codex UI metadata; other hosts can ignore them.
 
@@ -72,6 +78,8 @@ To retire a skill, move its declaration from `skills/manifest.tsv` to `skills/re
 ./scripts/validate-skills.sh
 ./tests/install-test.sh
 ```
+
+For behavior checks after editing the writing skills, run the prompts in `examples/agent-output-regression-prompts.md` against the target agent. These are manual checks, not an objective scoring system.
 
 ## License
 
