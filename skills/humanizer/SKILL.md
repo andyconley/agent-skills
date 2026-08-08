@@ -1,11 +1,11 @@
 ---
 name: humanizer
-description: Rewrites prose in the voice of an experienced engineering leader explaining reality to capable adults. Removes AI syntax patterns, filler, author-state narration, and corporate language while preserving the author's voice, facts, technical terms, and immutable reference material. Use for technical writing, case studies, messages, issue descriptions, emails, specs, checklists, or documentation. Do not use for structural review; use doc-flow-review first when a draft needs both structure and prose work. Version 4.4.0.
+description: Rewrites prose in the voice of an experienced engineering leader explaining reality to capable adults. Removes AI syntax patterns, filler, author-state narration, and corporate language while preserving the author's voice, facts, technical terms, and immutable reference material. Use for technical writing, case studies, messages, issue descriptions, emails, specs, checklists, or documentation. Do not use for structural review; use doc-flow-review first when a draft needs both structure and prose work. Version 4.5.0.
 ---
 
 # Humanizer: Rewrite for Engineering Leader Voice
 
-**Version: 4.4.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
+**Version: 4.5.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
 
 ## Objective
 
@@ -36,11 +36,12 @@ For strict mode, also apply `../../shared/final-gates.md` and `../../shared/patt
 
 Use strict mode when the user asks for `strict`, `high`, `hard pass`, `vale pass`, or `lint pass`.
 
-Strict mode does not require Vale in this version. Apply the final gates and known surface tells manually.
+Strict mode uses Vale when shell access exists, Vale is installed, and `tools/vale/.vale.ini` is available in the repository that contains this skill. If Vale cannot run, apply the final gates and known surface tells manually.
 
 In strict mode:
 
 - run the normal rewrite
+- from the repository that contains this skill, run `scripts/lint-prose.sh <target>` when the target is a file and the wrapper is available
 - apply the pattern classes before final output
 - revise until the final gates pass
 - return the rewrite first
@@ -367,3 +368,5 @@ Finish when:
 `../../examples/humanizer-agent-output.md` — bad and good rewrite-output examples.
 
 `../../examples/regression/` — manual regression fixtures for known failures.
+
+`../../tools/vale/` — optional Vale rules for strict-mode mechanical checks.

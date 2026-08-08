@@ -1,0 +1,14 @@
+extends: existence
+message: "Avoid stance phrase '%s'. State the point directly."
+level: error
+ignorecase: true
+tokens:
+  - 'Worth saying plainly'
+  - 'Worth noting'
+  - 'Worth considering'
+  - 'The key thing here is'
+  - 'The open question is genuinely open'
+  - 'genuinely open'
+  - 'This is an attempt to capture'
+  - 'it is important to note'
+

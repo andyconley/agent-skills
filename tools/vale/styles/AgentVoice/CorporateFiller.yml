@@ -1,0 +1,13 @@
+extends: existence
+message: "Avoid filler '%s'. Use the plain verb or delete it."
+level: warning
+ignorecase: true
+tokens:
+  - 'strategic effort'
+  - 'leverage'
+  - 'robust'
+  - 'seamless'
+  - 'comprehensive'
+  - 'in order to'
+  - 'due to the fact that'
+

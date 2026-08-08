@@ -1,0 +1,14 @@
+extends: existence
+message: "Avoid polished review heading '%s'. Use a plain working label."
+level: error
+scope: heading
+ignorecase: true
+tokens:
+  - 'Key takeaways'
+  - 'Problems worth fixing'
+  - 'Worth a pass'
+  - "What's already correctly structured"
+  - 'What would change this conclusion'
+  - 'Recommendations and next steps'
+  - 'Areas of opportunity'
+

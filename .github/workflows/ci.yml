@@ -22,3 +22,9 @@ jobs:
         run: ./scripts/validate-skills.sh
       - name: Test installer
         run: ./tests/install-test.sh
+      - name: Lint prose
+        uses: vale-cli/vale-action@v3
+        with:
+          config: tools/vale/.vale.ini
+          files: '["README.md","skills","shared","examples","tests/manual"]'
+          fail_on_error: true
