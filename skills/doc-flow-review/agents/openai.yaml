@@ -1,0 +1,4 @@
+interface:
+  display_name: "Doc Flow Review"
+  short_description: "Review document structure and information flow"
+  default_prompt: "Use $doc-flow-review to review this document for structure and information flow."

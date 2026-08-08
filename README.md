@@ -1,0 +1,78 @@
+# Agent Skills
+
+Portable skills for Codex, Claude Code, and other LLM agents. The first two separate document structure from prose cleanup:
+
+| Skill | Use it for | Do not use it for |
+| --- | --- | --- |
+| `doc-flow-review` | Structure, information order, progressive disclosure, argument, and depth | Copyediting, fact-checking, or rewriting prose |
+| `humanizer` | Direct, concise prose in an experienced engineering-leader voice | Structural review or changing protected requirements |
+
+When a document needs both, run `doc-flow-review` first. Apply the structural decisions, then run `humanizer` on the prose.
+
+## Install
+
+macOS and Linux are supported. The installer keeps a checkout at `${AGENT_SKILLS_HOME:-$HOME/agent-skills}` and links selected skills into both Codex and Claude Code. It never removes skills it does not manage.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/andyconley/agent-skills/main/install.sh | bash
+```
+
+The interactive installer lists the manifest and lets you choose one, several, or all skills. Empty input cancels without making changes.
+
+For unattended installation:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/andyconley/agent-skills/main/install.sh | bash -s -- --all
+./install.sh --skill humanizer --skill doc-flow-review
+```
+
+The default targets are:
+
+- Codex: `~/.agents/skills/<skill>`
+- Claude Code: `~/.claude/skills/<skill>`
+
+If a selected target already contains a file, directory, or unrelated symlink, the installer stops before changing any target. Move or back up the conflict, then retry. A correct existing symlink is left in place.
+
+## Update
+
+Run the installer again. It requires a clean checkout with the expected GitHub origin, updates it with a fast-forward-only pull, and refreshes the selected links. Existing links point at the updated source automatically.
+
+## Uninstall
+
+Uninstall removes only symlinks that point to this checkout. It does not delete skill source, the checkout, or unrelated runtime skills.
+
+```bash
+./install.sh --uninstall --skill humanizer
+./install.sh --uninstall --all
+```
+
+Start a new agent session afterward. A built-in skill resumes only if the host provides one with the same name.
+
+## Use with another LLM
+
+Give the model the relevant `SKILL.md` as task instructions. Include referenced supporting files when needed. `doc-flow-review` uses `assets/reviewer-block.md` only when generating a reviewer-request block.
+
+The core skills need no scripts, network access, connectors, or product-specific tools. Optional `agents/openai.yaml` files add Codex UI metadata; other hosts can ignore them.
+
+## Add a skill
+
+Add `skills/<slug>/SKILL.md`, make its frontmatter `name` match the folder, and declare it in `skills/manifest.tsv` as `slug<TAB>description`. CI rejects duplicates, missing directories, undeclared directories, and name mismatches.
+
+To retire a skill, move its declaration from `skills/manifest.tsv` to `skills/retired.tsv` and leave its source directory in place. It disappears from new installs, existing symlinks keep working, and no runtime target is pruned.
+
+## Development
+
+```bash
+./scripts/validate-skills.sh
+./tests/install-test.sh
+```
+
+## License
+
+[MIT](LICENSE)
+
+## References
+
+- [Agent Skills open standard](https://agentskills.io)
+- [Claude Code skills](https://code.claude.com/docs/en/skills)
+- [OpenAI skill guidance](https://learn.chatgpt.com/docs/build-skills)
