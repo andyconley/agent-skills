@@ -54,7 +54,7 @@ Start a new agent session afterward. A built-in skill resumes only if the host p
 
 Give the model the relevant `SKILL.md` as task instructions. Include referenced supporting files when needed.
 
-The shared output discipline lives in `shared/agent-output-discipline.md`. The examples in `examples/` show bad and good agent output, plus manual regression prompts for checking whether an agent is getting wordy again.
+The shared output discipline lives in `shared/agent-output-discipline.md`. The examples in `examples/` show bad and good agent output, plus manual regression prompts for checking whether an agent is getting wordy or using polished review-template headings again.
 
 `doc-flow-review` uses `assets/reviewer-block.md` only when generating a reviewer-request block.
 

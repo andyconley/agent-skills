@@ -1,11 +1,11 @@
 ---
 name: doc-flow-review
-description: Reviews documents for structure and information flow rather than correctness or sentence-level style. Checks whether a document starts high and goes deep cleanly, each section builds on prior context, and each claim follows from established evidence or constraints. Use for readability, structural, developmental, clarity, organization, or pre-review feedback on design docs, PRDs, proposals, specs, runbooks, postmortems, RFCs, and long-form writing. Do not use for copyediting, grammar, fact-checking, or prose rewriting; use humanizer after structural decisions when both are needed. Version 1.1.0.
+description: Reviews documents for structure and information flow rather than correctness or sentence-level style. Checks whether a document starts high and goes deep cleanly, each section builds on prior context, and each claim follows from established evidence or constraints. Use for readability, structural, developmental, clarity, organization, or pre-review feedback on design docs, PRDs, proposals, specs, runbooks, postmortems, RFCs, and long-form writing. Do not use for copyediting, grammar, fact-checking, or prose rewriting; use humanizer after structural decisions when both are needed. Version 1.2.0.
 ---
 
 # Doc Flow Review
 
-**Version: 1.1.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
+**Version: 1.2.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
 
 Review documents for **structure and information flow**, not correctness.
 
@@ -24,6 +24,7 @@ Follow the shared contract in `../../shared/agent-output-discipline.md`. If that
 - Do not turn one problem into several overlapping findings.
 - For each finding, give the place, what breaks, and the smallest fix.
 - Keep the close short. Include what works only when it is specific and useful.
+- Use plain working labels for sections. Prefer `Summary`, `Recommendation`, `Problems to fix`, `Needs investigation`, `Good structure`, `Risks`, `Unknowns`, and `What to watch`.
 
 For output examples, see `../../examples/doc-flow-review-agent-output.md`.
 
@@ -98,6 +99,7 @@ If there is only one real issue, report one issue. Do not pad the review to fill
 - **Respect the audience.** A runbook for on-call engineers and a proposal for a VP fail in different ways. Ask who reads this if it isn't obvious, and calibrate the depth expectations to them.
 - **Don't confuse "I'd have written it differently" with a defect.** Only flag what costs the reader something.
 - **Do not review your own review.** No recap of how the feedback is structured, no explanation that the comments are concise, and no praise for the document unless it protects something the author should keep.
+- **Watch the labels.** `Problems worth fixing`, `Worth a pass`, `What's already correctly structured`, and `What would change this conclusion` sound like agent review headings now. Use plainer labels instead.
 
 ## Reference
 

@@ -22,6 +22,33 @@ Write like a capable person doing the work, not like a system explaining the wor
 - Repeated framing: two sentences that make the same point at different altitude
 - Decorative certainty: `clearly`, `strong`, `robust`, `seamless`, `comprehensive`
 
+## Headings and labels
+
+Use short working labels, not polished reviewer labels. A heading should sound like something someone would put in a working doc, not like an agent organizing its evaluation.
+
+Prefer:
+
+- `Summary`
+- `Recommendation`
+- `Problems to fix`
+- `Needs investigation`
+- `Good structure`
+- `Risks`
+- `Unknowns`
+- `What to watch`
+
+Avoid by default:
+
+- `Key takeaways`
+- `Problems worth fixing`
+- `Worth a pass`
+- `What's already correctly structured`
+- `What would change this conclusion`
+- `Areas of opportunity`
+- `Recommendations and next steps`
+
+Some phrases are not unclear. They are just overused by agents now. Replace them anyway.
+
 ## Keep when useful
 
 - A blunt first sentence
@@ -48,4 +75,3 @@ Before answering, remove any sentence that mostly says:
 - that the output is concise
 - that the output balances two obvious concerns
 - what the reader already knows from the prompt
-

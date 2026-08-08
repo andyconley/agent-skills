@@ -1,11 +1,11 @@
 ---
 name: humanizer
-description: Rewrites prose in the voice of an experienced engineering leader explaining reality to capable adults. Removes AI syntax patterns, filler, and corporate language while preserving the author's voice, facts, technical terms, and immutable reference material. Use for technical writing, case studies, messages, issue descriptions, emails, specs, checklists, or documentation. Do not use for structural review; use doc-flow-review first when a draft needs both structure and prose work. Version 4.1.0.
+description: Rewrites prose in the voice of an experienced engineering leader explaining reality to capable adults. Removes AI syntax patterns, filler, and corporate language while preserving the author's voice, facts, technical terms, and immutable reference material. Use for technical writing, case studies, messages, issue descriptions, emails, specs, checklists, or documentation. Do not use for structural review; use doc-flow-review first when a draft needs both structure and prose work. Version 4.2.0.
 ---
 
 # Humanizer: Rewrite for Engineering Leader Voice
 
-**Version: 4.1.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
+**Version: 4.2.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
 
 ## Objective
 
@@ -26,6 +26,7 @@ Follow the shared contract in `../../shared/agent-output-discipline.md`. If that
 - Keep change notes to 2 or 3 bullets by default.
 - Cut any sentence that restates the prompt, praises the rewrite, or describes the skill.
 - Avoid agent-sounding symmetry: `not only X but also Y`, `both A and B`, `whether X or Y`, `X, not Y`.
+- Replace polished review headings with plain working labels. Prefer `Summary`, `Recommendation`, `Problems to fix`, `Needs investigation`, `Good structure`, `Risks`, `Unknowns`, and `What to watch`.
 
 For output examples, see `../../examples/humanizer-agent-output.md`.
 
@@ -184,6 +185,7 @@ Remove:
 - repeated setup
 - soft transitions such as `overall`, `in summary`, `the key idea`
 - generic labels such as `more polished`, `more concise`, `more natural`
+- section headings that sound like a reusable evaluation framework
 
 Keep:
 
@@ -191,6 +193,8 @@ Keep:
 - adjacent edits that matter
 - constraints the user needs to know
 - source-format notes when preserving format affects the result
+
+If the source has headings such as `Key takeaways`, `Problems worth fixing`, `Worth a pass`, `What's already correctly structured`, or `What would change this conclusion`, replace them with plainer working labels unless the user explicitly asks to preserve headings exactly.
 
 ## Preserve technical truth
 
@@ -279,3 +283,4 @@ Finish when:
 - The author's voice remains recognizable.
 - The core message and sourcing remain intact.
 - The response around the rewrite is not longer than the rewrite unless the user asked for analysis.
+- Section headings sound like working labels, not polished reviewer taxonomy.
