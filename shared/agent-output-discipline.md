@@ -2,6 +2,8 @@
 
 Use this contract when a skill asks for concise, human, non-performative output.
 
+For strict or high-signal passes, also apply `final-gates.md` and `pattern-classes.md`.
+
 ## Default stance
 
 Write like a capable person doing the work, not like a system explaining the work.
@@ -65,6 +67,18 @@ Caps are defaults, not laws. Exceed them only when the user asks for depth or th
 - Rewrite change notes: 2 to 3
 - Explanation before the artifact: none
 - Explanation after the artifact: only what changes how the user should read or use it
+
+## Strict mode
+
+Strict mode is triggered by user wording such as:
+
+- `strict`
+- `high`
+- `hard pass`
+- `vale pass`
+- `lint pass`
+
+Strict mode does not require Vale in this version. Apply the final gates and known surface tells manually. Future versions may run Vale when available.
 
 ## Final check
 

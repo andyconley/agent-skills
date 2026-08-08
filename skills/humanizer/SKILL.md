@@ -1,11 +1,11 @@
 ---
 name: humanizer
-description: Rewrites prose in the voice of an experienced engineering leader explaining reality to capable adults. Removes AI syntax patterns, filler, author-state narration, and corporate language while preserving the author's voice, facts, technical terms, and immutable reference material. Use for technical writing, case studies, messages, issue descriptions, emails, specs, checklists, or documentation. Do not use for structural review; use doc-flow-review first when a draft needs both structure and prose work. Version 4.3.0.
+description: Rewrites prose in the voice of an experienced engineering leader explaining reality to capable adults. Removes AI syntax patterns, filler, author-state narration, and corporate language while preserving the author's voice, facts, technical terms, and immutable reference material. Use for technical writing, case studies, messages, issue descriptions, emails, specs, checklists, or documentation. Do not use for structural review; use doc-flow-review first when a draft needs both structure and prose work. Version 4.4.0.
 ---
 
 # Humanizer: Rewrite for Engineering Leader Voice
 
-**Version: 4.3.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
+**Version: 4.4.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
 
 ## Objective
 
@@ -30,6 +30,23 @@ Follow the shared contract in `../../shared/agent-output-discipline.md`. If that
 
 For output examples, see `../../examples/humanizer-agent-output.md`.
 
+For strict mode, also apply `../../shared/final-gates.md` and `../../shared/pattern-classes.md`.
+
+## Strict mode
+
+Use strict mode when the user asks for `strict`, `high`, `hard pass`, `vale pass`, or `lint pass`.
+
+Strict mode does not require Vale in this version. Apply the final gates and known surface tells manually.
+
+In strict mode:
+
+- run the normal rewrite
+- apply the pattern classes before final output
+- revise until the final gates pass
+- return the rewrite first
+- report only remaining blocking issues, if any
+- do not include method narration or a checklist of passed gates
+
 ## Quick start
 
 1. Read the draft. Identify the document type under **Branch on document type**.
@@ -40,9 +57,10 @@ For output examples, see `../../examples/humanizer-agent-output.md`.
 6. Run the deletion test.
 7. Run the measurable checks.
 8. Run the compression pass.
-9. Run the two guardrails.
-10. Return the rewrite plus a short summary of material changes.
-11. Update the source only when the user asks and the environment supports it.
+9. Run the final gates.
+10. Run the two guardrails.
+11. Return the rewrite plus a short summary of material changes.
+12. Update the source only when the user asks and the environment supports it.
 
 ## Branch on document type
 
@@ -199,6 +217,18 @@ For each sentence, delete it. If no fact, decision, constraint, or necessary tra
 
 This catches stance work a phrase list will miss. It does not catch every author-state sentence. `My first read was wrong` carries a fact, but the fact is the correction, not the author's experience. Use the deletion test and author-state scan together.
 
+## Final gates
+
+Before responding, revise until these gates pass:
+
+- **Subject gate:** each paragraph is about the work, not the author, agent, review, or writing process.
+- **Utility gate:** every sentence carries a fact, decision, constraint, risk, fix, or necessary transition.
+- **Label gate:** headings are working labels, not polished review labels.
+- **Prose gate:** no preamble, method narration, praise sandwich, generic recap, or self-congratulation.
+- **Evidence gate:** uncertainty is attached to the unknown, not the writer's feelings about it.
+
+Truth preservation protects facts, commands, identifiers, uncertainty, obligations, and technical meaning. It does not protect weak framing, author posture, section labels, or sentence order.
+
 ## Measurable checks
 
 Do not use a blanket word-count reduction target. Word count is a poor proxy. An already lean draft cannot hit it, and hitting it does not fix voice.
@@ -325,3 +355,15 @@ Finish when:
 - The response around the rewrite is not longer than the rewrite unless the user asked for analysis.
 - Section headings sound like working labels, not polished reviewer taxonomy.
 - Author-state and stance sentences are either converted to subject-level statements or cut.
+
+## Reference
+
+`../../shared/agent-output-discipline.md` — shared output contract for short, human agent responses.
+
+`../../shared/final-gates.md` — mandatory final gates for strict and normal quality checks.
+
+`../../shared/pattern-classes.md` — pattern classes and examples for known AI-shaped failures.
+
+`../../examples/humanizer-agent-output.md` — bad and good rewrite-output examples.
+
+`../../examples/regression/` — manual regression fixtures for known failures.

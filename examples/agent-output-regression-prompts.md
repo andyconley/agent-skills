@@ -2,6 +2,8 @@
 
 Use these after changing the skills. They are manual checks, not a scoring system.
 
+For deeper fixtures, see `examples/regression/` and `tests/manual/`.
+
 ## Humanizer
 
 Prompt:
@@ -11,6 +13,8 @@ Use the humanizer skill on this draft.
 
 This proposal represents a strategic effort to establish a more robust intake process for cross-functional work. By leveraging a consistent template, teams can create alignment, surface dependencies, and ensure that the right stakeholders are engaged before execution begins.
 ```
+
+Strict mode aliases: `strict`, `high`, `hard pass`, `vale pass`, `lint pass`.
 
 Passes if the output:
 
