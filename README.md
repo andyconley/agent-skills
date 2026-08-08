@@ -11,6 +11,8 @@ When a document needs both, run `doc-flow-review` first. Apply the structural de
 
 Both skills are intentionally host-agnostic. The optional `agents/openai.yaml` files provide Codex UI metadata, but the actual behavior lives in Markdown skill files and shared examples.
 
+Both writing skills support optional strict mode. Trigger it with wording such as `strict`, `high`, `hard pass`, `vale pass`, or `lint pass`. Strict mode applies the shared final gates and pattern classes manually. Vale support is planned as optional tooling in a later version; it is not required today.
+
 ## Install
 
 macOS and Linux are supported. The installer keeps a checkout at `${AGENT_SKILLS_HOME:-$HOME/agent-skills}` and links selected skills into both Codex and Claude Code. It never removes skills it does not manage.
@@ -54,7 +56,7 @@ Start a new agent session afterward. A built-in skill resumes only if the host p
 
 Give the model the relevant `SKILL.md` as task instructions. Include referenced supporting files when needed.
 
-The shared output discipline lives in `shared/agent-output-discipline.md`. The examples in `examples/` show bad and good agent output, plus manual regression prompts for checking whether an agent is getting wordy or using polished review-template headings again.
+The shared output discipline lives in `shared/agent-output-discipline.md`. Final gates live in `shared/final-gates.md`; pattern classes live in `shared/pattern-classes.md`. The examples in `examples/` show bad and good agent output, plus manual regression prompts for checking whether an agent is getting wordy or using polished review-template headings again.
 
 `doc-flow-review` uses `assets/reviewer-block.md` only when generating a reviewer-request block.
 
@@ -80,6 +82,11 @@ To retire a skill, move its declaration from `skills/manifest.tsv` to `skills/re
 ```
 
 For behavior checks after editing the writing skills, run the prompts in `examples/agent-output-regression-prompts.md` against the target agent. These are manual checks, not an objective scoring system.
+
+For a fuller pass, use:
+
+- `examples/regression/` for bad source/output, failure reason, expected shape, and pass checks
+- `tests/manual/` for prompts to run against a live agent
 
 ## License
 

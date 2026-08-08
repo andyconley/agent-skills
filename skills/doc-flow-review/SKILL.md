@@ -1,11 +1,11 @@
 ---
 name: doc-flow-review
-description: Reviews documents for structure and information flow rather than correctness or sentence-level style. Checks whether a document starts high and goes deep cleanly, each section builds on prior context, and each claim follows from established evidence or constraints. Use for readability, structural, developmental, clarity, organization, or pre-review feedback on design docs, PRDs, proposals, specs, runbooks, postmortems, RFCs, and long-form writing. Do not use for copyediting, grammar, fact-checking, or prose rewriting; use humanizer after structural decisions when both are needed. Version 1.2.0.
+description: Reviews documents for structure and information flow rather than correctness or sentence-level style. Checks whether a document starts high and goes deep cleanly, each section builds on prior context, and each claim follows from established evidence or constraints. Use for readability, structural, developmental, clarity, organization, or pre-review feedback on design docs, PRDs, proposals, specs, runbooks, postmortems, RFCs, and long-form writing. Do not use for copyediting, grammar, fact-checking, or prose rewriting; use humanizer after structural decisions when both are needed. Version 1.3.0.
 ---
 
 # Doc Flow Review
 
-**Version: 1.2.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
+**Version: 1.3.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
 
 Review documents for **structure and information flow**, not correctness.
 
@@ -27,6 +27,23 @@ Follow the shared contract in `../../shared/agent-output-discipline.md`. If that
 - Use plain working labels for sections. Prefer `Summary`, `Recommendation`, `Problems to fix`, `Needs investigation`, `Good structure`, `Risks`, `Unknowns`, and `What to watch`.
 
 For output examples, see `../../examples/doc-flow-review-agent-output.md`.
+
+For strict mode, also apply `../../shared/final-gates.md` and `../../shared/pattern-classes.md`.
+
+## Strict mode
+
+Use strict mode when the user asks for `strict`, `high`, `hard pass`, `vale pass`, or `lint pass`.
+
+Strict mode does not require Vale in this version. Apply the final gates and known surface tells manually.
+
+In strict mode:
+
+- run the normal structure review
+- apply the doc-flow pattern classes before final output
+- revise until the final gates pass
+- report only findings that change the author's next action
+- report only remaining blocking issues, if any
+- do not include method narration or a checklist of passed gates
 
 ## Two modes
 
@@ -92,6 +109,17 @@ Close with what's working — specifically, so they don't undo it in revision.
 
 If there is only one real issue, report one issue. Do not pad the review to fill the four passes.
 
+## Final gates
+
+Before responding, revise until these gates pass:
+
+- **Subject gate:** each finding is about the document and reader cost, not the reviewer or review process.
+- **Utility gate:** every sentence carries a reader problem, evidence, fix, risk, or necessary transition.
+- **Label gate:** headings are working labels, not polished review labels.
+- **Prose gate:** no preamble, method narration, praise sandwich, generic recap, or self-congratulation.
+- **Evidence gate:** uncertainty is attached to the unresolved question, not the reviewer's feelings about it.
+- **Scope gate:** review structure only; do not rewrite prose, fact-check, or copyedit unless asked.
+
 ## Calibration
 
 - **Be a reader, not a rubric.** The passes are a checklist for your attention, not a form to fill in. If a doc is well structured, say so and stop. Five weak findings are worse than one real one.
@@ -107,4 +135,10 @@ If there is only one real issue, report one issue. Do not pad the review to fill
 
 `../../shared/agent-output-discipline.md` — shared output contract for short, human agent responses.
 
+`../../shared/final-gates.md` — mandatory final gates for strict and normal quality checks.
+
+`../../shared/pattern-classes.md` — pattern classes and examples for known AI-shaped failures.
+
 `../../examples/doc-flow-review-agent-output.md` — bad and good review-output examples.
+
+`../../examples/regression/` — manual regression fixtures for known failures.
