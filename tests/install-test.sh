@@ -18,6 +18,15 @@ run_manager() {
   "$REPO_ROOT/scripts/manage-skills.sh" "$@"
 }
 
+run_manager_path() {
+  local path_value="$1"
+  shift
+  AGENT_SKILLS_CODEX_DIR="$TEST_ROOT/codex" \
+  AGENT_SKILLS_CLAUDE_DIR="$TEST_ROOT/claude" \
+  PATH="$path_value" \
+  "$REPO_ROOT/scripts/manage-skills.sh" "$@"
+}
+
 "$REPO_ROOT/scripts/validate-skills.sh" >/dev/null
 pass "manifest validates"
 
@@ -85,5 +94,49 @@ if run_manager --uninstall --skill humanizer >"$TEST_ROOT/uninstall-conflict.out
 fi
 assert_link "$TEST_ROOT/codex/humanizer" "$REPO_ROOT/skills/humanizer"
 pass "uninstall preflight prevents partial removal"
+rmdir "$TEST_ROOT/claude/humanizer"
+
+run_manager --uninstall --all >/dev/null
+missing_vale_path="/usr/bin:/bin:/usr/sbin:/sbin"
+run_manager_path "$missing_vale_path" --all --no-vale >"$TEST_ROOT/no-vale.out" 2>&1
+assert_link "$TEST_ROOT/codex/humanizer" "$REPO_ROOT/skills/humanizer"
+assert_link "$TEST_ROOT/codex/doc-flow-review" "$REPO_ROOT/skills/doc-flow-review"
+pass "no-vale skips dependency handling"
+
+run_manager --uninstall --all >/dev/null
+if run_manager_path "$missing_vale_path" --all --with-vale >"$TEST_ROOT/with-vale-missing.out" 2>&1; then
+  fail "--with-vale should fail without Vale or supported installer"
+fi
+assert_missing "$TEST_ROOT/codex/humanizer"
+assert_missing "$TEST_ROOT/claude/humanizer"
+pass "with-vale fails clearly when unsupported"
+
+fakebin="$TEST_ROOT/fakebin"
+mkdir -p "$fakebin"
+cat >"$fakebin/brew" <<EOF
+#!/usr/bin/env bash
+set -euo pipefail
+[ "\$1" = "install" ] && [ "\$2" = "vale" ]
+cat >"$fakebin/vale" <<'VALE'
+#!/usr/bin/env bash
+printf 'vale version test\n'
+VALE
+chmod +x "$fakebin/vale"
+EOF
+chmod +x "$fakebin/brew"
+run_manager_path "$fakebin:$missing_vale_path" --skill humanizer --with-vale >"$TEST_ROOT/with-vale.out" 2>&1
+assert_link "$TEST_ROOT/codex/humanizer" "$REPO_ROOT/skills/humanizer"
+grep -Fq 'Vale installed: vale version test' "$TEST_ROOT/with-vale.out" || fail "with-vale did not install mocked Vale"
+pass "with-vale installs through supported package manager"
+
+if run_manager --uninstall --with-vale --skill humanizer >"$TEST_ROOT/uninstall-with-vale.out" 2>&1; then
+  fail "--with-vale should not be accepted with uninstall"
+fi
+pass "with-vale is rejected for uninstall"
+
+if run_manager --all --with-vale --no-vale >"$TEST_ROOT/vale-conflict.out" 2>&1; then
+  fail "--with-vale and --no-vale should conflict"
+fi
+pass "vale flags are mutually exclusive"
 
 printf '1..%s\n' "$pass_count"

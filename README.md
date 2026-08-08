@@ -30,6 +30,15 @@ curl -fsSL https://raw.githubusercontent.com/andyconley/agent-skills/main/instal
 ./install.sh --skill humanizer --skill doc-flow-review
 ```
 
+Vale is optional, but enables strict-mode prose linting. If Vale is missing, interactive installs offer to install it. For unattended installs:
+
+```bash
+./install.sh --all --with-vale
+./install.sh --all --no-vale
+```
+
+`--with-vale` installs Vale with Homebrew when available and fails clearly when no supported installer is found. `--no-vale` skips dependency handling.
+
 The default targets are:
 
 - Codex: `~/.agents/skills/<skill>`
@@ -88,7 +97,7 @@ For a fuller pass, use:
 - `examples/regression/` for bad source/output, failure reason, expected shape, and pass checks
 - `tests/manual/` for prompts to run against a live agent
 
-For mechanical prose linting, install Vale and run:
+For mechanical prose linting, install Vale through the installer or your package manager, then run:
 
 ```bash
 ./scripts/lint-prose.sh
