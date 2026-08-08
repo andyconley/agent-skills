@@ -1,11 +1,11 @@
 ---
 name: humanizer
-description: Rewrites prose in the voice of an experienced engineering leader explaining reality to capable adults. Removes AI syntax patterns, filler, and corporate language while preserving the author's voice, facts, technical terms, and immutable reference material. Use for technical writing, case studies, messages, issue descriptions, emails, specs, checklists, or documentation. Do not use for structural review; use doc-flow-review first when a draft needs both structure and prose work. Version 4.2.0.
+description: Rewrites prose in the voice of an experienced engineering leader explaining reality to capable adults. Removes AI syntax patterns, filler, author-state narration, and corporate language while preserving the author's voice, facts, technical terms, and immutable reference material. Use for technical writing, case studies, messages, issue descriptions, emails, specs, checklists, or documentation. Do not use for structural review; use doc-flow-review first when a draft needs both structure and prose work. Version 4.3.0.
 ---
 
 # Humanizer: Rewrite for Engineering Leader Voice
 
-**Version: 4.2.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
+**Version: 4.3.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
 
 ## Objective
 
@@ -35,12 +35,14 @@ For output examples, see `../../examples/humanizer-agent-output.md`.
 1. Read the draft. Identify the document type under **Branch on document type**.
 2. Scan for syntax tells. These matter more than vocabulary.
 3. Scan for vocabulary tells.
-4. Rewrite. Rebuild sentences; do not just substitute words.
-5. Run the measurable checks.
-6. Run the compression pass.
-7. Run the two guardrails.
-8. Return the rewrite plus a short summary of material changes.
-9. Update the source only when the user asks and the environment supports it.
+4. Scan for author-state and stance sentences.
+5. Rewrite. Rebuild sentences; do not just substitute words.
+6. Run the deletion test.
+7. Run the measurable checks.
+8. Run the compression pass.
+9. Run the two guardrails.
+10. Return the rewrite plus a short summary of material changes.
+11. Update the source only when the user asks and the environment supports it.
 
 ## Branch on document type
 
@@ -111,9 +113,35 @@ Describing a finished condition instead of an action.
 - Tell: `handed down through practice`
 - Fix: `we came up with it in the room, figuring out what worked`
 
-### Hedged closers
+### Stance sentences
 
-Cut phrases such as `This is an attempt to capture it` and `Worth considering`. Replace them with a flat statement or a shrug.
+A sentence whose main job is to tell the reader how to weigh the next sentence, rather than to carry information. It can appear anywhere: opener, closer, or standalone fragment.
+
+- Tell: `Worth saying plainly: the number counts references, not targets.`
+- Fix: `The number counts references, not targets.`
+- Tell: `The open question is genuinely open.`
+- Fix: Ask the question.
+- Tell: `The key thing here is...`
+- Fix: State the thing.
+- Tell: `This is an attempt to capture it.`
+- Fix: Cut it, or replace it with the actual point.
+
+### Author-state sentences
+
+A sentence that reports the author's thinking instead of the subject. The reader should track the finding, not the author's relationship to the finding.
+
+Common verbs: `concluded`, `claimed`, `tested`, `chased`, `read`, `shelved`, `assumed`, `noticed`, `would rather`.
+
+- Tell: `What I concluded, and what I'm not claiming.`
+- Fix: `Conclusion` / `Limits`
+- Tell: `Two things I didn't test that may matter more.`
+- Fix: `Untested: cross-repo OpenAPI linking and the summarization layer.`
+- Tell: `My first read of this was wrong.`
+- Fix: `Earlier, this note said 33%. That counted references, not targets.`
+- Tell: `That's what I shelved it on.`
+- Fix: Cut it. The reason should already be on the page.
+
+More than two or three author-state sentences in a document is a smell. Convert each to a statement about the subject, or delete it.
 
 ## Vocabulary tells
 
@@ -161,6 +189,16 @@ Choose one posture and hold it throughout the document.
 
 Mixing postures within a paragraph often reads as blame-shifting. For example: `We come asking for a spot, and then you bring the recommendation.`
 
+Switching a document to first-person singular is a posture decision, not a substitution. Before switching, count sentences whose subject is the author. If there are more than a handful, convert those first. Otherwise the switch amplifies self-narration instead of sharpening voice.
+
+## Deletion test
+
+Run this after the rewrite.
+
+For each sentence, delete it. If no fact, decision, constraint, or necessary transition disappears, cut it.
+
+This catches stance work a phrase list will miss. It does not catch every author-state sentence. `My first read was wrong` carries a fact, but the fact is the correction, not the author's experience. Use the deletion test and author-state scan together.
+
 ## Measurable checks
 
 Do not use a blanket word-count reduction target. Word count is a poor proxy. An already lean draft cannot hit it, and hitting it does not fix voice.
@@ -186,6 +224,8 @@ Remove:
 - soft transitions such as `overall`, `in summary`, `the key idea`
 - generic labels such as `more polished`, `more concise`, `more natural`
 - section headings that sound like a reusable evaluation framework
+- stance sentences that tell the reader how to weigh the next point
+- author-state sentences that make the author a character in the doc
 
 Keep:
 
@@ -284,3 +324,4 @@ Finish when:
 - The core message and sourcing remain intact.
 - The response around the rewrite is not longer than the rewrite unless the user asked for analysis.
 - Section headings sound like working labels, not polished reviewer taxonomy.
+- Author-state and stance sentences are either converted to subject-level statements or cut.
