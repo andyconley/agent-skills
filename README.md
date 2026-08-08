@@ -11,7 +11,7 @@ When a document needs both, run `doc-flow-review` first. Apply the structural de
 
 Both skills are intentionally host-agnostic. The optional `agents/openai.yaml` files provide Codex UI metadata, but the actual behavior lives in Markdown skill files and shared examples.
 
-Both writing skills support optional strict mode. Trigger it with wording such as `strict`, `high`, `hard pass`, `vale pass`, or `lint pass`. Strict mode applies the shared final gates and pattern classes manually. Vale support is planned as optional tooling in a later version; it is not required today.
+Both writing skills support optional strict mode. Trigger it with wording such as `strict`, `high`, `hard pass`, `vale pass`, or `lint pass`. Strict mode runs Vale when shell access exists and Vale is installed, then falls back to the shared final gates and pattern classes when it cannot run.
 
 ## Install
 
@@ -60,7 +60,7 @@ The shared output discipline lives in `shared/agent-output-discipline.md`. Final
 
 `doc-flow-review` uses `assets/reviewer-block.md` only when generating a reviewer-request block.
 
-The core skills need no scripts, network access, connectors, or product-specific tools. Optional `agents/openai.yaml` files add Codex UI metadata; other hosts can ignore them.
+The default skill behavior needs no scripts, network access, connectors, or product-specific tools. Strict mode can optionally use the Vale wrapper when available. Optional `agents/openai.yaml` files add Codex UI metadata; other hosts can ignore them.
 
 ## Skill versions
 
@@ -87,6 +87,15 @@ For a fuller pass, use:
 
 - `examples/regression/` for bad source/output, failure reason, expected shape, and pass checks
 - `tests/manual/` for prompts to run against a live agent
+
+For mechanical prose linting, install Vale and run:
+
+```bash
+./scripts/lint-prose.sh
+./scripts/lint-prose.sh path/to/draft.md
+```
+
+The repo-local Vale config lives in `tools/vale/`. CI runs the same rules against the repo's Markdown docs and fixtures.
 
 ## License
 

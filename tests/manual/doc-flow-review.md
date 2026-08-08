@@ -35,7 +35,6 @@ Passes if:
 Fails if:
 
 - the output starts with `Overall`
-- the output says the document has a clear direction
+- the output uses generic praise about direction
 - the output rewrites the draft
 - the output reports a checklist of passed gates
-

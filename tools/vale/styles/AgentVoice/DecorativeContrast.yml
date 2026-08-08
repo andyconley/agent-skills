@@ -1,0 +1,8 @@
+extends: existence
+message: "Avoid decorative contrast '%s'. State the action or distinction directly."
+level: warning
+ignorecase: true
+tokens:
+  - 'not only [^.]+ but also'
+  - 'not just [^.]+ but'
+  - 'it is not .+ it is'

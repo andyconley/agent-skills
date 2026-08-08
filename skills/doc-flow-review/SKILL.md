@@ -1,11 +1,11 @@
 ---
 name: doc-flow-review
-description: Reviews documents for structure and information flow rather than correctness or sentence-level style. Checks whether a document starts high and goes deep cleanly, each section builds on prior context, and each claim follows from established evidence or constraints. Use for readability, structural, developmental, clarity, organization, or pre-review feedback on design docs, PRDs, proposals, specs, runbooks, postmortems, RFCs, and long-form writing. Do not use for copyediting, grammar, fact-checking, or prose rewriting; use humanizer after structural decisions when both are needed. Version 1.3.0.
+description: Reviews documents for structure and information flow rather than correctness or sentence-level style. Checks whether a document starts high and goes deep cleanly, each section builds on prior context, and each claim follows from established evidence or constraints. Use for readability, structural, developmental, clarity, organization, or pre-review feedback on design docs, PRDs, proposals, specs, runbooks, postmortems, RFCs, and long-form writing. Do not use for copyediting, grammar, fact-checking, or prose rewriting; use humanizer after structural decisions when both are needed. Version 1.4.0.
 ---
 
 # Doc Flow Review
 
-**Version: 1.3.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
+**Version: 1.4.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
 
 Review documents for **structure and information flow**, not correctness.
 
@@ -34,11 +34,12 @@ For strict mode, also apply `../../shared/final-gates.md` and `../../shared/patt
 
 Use strict mode when the user asks for `strict`, `high`, `hard pass`, `vale pass`, or `lint pass`.
 
-Strict mode does not require Vale in this version. Apply the final gates and known surface tells manually.
+Strict mode uses Vale when shell access exists, Vale is installed, and `tools/vale/.vale.ini` is available in the repository that contains this skill. If Vale cannot run, apply the final gates and known surface tells manually.
 
 In strict mode:
 
 - run the normal structure review
+- from the repository that contains this skill, run `scripts/lint-prose.sh <target>` when the target is a file and the wrapper is available
 - apply the doc-flow pattern classes before final output
 - revise until the final gates pass
 - report only findings that change the author's next action
@@ -142,3 +143,5 @@ Before responding, revise until these gates pass:
 `../../examples/doc-flow-review-agent-output.md` — bad and good review-output examples.
 
 `../../examples/regression/` — manual regression fixtures for known failures.
+
+`../../tools/vale/` — optional Vale rules for strict-mode mechanical checks.

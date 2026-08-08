@@ -1,4 +1,4 @@
 interface:
   display_name: "Doc Flow Review"
-  short_description: "Review document flow with strict-mode options"
+  short_description: "Review document flow with strict-mode Vale options"
   default_prompt: "Use $doc-flow-review to review this document for structure and information flow. Lead with the biggest reader problem and keep findings brief."

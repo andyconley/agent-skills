@@ -1,0 +1,12 @@
+extends: existence
+message: "Avoid review-template phrasing '%s'. Name the reader problem or fix directly."
+level: error
+ignorecase: true
+tokens:
+  - 'Overall, the document'
+  - 'would benefit from'
+  - 'may want to consider'
+  - 'could also be helpful'
+  - 'opportunities to tighten'
+  - 'clear direction'
+

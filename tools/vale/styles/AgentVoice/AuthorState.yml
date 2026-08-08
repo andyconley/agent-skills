@@ -1,0 +1,13 @@
+extends: existence
+message: "Avoid author-state narration '%s'. Make the work, finding, correction, limit, or unknown the subject."
+level: error
+ignorecase: true
+tokens:
+  - 'What I concluded'
+  - "what I'm not claiming"
+  - "I didn't test"
+  - "I didn't chase"
+  - 'My first read'
+  - "That's what I shelved it on"
+  - "I'd rather hear it"
+
