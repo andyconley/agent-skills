@@ -1,17 +1,33 @@
 ---
 name: humanizer
-description: Rewrites prose in the voice of an experienced engineering leader explaining reality to capable adults. Removes AI syntax patterns, filler, and corporate language while preserving the author's voice, facts, technical terms, and immutable reference material. Use for technical writing, case studies, messages, issue descriptions, emails, specs, checklists, or documentation. Do not use for structural review; use doc-flow-review first when a draft needs both structure and prose work. Version 4.0.0.
+description: Rewrites prose in the voice of an experienced engineering leader explaining reality to capable adults. Removes AI syntax patterns, filler, and corporate language while preserving the author's voice, facts, technical terms, and immutable reference material. Use for technical writing, case studies, messages, issue descriptions, emails, specs, checklists, or documentation. Do not use for structural review; use doc-flow-review first when a draft needs both structure and prose work. Version 4.1.0.
 ---
 
 # Humanizer: Rewrite for Engineering Leader Voice
 
-**Version: 4.0.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
+**Version: 4.1.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
 
 ## Objective
 
 Take a draft and rewrite it as if an experienced engineering leader is explaining the situation to other capable adults. Be direct, grounded, and pragmatic. State reality plainly. Make the output feel compressed, intentional, and confident.
 
 The most common failure is a rewrite that swaps corporate words for plain ones and still reads as machine-written because the sentence architecture never changed. Target architecture first.
+
+The second most common failure is agent performance: a long preamble, tidy meta-summary, and polished explanation around a good rewrite. Do not do that. The user asked for better prose, not a tour of your process.
+
+## Output discipline
+
+Follow the shared contract in `../../shared/agent-output-discipline.md`. If that file is not available in the host environment, apply these rules directly:
+
+- Lead with the rewrite. No preamble.
+- Use the shortest complete answer.
+- Do not explain that the rewrite is clearer, tighter, more direct, or more human.
+- Do not narrate the method unless the user asks.
+- Keep change notes to 2 or 3 bullets by default.
+- Cut any sentence that restates the prompt, praises the rewrite, or describes the skill.
+- Avoid agent-sounding symmetry: `not only X but also Y`, `both A and B`, `whether X or Y`, `X, not Y`.
+
+For output examples, see `../../examples/humanizer-agent-output.md`.
 
 ## Quick start
 
@@ -20,9 +36,10 @@ The most common failure is a rewrite that swaps corporate words for plain ones a
 3. Scan for vocabulary tells.
 4. Rewrite. Rebuild sentences; do not just substitute words.
 5. Run the measurable checks.
-6. Run the two guardrails.
-7. Return the rewrite plus a short summary of material changes.
-8. Update the source only when the user asks and the environment supports it.
+6. Run the compression pass.
+7. Run the two guardrails.
+8. Return the rewrite plus a short summary of material changes.
+9. Update the source only when the user asks and the environment supports it.
 
 ## Branch on document type
 
@@ -156,6 +173,25 @@ Check instead:
 
 Do not use readability scores as validation. Flesch-Kincaid and Gunning Fog measure syllables and sentence length, not voice. A rant and a clean rewrite can score identically. A document can read at grade five and still sound machine-written or self-important.
 
+## Compression pass
+
+Run this after rewriting and before responding.
+
+Remove:
+
+- throat-clearing before the rewrite
+- any sentence that explains why the rewrite works
+- repeated setup
+- soft transitions such as `overall`, `in summary`, `the key idea`
+- generic labels such as `more polished`, `more concise`, `more natural`
+
+Keep:
+
+- factual corrections
+- adjacent edits that matter
+- constraints the user needs to know
+- source-format notes when preserving format affects the result
+
 ## Preserve technical truth
 
 - Preserve meaning, true facts, sourcing, necessary technical terms, and the author's level of certainty.
@@ -220,9 +256,11 @@ Accept text from the conversation or any source the environment can read. Preser
 Return:
 
 1. The complete rewrite, or only the requested span for comment application.
-2. Three to five concise bullets describing material changes. Mention factual corrections and adjacent edits.
+2. Two or three concise bullets describing material changes. Mention factual corrections and adjacent edits.
 
 Do not add scores or word-count targets unless the user asks for them.
+
+Do not add a preamble such as `Here is a revised version`. Start with the artifact.
 
 ## When not to humanize
 
@@ -240,3 +278,4 @@ Finish when:
 - Both guardrails pass.
 - The author's voice remains recognizable.
 - The core message and sourcing remain intact.
+- The response around the rewrite is not longer than the rewrite unless the user asked for analysis.

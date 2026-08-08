@@ -6,7 +6,7 @@ Drop this into a doc template, or paste it when sending a doc out for review.
 
 This is a review for **structure and information flow**, not correctness. We're not checking whether the content is right. We're checking whether the doc makes its case, in an order a reader can follow.
 
-Typos and grammar are the least useful feedback you can give here. Leave them if you spot them, but don't spend the pass on them.
+Typos and grammar are the least useful feedback you can give here. Leave them if you spot them, but don't spend the pass on them. Keep the comments short; two real findings beat eight soft ones.
 
 **Four passes, in order:**
 
