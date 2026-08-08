@@ -7,11 +7,13 @@ CODEX_DIR="${AGENT_SKILLS_CODEX_DIR:-$HOME/.agents/skills}"
 CLAUDE_DIR="${AGENT_SKILLS_CLAUDE_DIR:-$HOME/.claude/skills}"
 MODE="install"
 SELECT_ALL=0
+VALE_MODE="prompt"
+VALE_OPTION_SET=0
 SELECTED_SKILLS=()
 
 usage() {
   cat <<'EOF'
-Usage: ./install.sh [--all | --skill NAME ...] [--uninstall]
+Usage: ./install.sh [--all | --skill NAME ...] [--uninstall] [--with-vale | --no-vale]
 
 Without a selection option, the installer prompts for skills. It installs to
 both Codex (~/.agents/skills) and Claude Code (~/.claude/skills).
@@ -20,6 +22,8 @@ Options:
   --all           Select every skill in the manifest.
   --skill NAME    Select one skill. Repeat for more than one.
   --uninstall     Remove selected repo-controlled symlinks.
+  --with-vale     Install Vale if it is missing. Fails if no supported installer is found.
+  --no-vale       Skip Vale dependency handling.
   --help          Show this help.
 EOF
 }
@@ -27,6 +31,65 @@ EOF
 fail() {
   printf 'Error: %s\n' "$*" >&2
   exit 1
+}
+
+vale_install_help() {
+  cat <<'EOF'
+Vale is optional, but enables strict-mode prose linting.
+
+Install it manually with:
+  brew install vale
+
+Then verify:
+  vale --version
+  ./scripts/lint-prose.sh
+EOF
+}
+
+install_vale() {
+  if command -v vale >/dev/null 2>&1; then
+    printf 'Vale already installed: %s\n' "$(vale --version)"
+    return 0
+  fi
+
+  if command -v brew >/dev/null 2>&1; then
+    printf 'Installing Vale with Homebrew...\n'
+    brew install vale
+    printf 'Vale installed: %s\n' "$(vale --version)"
+    return 0
+  fi
+
+  vale_install_help >&2
+  return 1
+}
+
+maybe_install_vale() {
+  [ "$MODE" = "install" ] || return 0
+
+  case "$VALE_MODE" in
+    skip) return 0 ;;
+    install)
+      install_vale || fail "could not install Vale"
+      ;;
+    prompt)
+      if command -v vale >/dev/null 2>&1; then
+        printf 'Vale already installed: %s\n' "$(vale --version)"
+        return 0
+      fi
+      if ( : </dev/tty ) 2>/dev/null; then
+        printf 'Vale is optional but enables strict-mode prose linting. Install it now? [y/N] '
+        answer=""
+        IFS= read -r answer < /dev/tty || true
+        case "$answer" in
+          y|Y|yes|YES|Yes) install_vale || fail "could not install Vale" ;;
+          *) printf 'Skipped Vale. Run ./install.sh --with-vale later to install it.\n' ;;
+        esac
+      else
+        printf 'Vale is optional and not installed. Run ./install.sh --with-vale to enable strict-mode linting.\n'
+      fi
+      ;;
+    *) fail "internal error: unknown Vale mode '$VALE_MODE'" ;;
+  esac
 }
 
 while [ "$#" -gt 0 ]; do
@@ -38,6 +101,16 @@ while [ "$#" -gt 0 ]; do
       SELECTED_SKILLS+=("$1")
       ;;
     --uninstall) MODE="uninstall" ;;
+    --with-vale)
+      [ "$VALE_OPTION_SET" -eq 0 ] || fail "use --with-vale or --no-vale, not both"
+      VALE_MODE="install"
+      VALE_OPTION_SET=1
+      ;;
+    --no-vale)
+      [ "$VALE_OPTION_SET" -eq 0 ] || fail "use --with-vale or --no-vale, not both"
+      VALE_MODE="skip"
+      VALE_OPTION_SET=1
+      ;;
     --help|-h) usage; exit 0 ;;
     *) fail "unknown option '$1'" ;;
   esac
@@ -45,6 +118,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 [ "$SELECT_ALL" -eq 0 ] || [ "${#SELECTED_SKILLS[@]}" -eq 0 ] || fail "use --all or --skill, not both"
+[ "$VALE_MODE" != "install" ] || [ "$MODE" = "install" ] || fail "--with-vale cannot be used with --uninstall"
 "$REPO_ROOT/scripts/validate-skills.sh" >/dev/null
 
 ALL_SKILLS=()
@@ -136,6 +210,7 @@ for skill_name in "${FINAL_SKILLS[@]}"; do
 done
 
 if [ "$MODE" = "install" ]; then
+  maybe_install_vale
   mkdir -p "$CODEX_DIR" "$CLAUDE_DIR"
   for skill_name in "${FINAL_SKILLS[@]}"; do
     expected="$REPO_ROOT/skills/$skill_name"
