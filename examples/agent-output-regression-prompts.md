@@ -31,6 +31,34 @@ Fails if it includes:
 - `Improvements made`
 - a long explanation of the method
 
+## Humanizer: Author-State Narration
+
+Prompt:
+
+```md
+Use the humanizer skill on this draft.
+
+What I concluded, and what I'm not claiming: fix both defects and TS symbol coverage still lands near 48%. That's what I shelved it on. Two things I didn't test that may matter more: cross-repo OpenAPI linking and the summarization layer. My first read of this was wrong because the number counts references, not targets. The open question is genuinely open. If there's headroom in the existing approach I haven't seen, I'd rather hear it than assume.
+```
+
+Passes if the output:
+
+- reports on the coverage, defects, limits, and open questions
+- converts `I concluded`, `I didn't test`, `my first read`, and `I'd rather hear` into subject-level statements
+- cuts `That's what I shelved it on`
+- turns `The open question is genuinely open` into the actual question
+- keeps the correction without making the author's experience the point
+
+Fails if it keeps:
+
+- `What I concluded`
+- `what I'm not claiming`
+- `I didn't test`
+- `My first read`
+- `That's what I shelved it on`
+- `genuinely open`
+- `I'd rather hear it`
+
 ## Doc Flow Review
 
 Prompt:
