@@ -28,8 +28,19 @@ for declaration_file in "$MANIFEST" "$RETIRED_MANIFEST"; do
     printf '%s\n' "$skill_name" >> "$names_file"
     skill_file="$REPO_ROOT/skills/$skill_name/SKILL.md"
     [ -f "$skill_file" ] || fail "missing skills/$skill_name/SKILL.md"
+    version_file="$REPO_ROOT/skills/$skill_name/VERSION"
+    [ -f "$version_file" ] || fail "missing skills/$skill_name/VERSION"
+    skill_version="$(tr -d '\r\n' < "$version_file")"
+    case "$skill_version" in
+      ''|*[!0-9.]*) fail "invalid version '$skill_version' for '$skill_name'" ;;
+    esac
+    printf '%s\n' "$skill_version" | awk -F. 'NF == 3 && $1 ~ /^(0|[1-9][0-9]*)$/ && $2 ~ /^(0|[1-9][0-9]*)$/ && $3 ~ /^(0|[1-9][0-9]*)$/ { found=1 } END { exit found ? 0 : 1 }' || fail "version '$skill_version' for '$skill_name' must use MAJOR.MINOR.PATCH"
     frontmatter_name="$(awk 'NR == 1 && $0 != "---" { exit 2 } NR > 1 && $0 == "---" { exit } NR > 1 && /^name:[[:space:]]*/ { sub(/^name:[[:space:]]*/, ""); print; exit }' "$skill_file")" || fail "invalid frontmatter in skills/$skill_name/SKILL.md"
     [ "$frontmatter_name" = "$skill_name" ] || fail "folder '$skill_name' does not match frontmatter name '$frontmatter_name'"
+    version_occurrences="$(grep -Foc "Version $skill_version" "$skill_file" || true)"
+    [ "$version_occurrences" -eq 1 ] || fail "description for '$skill_name' must contain 'Version $skill_version' exactly once"
+    body_occurrences="$(grep -Foc "**Version: $skill_version.**" "$skill_file" || true)"
+    [ "$body_occurrences" -eq 1 ] || fail "body for '$skill_name' must contain '**Version: $skill_version.**' exactly once"
   done < "$declaration_file"
 done
 

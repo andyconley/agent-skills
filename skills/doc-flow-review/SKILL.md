@@ -1,9 +1,11 @@
 ---
 name: doc-flow-review
-description: Reviews documents for structure and information flow rather than correctness or sentence-level style. Checks whether a document starts high and goes deep cleanly, each section builds on prior context, and each claim follows from established evidence or constraints. Use for readability, structural, developmental, clarity, organization, or pre-review feedback on design docs, PRDs, proposals, specs, runbooks, postmortems, RFCs, and long-form writing. Do not use for copyediting, grammar, fact-checking, or prose rewriting; use humanizer after structural decisions when both are needed.
+description: Reviews documents for structure and information flow rather than correctness or sentence-level style. Checks whether a document starts high and goes deep cleanly, each section builds on prior context, and each claim follows from established evidence or constraints. Use for readability, structural, developmental, clarity, organization, or pre-review feedback on design docs, PRDs, proposals, specs, runbooks, postmortems, RFCs, and long-form writing. Do not use for copyediting, grammar, fact-checking, or prose rewriting; use humanizer after structural decisions when both are needed. Version 1.0.0.
 ---
 
 # Doc Flow Review
+
+**Version: 1.0.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
 
 Review documents for **structure and information flow**, not correctness.
 

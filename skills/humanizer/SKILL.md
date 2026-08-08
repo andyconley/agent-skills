@@ -1,9 +1,11 @@
 ---
 name: humanizer
-description: Rewrites prose in the voice of an experienced engineering leader explaining reality to capable adults. Removes AI syntax patterns, filler, and corporate language while preserving the author's voice, facts, technical terms, and immutable reference material. Use for technical writing, case studies, messages, issue descriptions, emails, specs, checklists, or documentation. Do not use for structural review; use doc-flow-review first when a draft needs both structure and prose work.
+description: Rewrites prose in the voice of an experienced engineering leader explaining reality to capable adults. Removes AI syntax patterns, filler, and corporate language while preserving the author's voice, facts, technical terms, and immutable reference material. Use for technical writing, case studies, messages, issue descriptions, emails, specs, checklists, or documentation. Do not use for structural review; use doc-flow-review first when a draft needs both structure and prose work. Version 4.0.0.
 ---
 
-# Humanizer v4: Rewrite for Engineering Leader Voice
+# Humanizer: Rewrite for Engineering Leader Voice
+
+**Version: 4.0.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
 
 ## Objective
 

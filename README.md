@@ -54,9 +54,15 @@ Give the model the relevant `SKILL.md` as task instructions. Include referenced 
 
 The core skills need no scripts, network access, connectors, or product-specific tools. Optional `agents/openai.yaml` files add Codex UI metadata; other hosts can ignore them.
 
+## Skill versions
+
+Each skill ships a semantic version in `skills/<slug>/VERSION`. The same version appears in the skill description and body so an agent can report what it loaded. Validation rejects missing, malformed, or inconsistent versions.
+
+Ask the active agent directly—for example, “What version of humanizer are you using?” A session opened before an update may still report the version it loaded. Start a new session to verify an upgrade.
+
 ## Add a skill
 
-Add `skills/<slug>/SKILL.md`, make its frontmatter `name` match the folder, and declare it in `skills/manifest.tsv` as `slug<TAB>description`. CI rejects duplicates, missing directories, undeclared directories, and name mismatches.
+Add `skills/<slug>/SKILL.md`, make its frontmatter `name` match the folder, add a semantic `VERSION`, and declare it in `skills/manifest.tsv` as `slug<TAB>description`. Repeat the version in the frontmatter description as `Version X.Y.Z.` and in the body as `**Version: X.Y.Z.**`. CI rejects duplicates, missing directories, undeclared directories, name mismatches, and version drift.
 
 To retire a skill, move its declaration from `skills/manifest.tsv` to `skills/retired.tsv` and leave its source directory in place. It disappears from new installs, existing symlinks keep working, and no runtime target is pruned.
 
