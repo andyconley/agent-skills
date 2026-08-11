@@ -1,4 +1,4 @@
 interface:
   display_name: "Doc Flow Review"
-  short_description: "Review document flow with construction-swept output"
-  default_prompt: "Use $doc-flow-review to review this document for structure and information flow. Lead with the biggest reader problem, avoid rubric voice, and keep findings brief."
+  short_description: "Review document flow and terminology drift with construction-swept output and strict-mode Vale options"
+  default_prompt: "Use $doc-flow-review to review this document for structure, information flow, and terminology drift. Lead with the biggest reader problem, avoid rubric voice, and keep findings brief."
