@@ -96,7 +96,7 @@ The sentence performs caution instead of naming the unknown.
 
 One concept is given two names in the same document. The reader cannot tell whether they are the same thing.
 
-- Tell: `cell` in the summary, `workcell` in the detail section.
+- Tell: `folder` in the summary, `directory` in the detail section.
 - Tell: `job` and `task` used for the same unit of work.
 - Tell: a phrasal verb in one step and its plain verb in the next: `turn off the service`, then `disable the service`.
 - Fix: pick the name the codebase already uses and hold it. If the other name appears in code, say so once instead of alternating.

@@ -83,6 +83,7 @@ Run these in order. Don't mix them — mixing is what turns a structural review 
 - Where do I hit a term, system, or concept that hasn't been introduced?
 - Where does the depth jump too fast?
 - Where does it stay shallow too long before getting to the point?
+- Is the same thing called the same name throughout? Name the place a term changes — `job` becomes `task`, `folder` becomes `directory`. Tag it `[disclosure]`: the reader cannot tell whether the two names mean one thing or two. This is a terminology finding, not a copyedit. Report the drift and let the author pick the name.
 
 ### 3. Argument — does each point earn its place?
 
