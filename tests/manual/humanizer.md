@@ -83,3 +83,55 @@ Passes if:
 - the `DO NOT` / `DO` distinction survives
 - the `Driven with...` evidence survives or is replaced by equally explicit executed evidence
 - any remaining parallelism has a technical reason
+
+## Word Choice Pass
+
+Prompt:
+
+```md
+Use humanizer on this runbook section.
+
+Before you deploy, turn off the scheduler and set up the replacement config. Carry out a dry run. If the counts look off, find out which shard drifted and get rid of the stale cache. Each job writes to a folder under the run root; when a task fails, the retry handler reads the same directory. Older than six months? It's expired. Grab a fresh one. The rollback is pretty fast.
+```
+
+Passes if:
+
+- phrasal verbs are replaced with plain verbs
+- `job` and `task` collapse to one name, and `folder` and `directory` collapse to one name
+- the question-as-condition is gone, because the document carries a procedure
+- `pretty fast` becomes a number or an explicit unknown
+- steps read as commands
+
+Fails if:
+
+- the output keeps `turn off`, `set up`, `carry out`, `find out`, or `get rid of`
+- the output alternates between `job` and `task`
+- the output keeps `Older than six months? It's expired.`
+- the output keeps `pretty fast` without a number or an unknown
+- the output applies the rules to only one section of the passage
+
+## Mixed Document Pass
+
+Prompt:
+
+```md
+Use humanizer on this document.
+
+We should move the scheduler off cron. Cron gives us no retry semantics and no visibility, and we have lost three overnight runs this quarter to silent failures.
+
+## Rollback steps
+
+Turn off the new scheduler. Set up the cron entry again. Carry out a dry run.
+```
+
+Passes if:
+
+- the rollback steps use plain verbs
+- the argument paragraph also uses plain verbs, because the document carries a procedure section
+- the tradeoff in the argument paragraph survives
+- `three overnight runs this quarter` survives as a number
+
+Fails if:
+
+- the rules are applied to the rollback steps only
+- the argument paragraph is flattened into a bare requirement and loses the reason
