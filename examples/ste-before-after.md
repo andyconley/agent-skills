@@ -1,6 +1,6 @@
 # Simplified Technical English: Before and After
 
-A worked example, produced by `humanizer` 4.6.0 against a draft written to be representative of the reference documents these rules target. It is not a captured customer artifact.
+A worked example, produced by `humanizer` 4.7.0 against a draft written to be representative of the reference documents these rules target. It is not a captured customer artifact.
 
 The draft below is mixed: it opens with an argument and ends with a procedure. Under the document-level rule, the whole thing takes the Simplified Technical English rules, including the opening.
 
