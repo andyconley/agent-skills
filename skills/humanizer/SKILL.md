@@ -1,11 +1,11 @@
 ---
 name: humanizer
-description: Rewrites prose in the voice of an experienced engineering leader explaining reality to capable adults. Removes AI syntax patterns, mirrored rhythm, filler, author-state narration, and corporate language while preserving facts, caveats, technical terms, and immutable reference material. Uses STE-inspired discipline without claiming ASD-STE100 compliance. Use for technical writing, case studies, messages, issue descriptions, emails, specs, checklists, or documentation. Do not use for structural review; use doc-flow-review first when a draft needs both structure and prose work. Version 4.6.0.
+description: Rewrites prose in the voice of an experienced engineering leader explaining reality to capable adults. Removes AI syntax patterns, mirrored rhythm, filler, author-state narration, and corporate language while preserving facts, caveats, technical terms, and immutable reference material. Uses STE-inspired discipline without claiming ASD-STE100 compliance. Use for technical writing, case studies, messages, issue descriptions, emails, specs, checklists, or documentation. Do not use for structural review; use doc-flow-review first when a draft needs both structure and prose work. Version 4.7.0.
 ---
 
 # Humanizer: Rewrite for Engineering Leader Voice
 
-**Version: 4.6.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
+**Version: 4.7.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
 
 ## Objective
 
@@ -91,6 +91,14 @@ Use for bars, runbooks, definitions of ready, onboarding docs, and process cards
 - Put rationale in the introduction once, or omit it.
 - Make each item state what to do. Do not make each item argue for itself.
 
+Apply Simplified Technical English rules to this type. See **Simplified Technical English** below for what the term covers here.
+
+- **One term per thing.** Use the term the codebase or the team already uses. Hold it for the whole document. Do not vary it for rhythm.
+- **Plain verbs, not phrasal verbs.** `disable`, not `turn off`. `configure`, not `set up`. `perform`, not `carry out`.
+- **No idioms, metaphors, or conversational asides.** The texture moves below do not apply here.
+- **One instruction per step.** Write steps as commands.
+- **Numbers, not adjectives.** `under 15 seconds`, not `fast`. When the number is unknown, say it is unknown.
+
 ### Argument or analysis
 
 Use for design docs, postmortems, proposals, ADRs, and recommendations. The reader needs to evaluate a conclusion.
@@ -103,6 +111,8 @@ Use for design docs, postmortems, proposals, ADRs, and recommendations. The read
 ### Mixed
 
 Most real documents are mixed. The introduction argues and the body serves as reference. Apply the relevant rules by section.
+
+Simplified Technical English is the exception. It applies to the whole document, not by section. If any section is reference, checklist, or procedure, apply the rules everywhere and drop the texture moves for that document. A reader following a procedure should not have to switch registers halfway through, and a phrasal verb in the argument section undercuts the plain verb in the step.
 
 If the type is unclear, infer it from the document's purpose. Ask only when the choice would materially change the result.
 
@@ -172,7 +182,7 @@ Count them. If most sentences have a dependent clause attached, the rhythm is ma
 Describing a finished condition instead of an action.
 
 - Tell: `Owners named. Template filled out. Dependencies surfaced.`
-- Fix: `Name the owners. Fill out the template. Name the dependencies.`
+- Fix: `Name the owners. Complete the template. Name the dependencies.`
 
 ### Abstract process nouns for human events
 
@@ -222,6 +232,8 @@ These are secondary, but still scan for them.
 ## Controlled human texture
 
 Use these sparingly. Do not add texture until truth preservation, STE discipline, and the construction sweep pass.
+
+These apply to argument and analysis documents. Do not use them in a document that carries any reference, checklist, or procedure section.
 
 ### Question as condition
 
@@ -283,6 +295,8 @@ Check instead:
 - **Dash density:** Count sentences containing an em dash or a subordinate clause. Rebuild the prose if they appear in more than a third.
 - **Verb-initial ratio:** In reference documents, start most bullets with a verb.
 - **Rationale count:** In reference documents, keep rationale out of the body.
+- **Names per concept:** Count the distinct names used for each concept. The count should be 1.
+- **Phrasal verbs:** In documents under the Simplified Technical English rules, the count should be 0.
 
 Do not use readability scores as validation. Flesch-Kincaid and Gunning Fog measure syllables and sentence length, not voice. A rant and a clean rewrite can score identically. A document can read at grade five and still sound machine-written or self-important.
 
@@ -338,6 +352,14 @@ Use these rules as a pressure system against agent prose. Do not claim ASD-STE10
 ## Self-authored drafts
 
 If you wrote or heavily revised the draft, run the construction sweep as if another person wrote it. Truth does not protect constructed phrasing. A sentence can be true and still sound like agent prose.
+
+## Simplified Technical English
+
+The reference-branch rules come from ASD-STE100, the controlled-language standard used in aerospace and defence documentation. Its target reader works through a maintenance procedure in a second language under time pressure. That reader is why the rules ban idioms and phrasal verbs.
+
+The standard has two parts: about 65 writing rules, and a dictionary of roughly 900 approved words with one meaning and one part of speech each. This skill implements the rules that apply to internal engineering writing. It does not include the dictionary, which is the substance of the standard and is licensed.
+
+Do not describe output from this skill as STE-conformant. It follows some of the rules. It does not meet the standard.
 
 ## Guardrails
 
@@ -416,12 +438,13 @@ Finish when:
 - The document-type branch was applied correctly.
 - Pronoun posture is consistent.
 - Both guardrails pass.
-- The author's voice remains recognizable.
 - The core message and sourcing remain intact.
 - The response around the rewrite is not longer than the rewrite unless the user asked for analysis.
 - Section headings sound like working labels, not polished reviewer taxonomy.
 - Author-state and stance sentences are either converted to subject-level statements or cut.
 - Mirrored rhythm remains only with a specific technical protection reason.
+- Each concept carries one name throughout.
+- Documents under the Simplified Technical English rules use plain verbs and no idioms.
 
 ## Reference
 

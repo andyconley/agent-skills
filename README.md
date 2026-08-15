@@ -15,7 +15,15 @@ Both writing skills run the shared construction sweep in normal mode. The sweep 
 
 Both writing skills support optional strict mode. Trigger it with wording such as `strict`, `high`, `hard pass`, `vale pass`, or `lint pass`. Strict mode runs Vale when shell access exists and Vale is installed, then falls back to the shared final gates and pattern classes when it cannot run.
 
-The writing discipline is STE-inspired: short sentences, active voice, one term for one thing, plain verbs, no idioms, and no deleted caveats. It does not claim full ASD-STE100 compliance or dictionary enforcement.
+## Simplified Technical English
+
+The writing discipline is STE-inspired: short sentences, active voice, one term for one thing, plain verbs, no idioms, and no deleted caveats.
+
+Reference documents, checklists, and procedures take a stricter set of word-choice rules drawn from ASD-STE100: one term per thing, plain verbs instead of phrasal verbs, no idioms, and numbers instead of adjectives. The same rules govern the agent's own replies through `shared/agent-output-discipline.md`.
+
+A document takes these rules as a whole. If any section is reference, checklist, or procedure, the rules apply everywhere in it and the conversational moves are dropped, so a reader working through a procedure never switches registers.
+
+These skills implement applicable rules. They do not include the approved-word dictionary, which is the substance of ASD-STE100 and is licensed. Do not describe their output as STE-conformant.
 
 ## Install
 
@@ -83,7 +91,7 @@ Ask the active agent directly—for example, “What version of humanizer are yo
 
 ## Add a skill
 
-Add `skills/<slug>/SKILL.md`, make its frontmatter `name` match the folder, add a semantic `VERSION`, and declare it in `skills/manifest.tsv` as `slug<TAB>description`. Repeat the version in the frontmatter description as `Version X.Y.Z.` and in the body as `**Version: X.Y.Z.**`. CI rejects duplicates, missing directories, undeclared directories, name mismatches, and version drift.
+Add `skills/<slug>/SKILL.md`, make its frontmatter `name` match the directory, add a semantic `VERSION`, and declare it in `skills/manifest.tsv` as `slug<TAB>description`. Repeat the version in the frontmatter description as `Version X.Y.Z.` and in the body as `**Version: X.Y.Z.**`. CI rejects duplicates, missing directories, undeclared directories, name mismatches, and version drift.
 
 To retire a skill, move its declaration from `skills/manifest.tsv` to `skills/retired.tsv` and leave its source directory in place. It disappears from new installs, existing symlinks keep working, and no runtime target is pruned.
 

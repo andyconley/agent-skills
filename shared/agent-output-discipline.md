@@ -76,13 +76,23 @@ If a mirrored construction remains, name the technical meaning that plain prose 
 - Self-congratulation: explaining why the rewrite is clearer, tighter, or more human
 - Symmetric filler: `not only X but also Y`, `both A and B`, `whether X or Y`, `X, not Y`
 - Repeated framing: two sentences that make the same point at different altitude
-- Decorative certainty: `clearly`, `strong`, `robust`, `seamless`, `comprehensive`
+- Decorative certainty: `clearly`, `strong`, `robust`, `seamless`, `comprehensive`. Where a number is available, give the number instead. Where it is not, say the number is unknown.
 - Idioms and punchlines: `break loudly`, `move the needle`, `the hard part`, `the one line worth carrying forward`
-- Phrasal verbs when a plain verb exists: prefer `disable` to `turn off`, `install` to `set up`, `execute` to `carry out`
+
+## Word choice
+
+These rules come from Simplified Technical English. They apply to your own replies, not only to documents you rewrite.
+
+- **Plain verbs, not phrasal verbs.** `disable`, not `turn off`. `configure`, not `set up`. `perform`, not `carry out`. `remove`, not `get rid of`.
+- **One term per thing.** Choose the term the codebase or the user already uses, then hold it for the whole reply. Do not vary it for rhythm.
+- **No idioms or metaphors** in reference material, procedures, or instructions.
+- **Numbers, not adjectives.** `under 15 seconds`, not `fast`. `3 of 11 files`, not `most files`. When the number is unknown, say so.
+
+Copy identifiers, quoted error text, file paths, and a repo's existing terms exactly. Do not improve them.
 
 ## Headings and labels
 
-Use short working labels, not polished reviewer labels. A heading should sound like something someone would put in a working doc, not like an agent organizing its evaluation.
+Use short working labels, not polished reviewer labels. A heading should sound like something someone would use in a working doc, not like an agent organizing its evaluation.
 
 Prefer:
 

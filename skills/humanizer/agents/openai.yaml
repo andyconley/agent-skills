@@ -1,4 +1,4 @@
 interface:
   display_name: "Humanizer"
-  short_description: "Rewrite drafts with construction sweeps and optional Vale"
-  default_prompt: "Use $humanizer to rewrite this draft in a direct, grounded engineering leader voice. Remove mirrored rhythm, start with the rewrite, and keep notes brief."
+  short_description: "Rewrite drafts with construction sweeps, plain-verb discipline, and strict-mode Vale options"
+  default_prompt: "Use $humanizer to rewrite this draft in a direct, grounded engineering leader voice. Remove mirrored rhythm, use plain verbs and one term per thing. Start with the rewrite and keep notes brief."

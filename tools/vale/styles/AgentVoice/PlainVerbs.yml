@@ -1,0 +1,21 @@
+extends: substitution
+message: "Use the plain verb '%s' instead of the phrasal verb '%s'."
+level: warning
+ignorecase: true
+swap:
+  turn off: disable
+  turn on: enable
+  set up: configure
+  carry out: perform
+  get rid of: remove
+  find out: determine
+  figure out: determine
+  come up with: propose
+  fill out: complete
+  take out: remove
+  look into: investigate
+  go over: review
+  point out: identify
+  bring up: raise
+  cut down on: reduce
+  make use of: use

@@ -1,11 +1,11 @@
 ---
 name: doc-flow-review
-description: Reviews documents for structure and information flow rather than correctness or sentence-level style. Checks whether a document starts high and goes deep cleanly, each section builds on prior context, and each claim follows from established evidence or constraints. Uses shared output discipline to avoid mirrored rhythm, stance headings, and polished rubric voice in the review itself. Use for readability, structural, developmental, clarity, organization, or pre-review feedback on design docs, PRDs, proposals, specs, runbooks, postmortems, RFCs, and long-form writing. Do not use for copyediting, grammar, fact-checking, or prose rewriting; use humanizer after structural decisions when both are needed. Version 1.5.0.
+description: Reviews documents for structure and information flow rather than correctness or sentence-level style. Checks whether a document starts high and goes deep cleanly, each section builds on prior context, and each claim follows from established evidence or constraints. Uses shared output discipline to avoid mirrored rhythm, stance headings, and polished rubric voice in the review itself. Use for readability, structural, developmental, clarity, organization, or pre-review feedback on design docs, PRDs, proposals, specs, runbooks, postmortems, RFCs, and long-form writing. Do not use for copyediting, grammar, fact-checking, or prose rewriting; use humanizer after structural decisions when both are needed. Version 1.6.0.
 ---
 
 # Doc Flow Review
 
-**Version: 1.5.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
+**Version: 1.6.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
 
 Review documents for **structure and information flow**, not correctness.
 
@@ -83,6 +83,7 @@ Run these in order. Don't mix them — mixing is what turns a structural review 
 - Where do I hit a term, system, or concept that hasn't been introduced?
 - Where does the depth jump too fast?
 - Where does it stay shallow too long before getting to the point?
+- Is the same thing called the same name throughout? Name the place a term changes — `job` becomes `task`, `folder` becomes `directory`. Tag it `[disclosure]`: the reader cannot tell whether the two names mean one thing or two. This is a terminology finding, not a copyedit. Report the drift and let the author pick the name.
 
 ### 3. Argument — does each point earn its place?
 

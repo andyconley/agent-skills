@@ -1,0 +1,23 @@
+# Starter list. Replace these pairs with your own vocabulary.
+#
+# Term drift is repo-specific: the pairs that matter are the ones your
+# codebase and your docs disagree about. The entries below are the
+# compound and spelling variants that drift in most technical writing.
+#
+# Add your own domain pairs in the same shape, variant on the left and
+# the name you want on the right. Delete any entry that fights your
+# house style.
+extends: substitution
+message: "Use one name per thing. Prefer '%s' over '%s'."
+level: suggestion
+ignorecase: true
+swap:
+  utilise: use
+  utilize: use
+  e-mail: email
+  web site: website
+  data base: database
+  file name: filename
+  back-end: backend
+  front-end: frontend
+  folder: directory
