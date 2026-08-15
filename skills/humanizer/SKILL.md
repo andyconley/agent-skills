@@ -1,6 +1,6 @@
 ---
 name: humanizer
-description: Rewrites prose in the voice of an experienced engineering leader explaining reality to capable adults. Removes AI syntax patterns, mirrored rhythm, filler, author-state narration, and corporate language while preserving the author's voice, facts, caveats, technical terms, and immutable reference material. Uses STE-inspired discipline without claiming ASD-STE100 compliance. Use for technical writing, case studies, messages, issue descriptions, emails, specs, checklists, or documentation. Do not use for structural review; use doc-flow-review first when a draft needs both structure and prose work. Version 4.6.0.
+description: Rewrites prose in the voice of an experienced engineering leader explaining reality to capable adults. Removes AI syntax patterns, mirrored rhythm, filler, author-state narration, and corporate language while preserving facts, caveats, technical terms, and immutable reference material. Uses STE-inspired discipline without claiming ASD-STE100 compliance. Use for technical writing, case studies, messages, issue descriptions, emails, specs, checklists, or documentation. Do not use for structural review; use doc-flow-review first when a draft needs both structure and prose work. Version 4.6.0.
 ---
 
 # Humanizer: Rewrite for Engineering Leader Voice
@@ -438,7 +438,6 @@ Finish when:
 - The document-type branch was applied correctly.
 - Pronoun posture is consistent.
 - Both guardrails pass.
-- The author's voice remains recognizable.
 - The core message and sourcing remain intact.
 - The response around the rewrite is not longer than the rewrite unless the user asked for analysis.
 - Section headings sound like working labels, not polished reviewer taxonomy.
