@@ -1,11 +1,11 @@
 ---
 name: doc-flow-review
-description: Reviews documents for structure and information flow rather than correctness or sentence-level style. Checks whether a document starts high and goes deep cleanly, each section builds on prior context, and each claim follows from established evidence or constraints. Use for readability, structural, developmental, clarity, organization, or pre-review feedback on design docs, PRDs, proposals, specs, runbooks, postmortems, RFCs, and long-form writing. Do not use for copyediting, grammar, fact-checking, or prose rewriting; use humanizer after structural decisions when both are needed. Version 1.4.0.
+description: Reviews documents for structure and information flow rather than correctness or sentence-level style. Checks whether a document starts high and goes deep cleanly, each section builds on prior context, and each claim follows from established evidence or constraints. Uses shared output discipline to avoid mirrored rhythm, stance headings, and polished rubric voice in the review itself. Use for readability, structural, developmental, clarity, organization, or pre-review feedback on design docs, PRDs, proposals, specs, runbooks, postmortems, RFCs, and long-form writing. Do not use for copyediting, grammar, fact-checking, or prose rewriting; use humanizer after structural decisions when both are needed. Version 1.5.0.
 ---
 
 # Doc Flow Review
 
-**Version: 1.4.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
+**Version: 1.5.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
 
 Review documents for **structure and information flow**, not correctness.
 
@@ -25,6 +25,9 @@ Follow the shared contract in `../../shared/agent-output-discipline.md`. If that
 - For each finding, give the place, what breaks, and the smallest fix.
 - Keep the close short. Include what works only when it is specific and useful.
 - Use plain working labels for sections. Prefer `Summary`, `Recommendation`, `Problems to fix`, `Needs investigation`, `Good structure`, `Risks`, `Unknowns`, and `What to watch`.
+- Run the shared construction sweep on the review output before final answer.
+- Remove mirrored rhythm, aphoristic closers, stance headings, and signpost nominalization from the review itself.
+- Use STE-inspired discipline in the review: short sentences, active voice, one term for one thing, no idioms.
 
 For output examples, see `../../examples/doc-flow-review-agent-output.md`.
 
@@ -39,6 +42,7 @@ Strict mode uses Vale when shell access exists, Vale is installed, and `tools/va
 In strict mode:
 
 - run the normal structure review
+- run the shared construction sweep on the review output
 - from the repository that contains this skill, run `scripts/lint-prose.sh <target>` when the target is a file and the wrapper is available
 - apply the doc-flow pattern classes before final output
 - revise until the final gates pass
@@ -120,6 +124,7 @@ Before responding, revise until these gates pass:
 - **Prose gate:** no preamble, method narration, praise sandwich, generic recap, or self-congratulation.
 - **Evidence gate:** uncertainty is attached to the unresolved question, not the reviewer's feelings about it.
 - **Scope gate:** review structure only; do not rewrite prose, fact-check, or copyedit unless asked.
+- **Mirrored rhythm gate:** remove mirrored rhythm unless it protects a specific technical comparison or rule pair in the review.
 
 ## Calibration
 
@@ -129,6 +134,7 @@ Before responding, revise until these gates pass:
 - **Don't confuse "I'd have written it differently" with a defect.** Only flag what costs the reader something.
 - **Do not review your own review.** No recap of how the feedback is structured, no explanation that the comments are concise, and no praise for the document unless it protects something the author should keep.
 - **Watch the labels.** `Problems worth fixing`, `Worth a pass`, `What's already correctly structured`, and `What would change this conclusion` sound like agent review headings now. Use plainer labels instead.
+- **Remove review punchlines.** Closers such as `That is the real issue` or `Nothing answers it today` sound like agent prose. State the reader cost or stop.
 
 ## Reference
 

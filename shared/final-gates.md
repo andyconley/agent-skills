@@ -66,6 +66,48 @@ The response has no:
 - generic recap
 - self-congratulation
 - explanation that the output is concise or human
+- decorative mirrored rhythm
+- aphoristic closers
+- idioms or punchlines where plain technical prose would work
+
+## STE Discipline Gate
+
+The response uses STE-inspired discipline without claiming full ASD-STE100 compliance.
+
+Passes:
+
+- short sentences
+- active voice
+- one term for one thing
+- one claim or instruction per sentence
+- numbers instead of vague adjectives when the number is known
+- split sentences instead of deleted caveats
+
+Fails:
+
+- phrasal verbs when a plain verb exists
+- idioms
+- dropped caveats
+- clever compression that hides a technical condition
+- invented terms for an existing repo concept
+
+## Mirrored Rhythm Gate
+
+Mirrored rhythm is removed unless plain prose would lose a specific technical relationship.
+
+Valid protected cases:
+
+- a `DO` / `DO NOT` rule pair
+- two values with different required handling
+- repeated evidence markers that let the reader compare cases
+- exact quoted text, identifiers, commands, or source structure
+
+Invalid reasons:
+
+- it sounds sharper
+- it emphasizes contrast
+- it reads better
+- it is more memorable
 
 ## Evidence Gate
 
@@ -88,4 +130,3 @@ The answer does only the requested job.
 For reviews, do not rewrite unless asked.
 For rewrites, do not review structure unless asked.
 For strict mode, report only blocking issues that remain after revision.
-

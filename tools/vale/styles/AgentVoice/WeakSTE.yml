@@ -1,0 +1,16 @@
+extends: existence
+message: "Use STE-inspired discipline for '%s'. Prefer a plain verb, number, or exact term."
+level: warning
+ignorecase: true
+tokens:
+  - '\bturn off\b'
+  - '\bset up\b'
+  - '\bcarry out\b'
+  - '\bbring up\b'
+  - '\bpoint out\b'
+  - '\beasy\b'
+  - '\bsimple\b'
+  - '\bmeaningful\b'
+  - '\bstrong\b'
+  - '\bthe hard part\b'
+  - '\bmove the needle\b'

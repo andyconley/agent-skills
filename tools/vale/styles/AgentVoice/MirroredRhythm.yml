@@ -1,0 +1,13 @@
+extends: existence
+message: "Avoid mirrored rhythm '%s'. Remove it unless plain prose loses a specific technical relationship."
+level: error
+ignorecase: true
+tokens:
+  - '\bnot\s+[^.;:]+[,;]\s+but\b'
+  - '\bnot\s+just\s+[^.]+also\b'
+  - '\bToday\s+it\s+(does not|is not)\b'
+  - '\bNothing\s+answers\s+it\s+today\b'
+  - '\bwhat\s+[^.]+what\s+[^.]+'
+  - '\bNo\s+[^.]+[.]\s+No\s+[^.]+[.]\s+Just\s+'
+  - '\bThis\s+is\s+the\s+(context|point|problem|issue|mechanism)\b'
+  - '\bThat\s+is\s+the\s+(context|point|problem|issue|mechanism)\b'

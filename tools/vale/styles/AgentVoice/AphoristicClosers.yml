@@ -1,0 +1,11 @@
+extends: existence
+message: "Avoid aphoristic closer '%s'. State the failure mode or delete the closer."
+level: error
+ignorecase: true
+tokens:
+  - 'breaks?\s+loudly'
+  - 'breaks?\s+silently'
+  - 'outlives\s+a\s+convention'
+  - 'does\s+what\s+(its|their)\s+name(s)?\s+(says|say|describe)'
+  - 'the\s+real\s+(issue|problem|challenge|unlock)'
+  - 'the\s+one\s+line\s+worth\s+carrying\s+forward'

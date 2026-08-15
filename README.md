@@ -11,7 +11,11 @@ When a document needs both, run `doc-flow-review` first. Apply the structural de
 
 Both skills are intentionally host-agnostic. The optional `agents/openai.yaml` files provide Codex UI metadata, but the actual behavior lives in Markdown skill files and shared examples.
 
+Both writing skills run the shared construction sweep in normal mode. The sweep removes mirrored rhythm, stance headings, aphoristic closers, signpost nominalization, decorative contrast, and similar agent-shaped prose from the skill output.
+
 Both writing skills support optional strict mode. Trigger it with wording such as `strict`, `high`, `hard pass`, `vale pass`, or `lint pass`. Strict mode runs Vale when shell access exists and Vale is installed, then falls back to the shared final gates and pattern classes when it cannot run.
+
+The writing discipline is STE-inspired: short sentences, active voice, one term for one thing, plain verbs, no idioms, and no deleted caveats. It does not claim full ASD-STE100 compliance or dictionary enforcement.
 
 ## Install
 
@@ -65,7 +69,7 @@ Start a new agent session afterward. A built-in skill resumes only if the host p
 
 Give the model the relevant `SKILL.md` as task instructions. Include referenced supporting files when needed.
 
-The shared output discipline lives in `shared/agent-output-discipline.md`. Final gates live in `shared/final-gates.md`; pattern classes live in `shared/pattern-classes.md`. The examples in `examples/` show bad and good agent output, plus manual regression prompts for checking whether an agent is getting wordy or using polished review-template headings again.
+The shared output discipline lives in `shared/agent-output-discipline.md`. Final gates live in `shared/final-gates.md`; pattern classes live in `shared/pattern-classes.md`. The examples in `examples/` show bad and good agent output, plus manual regression prompts for checking whether an agent is getting wordy, using polished review-template headings, or preserving mirrored rhythm.
 
 `doc-flow-review` uses `assets/reviewer-block.md` only when generating a reviewer-request block.
 
@@ -102,6 +106,7 @@ For mechanical prose linting, install Vale through the installer or your package
 ```bash
 ./scripts/lint-prose.sh
 ./scripts/lint-prose.sh path/to/draft.md
+./scripts/lint-prose.sh path/to/pasted-text.txt
 ```
 
 The repo-local Vale config lives in `tools/vale/`. CI runs the same rules against the repo's Markdown docs and fixtures.

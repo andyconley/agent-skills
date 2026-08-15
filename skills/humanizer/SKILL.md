@@ -1,19 +1,28 @@
 ---
 name: humanizer
-description: Rewrites prose in the voice of an experienced engineering leader explaining reality to capable adults. Removes AI syntax patterns, filler, author-state narration, and corporate language while preserving the author's voice, facts, technical terms, and immutable reference material. Use for technical writing, case studies, messages, issue descriptions, emails, specs, checklists, or documentation. Do not use for structural review; use doc-flow-review first when a draft needs both structure and prose work. Version 4.5.0.
+description: Rewrites prose in the voice of an experienced engineering leader explaining reality to capable adults. Removes AI syntax patterns, mirrored rhythm, filler, author-state narration, and corporate language while preserving facts, caveats, technical terms, and immutable reference material. Uses STE-inspired discipline without claiming ASD-STE100 compliance. Use for technical writing, case studies, messages, issue descriptions, emails, specs, checklists, or documentation. Do not use for structural review; use doc-flow-review first when a draft needs both structure and prose work. Version 4.6.0.
 ---
 
 # Humanizer: Rewrite for Engineering Leader Voice
 
-**Version: 4.5.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
+**Version: 4.6.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
 
 ## Objective
 
-Take a draft and rewrite it as if an experienced engineering leader is explaining the situation to other capable adults. Be direct, grounded, and pragmatic. State reality plainly. Make the output feel compressed, intentional, and confident.
+Take a draft and rewrite it as if an experienced engineering leader is explaining the situation to other capable adults. Be direct, grounded, and pragmatic. State reality plainly. Make the output plain, specific, and technically safe.
 
 The most common failure is a rewrite that swaps corporate words for plain ones and still reads as machine-written because the sentence architecture never changed. Target architecture first.
 
 The second most common failure is agent performance: a long preamble, tidy meta-summary, and polished explanation around a good rewrite. Do not do that. The user asked for better prose, not a tour of your process.
+
+## Rule priority
+
+Use the priority order in `../../shared/agent-output-discipline.md`.
+
+- Truth, caveats, uncertainty, identifiers, quoted text, commands, and technical meaning come first.
+- STE-inspired discipline comes before author voice.
+- Author voice cannot protect mirrored rhythm, stance headings, aphoristic closers, or other AI-shaped architecture.
+- This skill uses Simplified Technical English as a discipline. It does not claim full ASD-STE100 compliance.
 
 ## Output discipline
 
@@ -25,7 +34,7 @@ Follow the shared contract in `../../shared/agent-output-discipline.md`. If that
 - Do not narrate the method unless the user asks.
 - Keep change notes to 2 or 3 bullets by default.
 - Cut any sentence that restates the prompt, praises the rewrite, or describes the skill.
-- Avoid agent-sounding symmetry: `not only X but also Y`, `both A and B`, `whether X or Y`, `X, not Y`.
+- Remove mirrored rhythm by default. Do not keep it because it sounds sharp, balanced, memorable, emphatic, or clear.
 - Replace polished review headings with plain working labels. Prefer `Summary`, `Recommendation`, `Problems to fix`, `Needs investigation`, `Good structure`, `Risks`, `Unknowns`, and `What to watch`.
 
 For output examples, see `../../examples/humanizer-agent-output.md`.
@@ -38,11 +47,16 @@ Use strict mode when the user asks for `strict`, `high`, `hard pass`, `vale pass
 
 Strict mode uses Vale when shell access exists, Vale is installed, and `tools/vale/.vale.ini` is available in the repository that contains this skill. If Vale cannot run, apply the final gates and known surface tells manually.
 
+In normal and strict mode:
+
+- run the construction sweep in `../../shared/agent-output-discipline.md`
+- remove mirrored rhythm unless plain prose would lose a specific technical relationship
+- apply the pattern classes before final output
+
 In strict mode:
 
 - run the normal rewrite
 - from the repository that contains this skill, run `scripts/lint-prose.sh <target>` when the target is a file and the wrapper is available
-- apply the pattern classes before final output
 - revise until the final gates pass
 - return the rewrite first
 - report only remaining blocking issues, if any
@@ -51,17 +65,18 @@ In strict mode:
 ## Quick start
 
 1. Read the draft. Identify the document type under **Branch on document type**.
-2. Scan for syntax tells. These matter more than vocabulary.
+2. Run the construction sweep one class at a time. These classes matter more than vocabulary.
 3. Scan for vocabulary tells.
 4. Scan for author-state and stance sentences.
-5. Rewrite. Rebuild sentences; do not just substitute words.
-6. Run the deletion test.
-7. Run the measurable checks.
-8. Run the compression pass.
-9. Run the final gates.
-10. Run the two guardrails.
-11. Return the rewrite plus a short summary of material changes.
-12. Update the source only when the user asks and the environment supports it.
+5. Apply STE-inspired discipline.
+6. Rewrite. Rebuild sentences; do not just substitute words.
+7. Run the deletion test.
+8. Run the measurable checks.
+9. Run the compression pass.
+10. Run the final gates.
+11. Run the two guardrails.
+12. Return the rewrite plus a short summary of material changes.
+13. Update the source only when the user asks and the environment supports it.
 
 ## Branch on document type
 
@@ -116,9 +131,41 @@ Symmetry that sounds composed rather than spoken.
 - Tell: `That makes it discovery, not implementation.`
 - Fix: `That means we do discovery before implementation.`
 
+### Mirrored rhythm
+
+Repeated sentence shapes are presumed defective.
+
+- Tell: `Every Node harness approximates that context. This is the context.`
+- Tell: `A workflow you believe is working actually works.`
+- Tell: `The trace answers. Nothing answers it today.`
+- Fix: state the technical relationship once.
+
+Keep mirrored structure only when plain prose would lose a specific technical relationship: a `DO` / `DO NOT` rule pair, two values with different required handling, repeated evidence markers, or exact source structure. If you cannot name the technical meaning that would be lost, remove the mirroring.
+
+### Free-relative antithesis
+
+A `what...what...` construction that creates tidy contrast.
+
+- Tell: `The debug CLI displays what the workflow ignores.`
+- Fix: `The debug CLI reports low confidence. The workflow ignores that field.`
+
+### Signpost nominalization
+
+The sentence names the role of the point instead of stating the point.
+
+- Tell: `Reviewability is the second gain.`
+- Fix: `Reviewers read smaller diffs.`
+
+### Aphoristic close
+
+A memorable closer that restates the paragraph.
+
+- Tell: `A hand-maintained pair does not break loudly. It breaks silently.`
+- Fix: `When the lists drift, the stale side behaves as though the field does not exist.`
+
 ### Subordinate clause on every main clause
 
-Count them. If most sentences have a dependent clause attached, the rhythm is machine-even. Break some into simple sentences.
+Count them. If most sentences have a dependent clause attached, the rhythm is machine-even. Split the sentence.
 
 ### Nominalized states
 
@@ -172,9 +219,9 @@ These are secondary, but still scan for them.
 - Hedging that obscures: `could potentially`, `appears to suggest`
 - Domain jargon with a plain equivalent: `every team carrying effort` becomes `every team who has work`
 
-## Moves that add human texture
+## Controlled human texture
 
-Use these sparingly. Add one or two per document, not one per paragraph.
+Use these sparingly. Do not add texture until truth preservation, STE discipline, and the construction sweep pass.
 
 ### Question as condition
 
@@ -190,13 +237,9 @@ Use these sparingly. Add one or two per document, not one per paragraph.
 Replace an asserted claim with a specific event.
 
 - Weak: `This reduces productivity.`
-- Strong: `We lost a data corpus when it drifted out of compatibility.`
+- Better: `We lost a data corpus when it drifted out of compatibility.`
 
-### Two-beat sentences
-
-Use a short declarative followed by a shorter one.
-
-> The review decides. It does not plan.
+Do not add two-beat rhythm for emphasis. If a short sentence pair mirrors itself, rewrite it unless the repeated structure protects a technical comparison.
 
 ## Pronoun posture
 
@@ -236,7 +279,7 @@ Do not use a blanket word-count reduction target. Word count is a poor proxy. An
 
 Check instead:
 
-- **Sentence length:** Keep sentences under about 15 words unless there is a reason not to.
+- **Sentence length:** Prefer short sentences unless there is a reason not to. Do not create rhythmic pairs to hit a length target.
 - **Dash density:** Count sentences containing an em dash or a subordinate clause. Rebuild the prose if they appear in more than a third.
 - **Verb-initial ratio:** In reference documents, start most bullets with a verb.
 - **Rationale count:** In reference documents, keep rationale out of the body.
@@ -257,6 +300,8 @@ Remove:
 - section headings that sound like a reusable evaluation framework
 - stance sentences that tell the reader how to weigh the next point
 - author-state sentences that make the author a character in the doc
+- mirrored rhythm, aphoristic closers, and decorative contrast
+- idioms and phrasal verbs when a plain verb exists
 
 Keep:
 
@@ -274,6 +319,25 @@ If the source has headings such as `Key takeaways`, `Problems worth fixing`, `Wo
 - Do not invent facts, examples, evidence, certainty, or enthusiasm.
 - Rewrite only prose in mixed technical documents. Preserve code, configuration, commands, API and parameter tables, identifiers, paths, flags, and exact output unless the user explicitly asks to change them.
 - Do not smooth a procedure in a way that could change its behavior.
+- Shorten by splitting a sentence, never by dropping a caveat.
+- Copy identifiers, quoted error text, commands, flags, and a repo's existing terms exactly. Do not improve them.
+
+## STE-inspired discipline
+
+Use these rules as a pressure system against agent prose. Do not claim ASD-STE100 compliance.
+
+- Use short sentences.
+- Use active voice.
+- Use one term for one thing.
+- Put one claim or instruction in each sentence.
+- Use plain verbs over phrasal verbs: `disable`, not `turn off`.
+- Use numbers instead of vague adjectives when numbers are known.
+- Avoid idioms, aphorisms, punchlines, and memorable contrast.
+- Comments say why, not what. Never write a comment you have not verified.
+
+## Self-authored drafts
+
+If you wrote or heavily revised the draft, run the construction sweep as if another person wrote it. Truth does not protect constructed phrasing. A sentence can be true and still sound like agent prose.
 
 ## Guardrails
 
@@ -348,6 +412,7 @@ Do not add a preamble such as `Here is a revised version`. Start with the artifa
 Finish when:
 
 - Syntax tells are gone, not just vocabulary tells.
+- The construction sweep ran in normal mode.
 - The document-type branch was applied correctly.
 - Pronoun posture is consistent.
 - Both guardrails pass.
@@ -356,6 +421,7 @@ Finish when:
 - The response around the rewrite is not longer than the rewrite unless the user asked for analysis.
 - Section headings sound like working labels, not polished reviewer taxonomy.
 - Author-state and stance sentences are either converted to subject-level statements or cut.
+- Mirrored rhythm remains only with a specific technical protection reason.
 
 ## Reference
 

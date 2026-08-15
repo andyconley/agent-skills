@@ -6,3 +6,5 @@ tokens:
   - 'not only [^.]+ but also'
   - 'not just [^.]+ but'
   - 'it is not .+ it is'
+  - '\bnot\s+[^.;:]+[,;]\s+but\b'
+  - '\bnot\s+[^.]+[.]\s+It is\b'

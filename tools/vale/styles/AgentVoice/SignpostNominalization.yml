@@ -1,0 +1,10 @@
+extends: existence
+message: "Avoid signpost nominalization '%s'. State the gain, mechanism, or limit directly."
+level: warning
+ignorecase: true
+tokens:
+  - '\bReviewability\s+is\s+the\s+second\s+gain\b'
+  - '\bgains\s+something\s+narrower\b'
+  - '\bThis\s+section\s+covers\s+one\s+mechanism\b'
+  - '\bThe\s+mechanics\s+are\s+[^.]+barrier\b'
+  - '\bThe\s+result\s+that\s+matters\b'

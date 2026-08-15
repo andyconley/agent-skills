@@ -1,0 +1,6 @@
+extends: existence
+message: "Long sentence. Split it instead of dropping a caveat."
+level: warning
+scope: sentence
+tokens:
+  - '(?:\b[[:alnum:]_/-]+\b\W+){36,}'
