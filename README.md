@@ -75,6 +75,10 @@ If a selected target already contains a file, directory, or unrelated symlink, t
 
 Start with [docs/README.md](docs/README.md) for the strategy, theory, skill docs, shared writing rules, examples, tests, and tooling.
 
+## Releases
+
+Releases are generated from Conventional Commits on `main`. Skill behavior changes should use a scope that names the affected surface, such as `feat(humanizer):`, `fix(doc-flow-review):`, or `docs(shared):`.
+
 ## Update
 
 Run the installer again. It requires a clean checkout with the expected GitHub origin, updates it with a fast-forward-only pull, and refreshes the selected links. Existing links point at the updated source automatically.

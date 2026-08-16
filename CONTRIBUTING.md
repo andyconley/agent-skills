@@ -76,6 +76,8 @@ fix: reject malformed skill versions
 feat(humanizer): add term-drift guidance
 ```
 
+Commits to `main` drive the changelog and GitHub releases. Use `docs(skills):` or `docs(shared):` when a Markdown change materially changes skill behavior, because those docs are runtime instructions.
+
 ## Adding or Retiring Skills
 
 Add a skill by creating `skills/<slug>/SKILL.md`, adding `skills/<slug>/VERSION`, and declaring the skill in `skills/manifest.tsv`.
