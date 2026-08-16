@@ -1,6 +1,6 @@
 # Agent Skills
 
-Portable skills for Codex, Claude Code, and other LLM agents. The first two separate document structure from prose cleanup and share a short-output discipline:
+Portable skills for Codex, Claude Code, and other LLM agents. The first two skills separate document structure from prose cleanup and share a short-output discipline:
 
 | Skill | Use it for | Do not use it for |
 | --- | --- | --- |
@@ -35,14 +35,19 @@ curl -fsSL https://raw.githubusercontent.com/andyconley/agent-skills/main/instal
 
 The interactive installer lists the manifest and lets you choose one, several, or all skills. Empty input cancels without making changes.
 
-For unattended installation:
+For unattended installation from the remote installer:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/andyconley/agent-skills/main/install.sh | bash -s -- --all
+```
+
+From a local checkout, you can install selected skills:
+
+```bash
 ./install.sh --skill humanizer --skill doc-flow-review
 ```
 
-Vale is optional, but enables strict-mode prose linting. If Vale is missing, interactive installs offer to install it. For unattended installs:
+Vale is optional, but enables strict-mode prose linting. If Vale is missing, interactive installs offer to install it. For unattended installs from a local checkout:
 
 ```bash
 ./install.sh --all --with-vale
@@ -57,6 +62,10 @@ The default targets are:
 - Claude Code: `~/.claude/skills/<skill>`
 
 If a selected target already contains a file, directory, or unrelated symlink, the installer stops before changing any target. Move or back up the conflict, then retry. A correct existing symlink is left in place.
+
+## Documentation
+
+Start with [docs/README.md](docs/README.md) for the skill docs, shared writing rules, examples, tests, and tooling.
 
 ## Update
 

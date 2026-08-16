@@ -26,5 +26,5 @@ jobs:
         uses: vale-cli/vale-action@v3
         with:
           config: tools/vale/.vale.ini
-          files: '["README.md","skills","shared","examples","tests/manual"]'
+          files: '["README.md","CONTRIBUTING.md","CODE_OF_CONDUCT.md","SECURITY.md","docs","skills","shared","examples","tests/manual"]'
           fail_on_error: true

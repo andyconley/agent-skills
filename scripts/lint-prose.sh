@@ -21,8 +21,11 @@ fi
 
 exec vale --config "$CONFIG" \
   "$REPO_ROOT/README.md" \
+  "$REPO_ROOT/CONTRIBUTING.md" \
+  "$REPO_ROOT/CODE_OF_CONDUCT.md" \
+  "$REPO_ROOT/SECURITY.md" \
+  "$REPO_ROOT/docs" \
   "$REPO_ROOT/skills" \
   "$REPO_ROOT/shared" \
   "$REPO_ROOT/examples" \
   "$REPO_ROOT/tests/manual"
-
