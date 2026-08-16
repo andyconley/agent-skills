@@ -1,6 +1,14 @@
 # Agent Skills
 
-Portable skills for Codex, Claude Code, and other LLM agents. The first two skills separate document structure from prose cleanup and share a short-output discipline:
+Portable skills for Codex, Claude Code, and other LLM agents. This repo starts with two writing skills that separate document structure from prose cleanup and share a short-output discipline.
+
+These skills exist because most agent writing problems are not vocabulary problems. The usual failure is shape: the answer starts too low, explains the method, mirrors its own rhythm, preserves weak headings, or rewrites prose before the document has earned its structure.
+
+The repo's strategy is to make those failures explicit and testable. Skill behavior lives in Markdown instructions, shared rules, examples, regression fixtures, and optional Vale checks. Host-specific metadata stays thin so the same skill can move across runtimes.
+
+For the deeper strategy, theory, and repo map, see [docs/README.md](docs/README.md).
+
+## Skills
 
 | Skill | Use it for | Do not use it for |
 | --- | --- | --- |
@@ -9,7 +17,7 @@ Portable skills for Codex, Claude Code, and other LLM agents. The first two skil
 
 When a document needs both, run `doc-flow-review` first. Apply the structural decisions, then run `humanizer` on the prose.
 
-Both skills are intentionally host-agnostic. The optional `agents/openai.yaml` files provide Codex UI metadata, but the actual behavior lives in Markdown skill files and shared examples.
+Both skills are intentionally host-agnostic. The optional `agents/openai.yaml` files provide Codex UI metadata, but the behavior lives in Markdown skill files and shared examples.
 
 Both writing skills run the shared construction sweep in normal mode. The sweep removes mirrored rhythm, stance headings, aphoristic closers, signpost nominalization, decorative contrast, and similar agent-shaped prose from the skill output.
 
@@ -65,7 +73,7 @@ If a selected target already contains a file, directory, or unrelated symlink, t
 
 ## Documentation
 
-Start with [docs/README.md](docs/README.md) for the skill docs, shared writing rules, examples, tests, and tooling.
+Start with [docs/README.md](docs/README.md) for the strategy, theory, skill docs, shared writing rules, examples, tests, and tooling.
 
 ## Update
 
