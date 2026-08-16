@@ -4,6 +4,10 @@ All notable changes to agent-skills are generated from Conventional Commits. Lon
 
 ## [1.0.1](https://github.com/andyconley/agent-skills/compare/v1.0.0...v1.0.1) (2026-08-16)
 
+### Documentation
+
+* clarify documentation release notes ([ec0aacd](https://github.com/andyconley/agent-skills/commit/ec0aacdf44e87e0a9075bbaac0fcbb72e397ab0e))
+
 ## [1.0.0](https://github.com/andyconley/agent-skills/tree/v1.0.0) (2026-08-16)
 
 ### Baseline
