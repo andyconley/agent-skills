@@ -78,6 +78,7 @@ Start with [docs/README.md](docs/README.md) for the strategy, theory, skill docs
 ## Releases
 
 Releases are generated from Conventional Commits on `main`. Skill behavior changes should use a scope that names the affected surface, such as `feat(humanizer):`, `fix(doc-flow-review):`, or `docs(shared):`.
+Documentation-only releases should still describe the user-visible behavior, rule, or workflow that changed.
 
 ## Update
 
