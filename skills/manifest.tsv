@@ -1,3 +1,4 @@
 # slug	description
 humanizer	Rewrite prose in a direct, grounded engineering-leader voice with default construction sweeps, STE-inspired discipline, and optional Vale linting.
 doc-flow-review	Review document flow and argument support with default construction sweeps, strict reader feedback, and optional Vale linting.
+workbreakdown	Draft, review, audit, or explicitly apply Jira milestone breakdowns through a complete YAML manifest and verified dependency graph.

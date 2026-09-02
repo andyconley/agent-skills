@@ -22,6 +22,8 @@ jobs:
         run: ./scripts/validate-skills.sh
       - name: Test installer
         run: ./tests/install-test.sh
+      - name: Test workbreakdown contract
+        run: ./tests/workbreakdown-contract-test.sh
       - name: Lint prose
         uses: vale-cli/vale-action@v3
         with:

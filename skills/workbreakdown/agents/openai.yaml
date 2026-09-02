@@ -1,0 +1,4 @@
+interface:
+  display_name: "Work Breakdown"
+  short_description: "Break milestones into verifiable Jira work"
+  default_prompt: "Use $workbreakdown to draft a Jira-ready milestone breakdown with direct Epic children, a complete YAML manifest, and verified dependency direction. Do not change Jira."

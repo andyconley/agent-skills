@@ -1,6 +1,6 @@
 # Agent Skills
 
-Portable skills for Codex, Claude Code, and other LLM agents. This repo starts with two writing skills that separate document structure from prose cleanup and share a short-output discipline.
+Portable skills for Codex, Claude Code, and other LLM agents. The repository includes writing skills and a guarded work-breakdown workflow for Jira milestone planning.
 
 These skills exist because most agent writing problems are not vocabulary problems. The usual failure is shape: the answer starts too low, explains the method, mirrors its own rhythm, preserves weak headings, or rewrites prose before the document has earned its structure.
 
@@ -14,10 +14,11 @@ For the deeper strategy, theory, and repo map, see [docs/README.md](docs/README.
 | --- | --- | --- |
 | `doc-flow-review` | Structure, information order, progressive disclosure, argument, and depth | Copyediting, fact-checking, or rewriting prose |
 | `humanizer` | Direct, concise prose in an experienced engineering-leader voice | Structural review or changing protected requirements |
+| `workbreakdown` | Direct Epic-child work, YAML manifests, hard dependencies, and Jira reconciliation | Portfolio hierarchy or unreviewed Jira changes |
 
 When a document needs both, run `doc-flow-review` first. Apply the structural decisions, then run `humanizer` on the prose.
 
-Both skills are intentionally host-agnostic. The optional `agents/openai.yaml` files provide Codex UI metadata, but the behavior lives in Markdown skill files and shared examples.
+All skills are host-agnostic. The optional `agents/openai.yaml` files provide Codex UI metadata, but the behavior lives in Markdown skill files and references that Claude Code and other hosts can read.
 
 Both writing skills run the shared construction sweep in normal mode. The sweep removes mirrored rhythm, stance headings, aphoristic closers, signpost nominalization, decorative contrast, and similar agent-shaped prose from the skill output.
 
@@ -53,6 +54,7 @@ From a local checkout, you can install selected skills:
 
 ```bash
 ./install.sh --skill humanizer --skill doc-flow-review
+./install.sh --skill workbreakdown
 ```
 
 Vale is optional, but enables strict-mode prose linting. If Vale is missing, interactive installs offer to install it. For unattended installs from a local checkout:
@@ -101,7 +103,7 @@ Give the model the relevant `SKILL.md` as task instructions. Include referenced 
 
 The shared output discipline lives in `shared/agent-output-discipline.md`. Final gates live in `shared/final-gates.md`; pattern classes live in `shared/pattern-classes.md`. The examples in `examples/` show bad and good agent output, plus manual regression prompts for checking whether an agent is getting wordy, using polished review-template headings, or preserving mirrored rhythm.
 
-`doc-flow-review` uses `assets/reviewer-block.md` only when generating a reviewer-request block.
+`doc-flow-review` uses `assets/reviewer-block.md` only when generating a reviewer-request block. `workbreakdown` routes to its manifest and Jira change references only for the modes that need them.
 
 The default skill behavior needs no scripts, network access, connectors, or product-specific tools. Strict mode can optionally use the Vale wrapper when available. Optional `agents/openai.yaml` files add Codex UI metadata; other hosts can ignore them.
 
