@@ -2,6 +2,8 @@
 
 All notable changes to agent-skills are generated from Conventional Commits. Longer design context belongs in the documentation changed by the release.
 
+## [1.1.0](https://github.com/andyconley/agent-skills/compare/v1.0.1...v1.1.0) (2026-09-02)
+
 ## [1.0.1](https://github.com/andyconley/agent-skills/compare/v1.0.0...v1.0.1) (2026-08-16)
 
 ### Documentation
