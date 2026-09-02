@@ -1,0 +1,5 @@
+{"artifacts": {}, "at": "2026-09-02T17:30:01Z", "dispositions": {}, "event": "start-definition", "from": null, "to": "defining"}
+{"artifacts": {"acceptance_criteria": ".flow/runs/2026-09-02-workbreakdown-skill/acceptance-criteria.md", "requirements": ".flow/runs/2026-09-02-workbreakdown-skill/requirements.md"}, "at": "2026-09-02T17:30:01Z", "dispositions": {}, "event": "approve-definition", "from": "defining", "to": "definition_approved"}
+{"artifacts": {}, "at": "2026-09-02T17:30:01Z", "dispositions": {}, "event": "start-plan", "from": "definition_approved", "to": "planning"}
+{"artifacts": {"handoff": ".flow/runs/2026-09-02-workbreakdown-skill/implementation-handoff.md", "plan": ".flow/runs/2026-09-02-workbreakdown-skill/plan.md", "validation_plan": ".flow/runs/2026-09-02-workbreakdown-skill/validation-plan.md"}, "at": "2026-09-02T17:30:43Z", "dispositions": {}, "event": "approve-plan", "from": "planning", "to": "plan_approved"}
+{"artifacts": {}, "at": "2026-09-02T18:25:28Z", "dispositions": {}, "event": "start-implementation", "from": "plan_approved", "to": "implementing"}

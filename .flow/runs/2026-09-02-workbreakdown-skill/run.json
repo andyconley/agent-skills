@@ -1,0 +1,25 @@
+{
+  "artifacts": {
+    "acceptance_criteria": ".flow/runs/2026-09-02-workbreakdown-skill/acceptance-criteria.md",
+    "handoff": ".flow/runs/2026-09-02-workbreakdown-skill/implementation-handoff.md",
+    "plan": ".flow/runs/2026-09-02-workbreakdown-skill/plan.md",
+    "requirements": ".flow/runs/2026-09-02-workbreakdown-skill/requirements.md",
+    "validation_plan": ".flow/runs/2026-09-02-workbreakdown-skill/validation-plan.md"
+  },
+  "created_at": "2026-09-02T17:30:01Z",
+  "dispositions": {},
+  "gates": {
+    "approve-definition": "2026-09-02T17:30:01Z",
+    "approve-plan": "2026-09-02T17:30:43Z",
+    "start-definition": "2026-09-02T17:30:01Z",
+    "start-implementation": "2026-09-02T18:25:28Z",
+    "start-plan": "2026-09-02T17:30:01Z"
+  },
+  "lane": "implement",
+  "last_event": "start-implementation",
+  "phase": "implementing",
+  "schema_version": 1,
+  "state": "implementing",
+  "updated_at": "2026-09-02T18:25:28Z",
+  "work_id": "2026-09-02-workbreakdown-skill"
+}

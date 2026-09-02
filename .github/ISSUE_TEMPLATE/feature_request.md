@@ -28,6 +28,7 @@ Which surface does this affect?
 
 - `humanizer`
 - `doc-flow-review`
+- `workbreakdown`
 - shared output discipline
 - examples or regression fixtures
 - installer

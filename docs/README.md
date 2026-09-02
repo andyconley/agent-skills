@@ -1,6 +1,6 @@
 # Documentation
 
-This repo ships portable writing skills for Codex, Claude Code, and other LLM runtimes.
+This repo ships portable skills for Codex, Claude Code, and other LLM runtimes.
 
 Start with the [main README](../README.md) for install, update, uninstall, usage, and development commands. Use this page when you want to understand the strategy behind the repo and how the lower-level files fit together.
 
@@ -47,6 +47,7 @@ The STE-inspired rules apply pressure in the same direction. They favor short se
 
 - [`humanizer`](../skills/humanizer/SKILL.md): rewrites prose into a direct engineering-leader voice while preserving facts, caveats, and protected technical material.
 - [`doc-flow-review`](../skills/doc-flow-review/SKILL.md): reviews document structure, information order, progressive disclosure, argument support, and depth.
+- [`workbreakdown`](../skills/workbreakdown/SKILL.md): drafts, reviews, audits, and explicitly applies Jira milestone breakdowns through a reviewed YAML manifest.
 
 When a document needs both skills, run `doc-flow-review` first. Apply the structural decisions, then run `humanizer` on the prose.
 

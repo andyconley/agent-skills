@@ -21,7 +21,7 @@ What broke? What did you expect to happen instead?
 - OS:
 - Shell:
 - Host runtime: Codex, Claude Code, another LLM, or scripts only
-- Skill affected: `humanizer`, `doc-flow-review`, install, strict mode, Vale, or docs
+- Skill affected: `humanizer`, `doc-flow-review`, `workbreakdown`, install, strict mode, Vale, or docs
 - Repo version, tag, or commit:
 
 ## Output

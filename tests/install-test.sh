@@ -46,6 +46,16 @@ assert_link "$TEST_ROOT/claude/humanizer" "$REPO_ROOT/skills/humanizer"
 assert_missing "$TEST_ROOT/codex/doc-flow-review"
 pass "one skill installs to both runtimes"
 
+run_manager --skill workbreakdown >/dev/null
+assert_link "$TEST_ROOT/codex/workbreakdown" "$REPO_ROOT/skills/workbreakdown"
+assert_link "$TEST_ROOT/claude/workbreakdown" "$REPO_ROOT/skills/workbreakdown"
+[ -f "$TEST_ROOT/codex/workbreakdown/VERSION" ] || fail "workbreakdown VERSION is not distributed"
+[ -f "$TEST_ROOT/claude/workbreakdown/references/manifest-contract.md" ] || fail "workbreakdown references are not distributed"
+run_manager --uninstall --skill workbreakdown >/dev/null
+assert_missing "$TEST_ROOT/codex/workbreakdown"
+assert_missing "$TEST_ROOT/claude/workbreakdown"
+pass "workbreakdown installs and uninstalls on both runtimes"
+
 run_manager --skill humanizer >/dev/null
 assert_link "$TEST_ROOT/codex/humanizer" "$REPO_ROOT/skills/humanizer"
 pass "repeat install is idempotent"
@@ -53,6 +63,8 @@ pass "repeat install is idempotent"
 run_manager --all >/dev/null
 assert_link "$TEST_ROOT/codex/doc-flow-review" "$REPO_ROOT/skills/doc-flow-review"
 assert_link "$TEST_ROOT/claude/doc-flow-review" "$REPO_ROOT/skills/doc-flow-review"
+assert_link "$TEST_ROOT/codex/workbreakdown" "$REPO_ROOT/skills/workbreakdown"
+assert_link "$TEST_ROOT/claude/workbreakdown" "$REPO_ROOT/skills/workbreakdown"
 pass "all installs every declared skill"
 
 touch "$TEST_ROOT/codex/unrelated"

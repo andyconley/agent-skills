@@ -1,6 +1,6 @@
 # Contributing
 
-`agent-skills` is a small maintainer-led repository for portable writing skills. Contributions are welcome when they keep the skills host-agnostic, installable through one script, and strict about output quality.
+`agent-skills` is a small maintainer-led repository for portable agent workflows. Contributions are welcome when they keep the skills host-agnostic, installable through one script, and explicit about behavior and safety boundaries.
 
 ## Before You Start
 
@@ -56,13 +56,15 @@ Vale is optional for local use. Install it with the installer or your package ma
 
 If Vale is not available, apply the final gates and pattern classes manually.
 
-For behavior checks after editing `humanizer`, `doc-flow-review`, or shared QA files, run the prompts in:
+For behavior checks after editing `humanizer`, `doc-flow-review`, or shared writing QA files, run the prompts in:
 
 - `examples/agent-output-regression-prompts.md`
 - `tests/manual/`
 - `examples/regression/`
 
 These are regression checks for known failure modes. They are not an objective scoring system.
+
+For `workbreakdown`, run the Draft, Review, Audit, and Apply safety cases in `tests/manual/workbreakdown.md`.
 
 ## Pull Requests
 
