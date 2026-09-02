@@ -22,3 +22,12 @@ This proves version-drift fault detection. Agent behavior remains covered by man
 All static, package, YAML, installer, and prose checks ran against the changed checkout itself. The installer test uses isolated temporary Codex and Claude target directories; its path, symlink, conflict, and uninstall verdicts transfer because those checks do not depend on live host discovery.
 
 Fresh-session Codex and Claude discovery and live Jira Apply remain runtime checks. Their verdict is not inferred from the isolated tests.
+
+## Local distribution
+
+- Ran `./install.sh --with-vale --all` from the clean feature branch.
+- Vale `3.17.1` was already installed.
+- `~/.agents/skills/workbreakdown` and `~/.claude/skills/workbreakdown` both resolve to `/Users/andyconley/agent-skills/skills/workbreakdown`.
+- Both runtime paths report version `1.0.0`.
+- The Codex and Claude `SKILL.md` paths are byte-identical because both are links to the same portable source.
+- Codex `quick_validate.py` passed through both runtime paths.
