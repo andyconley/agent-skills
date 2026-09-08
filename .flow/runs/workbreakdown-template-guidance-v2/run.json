@@ -1,23 +1,30 @@
 {
   "artifacts": {
     "acceptance_criteria": ".flow/runs/workbreakdown-template-guidance-v2/acceptance-criteria.md",
+    "archive": ".flow/runs/workbreakdown-template-guidance-v2/archive.md",
     "handback": ".flow/runs/workbreakdown-template-guidance-v2/HANDOFF.md",
     "handoff": ".flow/runs/workbreakdown-template-guidance-v2/implementation-handoff.md",
     "implementation_evidence": ".flow/runs/workbreakdown-template-guidance-v2/validation-results.md",
     "orchestration_manifest": ".flow/runs/workbreakdown-template-guidance-v2/orchestration.json",
     "plan": ".flow/runs/workbreakdown-template-guidance-v2/plan.md",
     "requirements": ".flow/runs/workbreakdown-template-guidance-v2/requirements.md",
+    "review": ".flow/runs/workbreakdown-template-guidance-v2/review.md",
     "solution": ".flow/runs/workbreakdown-template-guidance-v2/solution.md",
     "validation_plan": ".flow/runs/workbreakdown-template-guidance-v2/validation-plan.md"
   },
   "created_at": "2026-09-08T16:25:40Z",
   "dispositions": {
+    "archive_enrichment": "1",
+    "capability_gaps": "recorded",
+    "memory": "updated",
     "risk": "accepted"
   },
   "gates": {
+    "accept-review": "2026-09-08T21:37:40Z",
     "approve-definition": "2026-09-08T16:30:42Z",
     "approve-plan": "2026-09-08T16:41:59Z",
     "approve-solution": "2026-09-08T16:32:04Z",
+    "archive": "2026-09-08T21:38:46Z",
     "mark-handback-ready": "2026-09-08T17:35:27Z",
     "start-definition": "2026-09-08T16:25:40Z",
     "start-implementation": "2026-09-08T16:43:14Z",
@@ -25,12 +32,13 @@
     "start-review": "2026-09-08T20:12:14Z",
     "start-solution": "2026-09-08T16:30:49Z"
   },
-  "lane": "review",
-  "last_event": "start-review",
-  "phase": "reviewing",
+  "lane": "archive",
+  "last_event": "archive",
+  "next_action": "Live Jira Apply and the ten manual behavior checks remain deferred.",
+  "phase": "archived",
   "protocol_revision": 2,
   "schema_version": 1,
-  "state": "reviewing",
-  "updated_at": "2026-09-08T20:12:14Z",
+  "state": "archived",
+  "updated_at": "2026-09-08T21:38:46Z",
   "work_id": "workbreakdown-template-guidance-v2"
 }
