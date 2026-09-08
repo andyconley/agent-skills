@@ -107,7 +107,7 @@ templates:
     variant: design
     status: default
     file: spike-design-v2.md
-    sha256: de1f159a8aa244c6fc4f4149526d84a12555e2ec12f76077010fdb73ff7cdb5f
+    sha256: 5b936d0a1ad0bbf705e446fa921234ee9818f17a79df79e99c2a55e47491aff5
     description_format: adf
     required_keys: [decision, questions_and_constraints, design_artifact, reviewers, checklist_coverage, done_when, downstream_updates]
     conditional_keys: [references]
@@ -118,7 +118,7 @@ templates:
     variant: investigation
     status: default
     file: spike-investigation-v2.md
-    sha256: 30b1b13d625aef4be726c0b1b8ac96a8ebbc9f71bae1da0cc09761ec75c66968
+    sha256: 988d1188e66b2afe7932b5dc6be0da2f29af51b62cff483df91855056fb7e960
     description_format: adf
     required_keys: [question, evidence_needed, done_when, downstream_updates]
     conditional_keys: [boundaries, references]

@@ -61,7 +61,7 @@ children:
     type: Spike
     variant: investigation
     template_id: jira-spike-investigation-v2
-    template_sha256: 30b1b13d625aef4be726c0b1b8ac96a8ebbc9f71bae1da0cc09761ec75c66968
+    template_sha256: 988d1188e66b2afe7932b5dc6be0da2f29af51b62cff483df91855056fb7e960
     disposition: existing
     verify:
       summary: Inventory supported state sources
@@ -141,7 +141,7 @@ Reject schema 2 when epic contains disposition, verify, expected_current, or cha
 
 ## Schema 3: scoped Epic authority
 
-Schema 3 keeps the child contract and adds exactly one Epic disposition.
+Schema 3 keeps the child contract and adds exactly one Epic disposition. epic.disposition must be exactly `existing` or `update`. Reject any other value instead of interpreting it.
 
 ### Verify only
 
@@ -157,7 +157,7 @@ epic:
   verify:
     template_id: jira-epic-v2
     template_sha256: 18fefffa6ebb6fe385616ecc0dce1756a6238ce11cd5f41d972557313d42342e
-    description_adf_sha256: <normalized-live-adf-digest>
+    description_adf_sha256: 9f2c4b7a1e5d8036c4a91b2e7f60d3a85c19e4b70d2f6a83915ce4d70b8a2f61
     description:
       milestone_outcome: A consumer retrieves current system state through the supported API.
       problem: Current integrations cannot retrieve one supported, current representation of system state.
@@ -196,7 +196,7 @@ epic:
   template_id: jira-epic-v2
   template_sha256: 18fefffa6ebb6fe385616ecc0dce1756a6238ce11cd5f41d972557313d42342e
   expected_current:
-    description_adf_sha256: <normalized-live-adf-digest>
+    description_adf_sha256: 9f2c4b7a1e5d8036c4a91b2e7f60d3a85c19e4b70d2f6a83915ce4d70b8a2f61
   changes:
     description:
       milestone_outcome: A consumer retrieves current system state through the supported API.
@@ -225,13 +225,16 @@ For update:
 - scope.epic_key is the only Epic identity.
 - template-set version must be 2.
 - template_id must be jira-epic-v2 and the asset hash must match the installed registry.
-- expected_current.description_adf_sha256 is required. Remove only `localId` properties from raw live ADF, serialize UTF-8 JSON with sorted object keys, preserved array order, and no insignificant whitespace, then calculate SHA-256.
+- expected_current.description_adf_sha256 is required and must be exactly 64 lowercase hexadecimal characters. Any other value, including a template token, an empty string, or a description of how to obtain the digest, is a manifest rejection.
+- Compute it by removing only `localId` properties from raw live ADF, then serializing UTF-8 JSON with sorted object keys, preserved array order, and no insignificant whitespace, then calculating SHA-256.
+- Capture the digest from live Jira before approval. Apply never computes, fills, refreshes, or substitutes this value. A digest derived from the state Apply just read proves nothing and satisfies no gate.
+- When the live Epic has no description, or its description is empty, the digest is the digest of the empty document `{"type":"doc","version":1,"content":[]}`. A manifest naming that sentinel is rejected when the live description is non-empty, and a manifest naming any other digest is rejected when the live description is absent or empty. Either mismatch is material drift and produces zero writes.
 - changes may contain only description.
 - The description contains every required key and only approved conditional keys.
 - Acceptance criteria contain 3–5 binary conditions with evidence and an acceptor when known.
 - Omitted Epic fields are preserved. They never become empty write values.
 
-Schema 3 does not authorize Epic creation, deletion, reparenting, retyping, ranking, or project, status, sprint, security, reporter, or arbitrary-field changes.
+Schema 3 does not authorize Epic creation, deletion, reparenting, retyping, ranking, or project, status, sprint, security, reporter, or arbitrary-field changes. It also does not authorize any non-field write on the Epic, including comments, attachments, watchers, worklogs, and labels.
 
 ## Child invariants
 

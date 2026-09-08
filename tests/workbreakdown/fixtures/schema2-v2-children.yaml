@@ -1,0 +1,73 @@
+schema_version: 2
+manifest_id: v2-children
+revision: 1
+template_set:
+  id: jira-house-templates
+  version: 2
+scope:
+  parent_key: INIT-1
+  epic_key: EPIC-1
+epic:
+  outcome: Prove that every v2 child template validates its description.
+children:
+  - ref: build-endpoint
+    type: Task
+    template_id: jira-task-v2
+    template_sha256: fedfeda541933a2a379bf7569703b138e078aa9ee730438a839977824bdd06b3
+    disposition: proposed
+    fields:
+      summary: Add the supported state endpoint
+      done_when: The endpoint returns current state for every supported source.
+      description:
+        result: A supported read endpoint returns current system state.
+        context: Consumers have no supported way to read current state.
+        acceptance_criteria:
+          - The endpoint returns current state for a permitted consumer.
+          - An unsupported source returns the documented error.
+        validation: Passing endpoint contract test in the representative system.
+        constraints: The endpoint reuses the existing authorization filter.
+  - ref: choose-transport
+    type: Spike
+    variant: design
+    template_id: jira-spike-design-v2
+    template_sha256: 5b936d0a1ad0bbf705e446fa921234ee9818f17a79df79e99c2a55e47491aff5
+    disposition: proposed
+    fields:
+      summary: Choose the state transport
+      done_when: The transport decision is recorded and reviewed.
+      description:
+        decision: Select the transport for state reads.
+        questions_and_constraints:
+          - Does the existing gateway support the required payload size?
+        design_artifact: docs/design/state-transport.md
+        reviewers:
+          - API owner
+        checklist_coverage: Interface and capacity concerns apply. Storage concerns are excluded.
+        done_when:
+          - The decision is recorded with evidence and reviewer disposition.
+        downstream_updates:
+          - The endpoint Task estimate is revised.
+  - ref: measure-staleness
+    type: Spike
+    variant: investigation
+    template_id: jira-spike-investigation-v2
+    template_sha256: 988d1188e66b2afe7932b5dc6be0da2f29af51b62cff483df91855056fb7e960
+    disposition: proposed
+    fields:
+      summary: Measure state staleness
+      done_when: The observed staleness range is recorded.
+      description:
+        question: How stale is the current state under normal load?
+        evidence_needed:
+          - Sampled measurement across a representative window.
+        done_when:
+          - The observed range, confidence, and recommendation are recorded.
+        downstream_updates:
+          - The acceptance threshold for the endpoint Task is confirmed.
+        boundaries:
+          - Production tuning is out of scope.
+dependencies: []
+rank:
+  mode: scoped-relative
+  order: [choose-transport, measure-staleness, build-endpoint]
+unknowns: []

@@ -19,7 +19,10 @@ Do not copy the design into Jira.
 ## Done when
 
 - <Decision is recorded with evidence and reviewer disposition>
-- <Risks, open decisions, and affected downstream work are updated>
+
+## Downstream updates
+
+- <Task, Story, estimate, dependency, or open risk the decision changes>
 
 ## References
 

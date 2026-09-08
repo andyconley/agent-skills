@@ -11,7 +11,10 @@
 ## Done when
 
 - <The answer, evidence, confidence, constraints, and recommendation are recorded>
-- <Affected Tasks, Stories, estimates, or dependencies are identified>
+
+## Downstream updates
+
+- <Task, Story, estimate, or dependency the answer changes>
 
 ## Boundaries
 

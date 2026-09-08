@@ -276,7 +276,7 @@ end
 
 def validate_story_review(story)
   description = story.fetch("description")
-  review = story.fetch("review_evidence")
+  review = description.fetch("review_evidence")
   published = review.fetch("documentation")
   passing = review.fetch("automated_tests")
   planned_documents = description.fetch("documentation", []).map { |item| item["id"] }
@@ -305,6 +305,14 @@ expect_error("duplicate template ID") { validate_registry(duplicate_registry) }
 drifted_registry = clone(registry)
 drifted_registry["templates"].first["sha256"] = "0" * 64
 expect_error("template hash drift") { validate_registry(drifted_registry) }
+
+missing_asset_registry = clone(registry)
+missing_asset_registry["templates"].first["file"] = "epic-v1-does-not-exist.md"
+expect_error("missing template asset") { validate_registry(missing_asset_registry) }
+
+variant_default_registry = clone(registry)
+variant_default_registry["template_sets"][2]["defaults"]["Spike"]["design"] = "jira-spike-investigation-v2"
+expect_error("default Spike variant mismatch") { validate_registry(variant_default_registry) }
 
 expected_v1 = {
   "jira-epic-v1" => "e6ac1fced57839ccaca7c56fe42cd08b5907af5b15f2f050625350dfaf9c758a",
@@ -406,9 +414,46 @@ incomplete = clone(schema3)
 incomplete["epic"]["changes"]["description"].delete("problem")
 expect_error("missing description key") { validate_manifest(incomplete, index, registry) }
 
+unapproved_key = clone(schema3)
+unapproved_key["epic"]["changes"]["description"]["internal_notes"] = "Not a registered Epic key."
+expect_error("unapproved description key") { validate_manifest(unapproved_key, index, registry) }
+
+duplicated_criteria = clone(schema3)
+duplicated_criteria["epic"]["changes"]["description"]["success_measures"] =
+  [duplicated_criteria["epic"]["changes"]["description"]["acceptance_criteria"].first["condition"]]
+expect_error("Epic acceptance duplicates success measures") { validate_manifest(duplicated_criteria, index, registry) }
+
 too_few_criteria = clone(schema3)
 too_few_criteria["epic"]["changes"]["description"]["acceptance_criteria"] = too_few_criteria["epic"]["changes"]["description"]["acceptance_criteria"].first(2)
 expect_error("Epic requires 3-5 acceptance criteria") { validate_manifest(too_few_criteria, index, registry) }
+
+v2_children = load_yaml(File.join(FIXTURES, "schema2-v2-children.yaml"))
+validate_manifest(v2_children, index, registry)
+assert(v2_children["children"].map { |child| child["template_id"] }.sort ==
+       %w[jira-spike-design-v2 jira-spike-investigation-v2 jira-task-v2],
+       "v2 child fixture lost a template under test")
+
+v2_children["children"].each do |child|
+  template = index.fetch(child.fetch("template_id"))
+  description = child.dig("fields", "description")
+  missing_required = clone(v2_children)
+  target = missing_required["children"].find { |item| item["ref"] == child["ref"] }
+  target["fields"]["description"].delete(template.fetch("required_keys").first)
+  expect_error("missing description key") { validate_manifest(missing_required, index, registry) }
+
+  undeclared = clone(v2_children)
+  target = undeclared["children"].find { |item| item["ref"] == child["ref"] }
+  target["fields"]["description"]["internal_notes"] = "Not a registered key."
+  expect_error("unapproved description key") { validate_manifest(undeclared, index, registry) }
+
+  assert(description.keys.all? { |key| (template.fetch("required_keys") + template.fetch("conditional_keys")).include?(key) },
+         "#{child["ref"]} uses a key the registry does not declare")
+end
+
+swapped_variant = clone(v2_children)
+design_child = swapped_variant["children"].find { |child| child["ref"] == "choose-transport" }
+design_child["variant"] = "investigation"
+expect_error("Spike variant mismatch") { validate_manifest(swapped_variant, index, registry) }
 
 story = load_yaml(File.join(FIXTURES, "story-lifecycle.yaml"))
 validate_story_description(story.fetch("description"))
@@ -416,20 +461,20 @@ validate_story_review(story)
 assert(!story.dig("description", "documentation", 0).key?("owner"), "unknown owner must not render an empty field")
 
 missing_docs = clone(story)
-missing_docs["review_evidence"]["documentation"].first["status"] = "planned"
+missing_docs["description"]["review_evidence"]["documentation"].first["status"] = "planned"
 expect_error("missing published documentation evidence") { validate_story_review(missing_docs) }
 
 missing_tests = clone(story)
-missing_tests["review_evidence"]["automated_tests"].first["status"] = "planned"
+missing_tests["description"]["review_evidence"]["automated_tests"].first["status"] = "planned"
 expect_error("missing passing automated-test evidence") { validate_story_review(missing_tests) }
 
 empty_review = clone(story)
-empty_review["review_evidence"]["documentation"] = []
-empty_review["review_evidence"]["automated_tests"] = []
+empty_review["description"]["review_evidence"]["documentation"] = []
+empty_review["description"]["review_evidence"]["automated_tests"] = []
 expect_error("missing published documentation evidence") { validate_story_review(empty_review) }
 
 unmapped_review = clone(story)
-unmapped_review["review_evidence"]["automated_tests"].first["scenario_id"] = "other-scenario"
+unmapped_review["description"]["review_evidence"]["automated_tests"].first["scenario_id"] = "other-scenario"
 expect_error("automated-test evidence does not match the plan") { validate_story_review(unmapped_review) }
 
 manual_only = clone(story)
@@ -445,7 +490,7 @@ duplicate_document["documentation"] << clone(duplicate_document["documentation"]
 expect_error("documentation IDs must be unique") { validate_story_description(duplicate_document) }
 
 wrong_environment = clone(story)
-wrong_environment["review_evidence"]["automated_tests"].first["environment"] = "different-system"
+wrong_environment["description"]["review_evidence"]["automated_tests"].first["environment"] = "different-system"
 expect_error("automated-test evidence uses the wrong environment") { validate_story_review(wrong_environment) }
 
 exception_story = clone(story["description"])
@@ -470,16 +515,61 @@ generic = clone(story["description"])
 generic["automated_tests"].first["expected_evidence"] = "tests added"
 expect_error("generic evidence") { validate_story_description(generic) }
 
-render_fixture = load_yaml(File.join(FIXTURES, "render-conditionals.yaml"))
-rendered_sections = render_fixture.fetch("sections").each_with_object([]) do |section, sections|
-  value = section["value"]
-  next if section["conditional"] && (value.nil? || value == [] || value == {})
-  sections << "## #{section["heading"]}\n\n#{value}"
+# Every declared v2 key must have a render target in the shipped template asset.
+# The default target is the key name as a sentence-case heading. RENDER_EXCEPTIONS
+# mirrors the table in references/jira-description-templates.md; the two must agree.
+RENDER_EXCEPTIONS = {
+  "jira-epic-v2" => {
+    "out_of_scope" => "**Out:**",
+    "release_quality_additions" => "**Additions:**",
+    "approved_exceptions" => "**Approved exceptions:**"
+  },
+  "jira-story-v2" => {
+    "scenarios" => "## Acceptance scenarios",
+    "documentation" => "### Documentation",
+    "automated_tests" => "### Automated tests",
+    "documentation_exception" => "### Documentation exception",
+    "automated_tests_exception" => "### Automated-test exception",
+    "nonfunctional_requirements" => "## Non-functional requirements",
+    "review_evidence" => "## Review evidence",
+    "supplemental_demonstration" => "**Supplemental demonstration:**"
+  },
+  "jira-task-v2" => {
+    "ticket_quality_additions" => "**Additions:**",
+    "approved_exceptions" => "**Approved exceptions:**"
+  },
+  "jira-spike-design-v2" => {
+    "design_artifact" => "**Artifact:**",
+    "reviewers" => "**Reviewers:**",
+    "checklist_coverage" => "**Checklist coverage:**"
+  }
+}.freeze
+
+def render_target(template_id, key)
+  RENDER_EXCEPTIONS.dig(template_id, key) || "## #{key.tr("_", " ").capitalize}"
 end
-rendered = rendered_sections.join("\n\n")
-assert(rendered.include?("## Outcome"), "required section did not render")
-assert(!rendered.include?("## Constraints"), "empty conditional section rendered")
-assert(!rendered.include?("N/A"), "renderer added gratuitous N/A")
+
+templates.select { |template| template["set_version"] == 2 }.each do |template|
+  id = template.fetch("id")
+  body = File.read(File.join(SKILL, "assets", "jira-templates", template.fetch("file")))
+  template.fetch("required_keys").each do |key|
+    assert(body.include?(render_target(id, key)), "#{id} requires #{key} but the shipped template cannot render it")
+  end
+  template.fetch("conditional_keys").each do |key|
+    assert(body.include?(render_target(id, key)), "#{id} declares conditional #{key} but the shipped template cannot render it")
+  end
+  headings = body.scan(/^#{"#"}{2,3} .+$/)
+  assert(headings.uniq.length == headings.length, "#{id} repeats a heading")
+  assert(!body.match?(/\bN\/A\b/), "#{id} ships a forced N/A cell")
+  assert(!body.match?(/^\s*-?\s*None\s*$/), "#{id} ships a forced None value")
+end
+
+# The v1 assets are frozen with their original forced-value style; that contrast is
+# the anti-bloat change. Guard it so a v2 regression cannot pass unnoticed.
+legacy_forced = templates.select { |template| template["set_version"] == 1 }.count do |template|
+  File.read(File.join(SKILL, "assets", "jira-templates", template.fetch("file"))).match?(/\bN\/A\b|^\s*-?\s*None\s*$/)
+end
+assert(legacy_forced.positive?, "v1 templates no longer show the forced-value style v2 removed")
 
 story_template = File.read(File.join(SKILL, "assets", "jira-templates", "story-v2.md"))
 assert(!story_template.include?("| Owner |"), "Story template forces an optional owner cell")
