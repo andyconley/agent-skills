@@ -4,7 +4,7 @@ The manifest is the reviewed desired-state contract between planning and Jira. E
 
 ## Identity and approval
 
-- Set `schema_version: 1`.
+- Set `schema_version: 2`.
 - Give the manifest a stable `manifest_id` and integer `revision`.
 - Bind Apply approval to the exact content. For a standalone YAML file, calculate SHA-256 over its exact UTF-8 bytes after converting line endings to LF; include the final trailing newline. Do not digest Markdown fences or surrounding prose. If that representation is unavailable, use an immutable document revision ID supplied by the source system.
 - Approval is external to the YAML. A manifest cannot authorize itself.
@@ -14,9 +14,13 @@ The manifest is the reviewed desired-state contract between planning and Jira. E
 ## Complete shape
 
 ```yaml
-schema_version: 1
+schema_version: 2
 manifest_id: partner-state-m1
 revision: 1
+
+template_set:
+  id: jira-house-templates
+  version: 1
 
 scope:
   parent_key: ER-215
@@ -38,6 +42,7 @@ children:
   - ref: source-adapters
     jira_key: AE-1501
     type: Task
+    template_id: jira-task-v1
     disposition: update
     changes:
       summary: Implement supported-source adapters
@@ -46,10 +51,22 @@ children:
         - Automated component tests
         - Verified sample output
       estimate: 3
+      description:
+        context: Supported source behavior is inconsistent across the current adapters.
+        assumptions:
+          - The approved state model remains stable during implementation.
+        out_of_scope:
+          - Adding new source types
+        acceptance_criteria:
+          - Supported sources produce the canonical state model.
+        technical_considerations:
+          - Preserve adapter-specific error evidence.
+        open_questions: None
 
   - ref: prove-status
     jira_key: null
     type: Story
+    template_id: jira-story-v1
     disposition: proposed
     fields:
       summary: Prove real cell-status reads
@@ -60,6 +77,23 @@ children:
         - Demonstration record
         - Verification environment
       estimate: 3
+      description:
+        scenarios:
+          - given: A partner has valid credentials and access to a supported cell.
+            when: The partner requests current cell status.
+            then: The response returns the current state from the real cell.
+        figma: N/A
+        assumptions:
+          - The supported cell versions are known before qualification.
+        out_of_scope:
+          - Remote commands
+        technical_considerations:
+          - Use the approved state model and freshness rules.
+        nonfunctional_requirements:
+          - Stale data is identified rather than returned as current.
+        documentation_updates:
+          - Publish the supported status fields and freshness behavior.
+        open_questions: None
 
 dependencies:
   - action: ensure
@@ -91,7 +125,7 @@ unknowns:
 
 ## Child invariants
 
-Each child uses a unique, stable `ref` and exactly one disposition:
+Each child uses a unique, stable `ref` and exactly one disposition. `template_id` identifies the exact description structure when `changes` or `fields` includes `description`:
 
 | Disposition | Jira key | Payload | Meaning |
 | --- | --- | --- | --- |
@@ -101,7 +135,9 @@ Each child uses a unique, stable `ref` and exactly one disposition:
 
 Allowed child types are `Spike`, `Task`, and `Story`. Every child must define or verify a `summary` and `done_when`. Include `evidence` and `estimate` when known. Do not invent missing values; place material gaps in `unknowns`.
 
-In v1, `changes` and `fields` may contain only `summary`, `done_when`, `evidence`, and `estimate`. Derive the parent from `scope.epic_key` and the Jira issue type from `type`. Never use the manifest to delete or archive issues; move an issue between projects or parents; change its issue type, status, sprint, reporter, security, or permissions; or mutate a link type other than `Blocks`.
+In schema 2, `changes` and `fields` may contain only `summary`, `done_when`, `evidence`, `estimate`, and `description`. A `description` requires `template_id`, and its keys must match that template. The manifest must contain the complete rendered meaning: Apply cannot add template content that was not reviewed. Every proposed child uses its issue-type template and provides a complete description. For `existing` and `update`, omission of `description` means preserve the live description verbatim.
+
+`template_set` binds the manifest to a registry ID and version. A template or template-set change creates a new manifest revision and requires approval. Derive the parent from `scope.epic_key` and the Jira issue type from `type`. Never use the manifest to delete or archive issues; move an issue between projects or parents; change its issue type, status, sprint, reporter, security, or permissions; or mutate a link type other than `Blocks`.
 
 For a Story, its fields or verification expectations must cover observable behavior, Gherkin scenarios, the integration tests that prove them, deployment or packaging evidence, and verification environment. Use failure, authorization, version, and compatibility scenarios where applicable.
 

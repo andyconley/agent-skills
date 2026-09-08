@@ -1,0 +1,69 @@
+schema_version: 1
+registry_id: jira-house-templates
+version: 1
+verified_at: "2026-09-08"
+
+templates:
+  Epic:
+    id: jira-epic-v1
+    file: epic.md
+    description_format: adf
+    description_keys:
+      - impacted_okrs
+      - problem_statement
+      - background
+      - high_level_approach
+      - success_criteria
+      - definition_of_done
+      - out_of_scope
+      - acceptance_criteria
+      - figma
+      - open_questions
+      - nonfunctional_requirements
+
+  Story:
+    id: jira-story-v1
+    file: story.md
+    description_format: adf
+    description_keys:
+      - scenarios
+      - figma
+      - assumptions
+      - out_of_scope
+      - technical_considerations
+      - nonfunctional_requirements
+      - documentation_updates
+      - open_questions
+
+  Task:
+    id: jira-task-v1
+    file: task.md
+    description_format: adf
+    description_keys:
+      - context
+      - assumptions
+      - out_of_scope
+      - acceptance_criteria
+      - technical_considerations
+      - open_questions
+
+  Spike:
+    id: jira-spike-v1
+    file: spike.md
+    description_format: adf
+    description_keys:
+      - objective
+      - design_scope
+      - deliverables
+      - done_when
+      - references
+
+rendering:
+  preserve_native_adf: true
+  regenerate_local_ids: true
+  native_lists: true
+  jira_references: inline_card
+  gherkin:
+    node_type: codeBlock
+    language: gherkin
+    inline_cards_allowed: false

@@ -1,11 +1,11 @@
 ---
 name: workbreakdown
-description: Breaks milestone Epics into direct-child Spikes, Tasks, and Stories with observable completion states, a complete YAML manifest, hard dependency edges, and verified Jira reconciliation. Use when drafting, reviewing, auditing, or explicitly applying work below an ER or Initiative. Do not use for portfolio hierarchy or unreviewed Jira changes. Version 1.0.0.
+description: Breaks milestone Epics into direct-child Spikes, Tasks, and Stories with observable completion states, complete templated descriptions, a YAML manifest, hard dependency edges, and verified Jira reconciliation. Use when drafting, reviewing, auditing, or explicitly applying work below an ER or Initiative. Do not use for portfolio hierarchy or unreviewed Jira changes. Version 1.1.0.
 ---
 
 # Work Breakdown
 
-**Version: 1.0.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
+**Version: 1.1.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
 
 Break milestone work into items that can be owned, estimated, sequenced, and proven complete.
 
@@ -22,6 +22,8 @@ ER / Initiative
 Spikes, Tasks, and Stories are direct Epic children. Represent delivery sequence with `Blocks` links, not another hierarchy level. Do not create subtasks for planned milestone work.
 
 Read [references/work-breakdown-sop.md](references/work-breakdown-sop.md) in every mode. It owns issue classification, sizing, Story acceptance, refinement, and graph-quality rules.
+
+Read [references/jira-description-templates.md](references/jira-description-templates.md) when drafting, reviewing, or applying Jira descriptions. It owns template selection, content authorization, and rendering rules. The bundled templates live under `assets/jira-templates/`.
 
 ## Select one mode
 

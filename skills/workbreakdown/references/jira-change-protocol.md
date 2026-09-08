@@ -61,7 +61,7 @@ Before writing:
 8. Verify `Blocks` direction against one known-good live link in the target Jira before bulk link changes.
 9. Compare live state with the approved manifest.
 10. Confirm that every planned mutation is authorized by `disposition`, explicit field payload, dependency action, and rank scope.
-11. Reject fields outside the v1 allowlist and any dependency action whose endpoints are both outside the manifest scope.
+11. Reject fields outside the manifest allowlist, descriptions without an exact approved template ID and complete section content, and any dependency action whose endpoints are both outside the manifest scope.
 
 Stop before writing when a missing mapping, unsupported capability, conflicting live item, unexpected child, link difference, rank difference, or other drift would materially change the approved plan.
 

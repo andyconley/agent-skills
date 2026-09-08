@@ -47,7 +47,7 @@ The STE-inspired rules apply pressure in the same direction. They favor short se
 
 - [`humanizer`](../skills/humanizer/SKILL.md): rewrites prose into a direct engineering-leader voice while preserving facts, caveats, and protected technical material.
 - [`doc-flow-review`](../skills/doc-flow-review/SKILL.md): reviews document structure, information order, progressive disclosure, argument support, and depth.
-- [`workbreakdown`](../skills/workbreakdown/SKILL.md): drafts, reviews, audits, and explicitly applies Jira milestone breakdowns through a reviewed YAML manifest.
+- [`workbreakdown`](../skills/workbreakdown/SKILL.md): drafts, reviews, audits, and explicitly applies Jira milestone breakdowns through a reviewed schema-2 YAML manifest and bundled issue-description templates.
 
 When a document needs both skills, run `doc-flow-review` first. Apply the structural decisions, then run `humanizer` on the prose.
 

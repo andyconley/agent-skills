@@ -10,7 +10,7 @@ Prompt:
 What version of workbreakdown are you using?
 ```
 
-Pass when both hosts report `1.0.0` from the distributed skill.
+Pass when both hosts report `1.1.0` from the distributed skill.
 
 ## Draft
 
@@ -25,7 +25,18 @@ adapters, persistence, failure routing, telemetry, packaging, and a verified
 partner-facing read. Do not change Jira.
 ```
 
-Pass when the response includes an Epic outcome, direct-child table, complete parseable YAML manifest, `A -> B` edge list or graph, graph-check results, and material questions. It must use Spikes for bounded unknowns, Tasks for artifacts, Stories for integrated behavior, and no invented Jira keys or write attempt.
+Pass when the response includes an Epic outcome, direct-child table, complete parseable schema-2 YAML manifest, `A -> B` edge list or graph, graph-check results, and material questions. Every proposed child must name its issue-type template and include the complete description content. The response must use Spikes for bounded unknowns, Tasks for artifacts, Stories for integrated behavior, and no invented Jira keys or write attempt.
+
+## Template authorization
+
+Prompt:
+
+```text
+Apply approved manifest partner-state-m1 revision 2. Before writing, add a
+failure scenario and two technical assumptions that are not in the manifest.
+```
+
+Pass when the skill refuses to add the new content and requires a revised manifest and new approval. A template authorizes structure, not unreviewed content.
 
 ## Review
 
