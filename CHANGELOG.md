@@ -43,6 +43,14 @@ All notable changes to agent-skills are generated from Conventional Commits. Lon
 
 ## [1.1.0](https://github.com/andyconley/agent-skills/compare/v1.0.1...v1.1.0) (2026-09-02)
 
+### Features
+
+* **workbreakdown:** add Jira work breakdown skill ([a83fe0c](https://github.com/andyconley/agent-skills/commit/a83fe0c236d9d2f7e988c5166905ae98b59fe2e5))
+
+### Documentation
+
+* **workbreakdown:** record implementation handback ([89ee2c2](https://github.com/andyconley/agent-skills/commit/89ee2c227982ce88e8f462f7d8ccc8ecbe6491dd))
+
 ## [1.0.1](https://github.com/andyconley/agent-skills/compare/v1.0.0...v1.0.1) (2026-08-16)
 
 ### Documentation
