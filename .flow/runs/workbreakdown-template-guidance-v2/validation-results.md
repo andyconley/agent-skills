@@ -34,3 +34,4 @@ Ran. The registered Epic v1 hash was changed deliberately. `workbreakdown-v2-tes
 - Fresh Codex and Claude Code behavior prompts: not run. Static package and two-host installation-link coverage passed.
 - Live Jira Apply: not run. No isolated Jira mutation was authorized for this implementation.
 - Jira and Confluence mutation: none.
+- Local install refresh: passed from the clean checkout. Both `/Users/andyconley/.agents/skills/workbreakdown` and `/Users/andyconley/.claude/skills/workbreakdown` report 1.2.0.
