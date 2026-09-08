@@ -2,6 +2,12 @@
 
 All notable changes to agent-skills are generated from Conventional Commits. Longer design context belongs in the documentation changed by the release.
 
+## [1.4.1](https://github.com/andyconley/agent-skills/compare/v1.4.0...v1.4.1) (2026-09-08)
+
+### Bug Fixes
+
+* **release:** pin a preset version that actually generates notes ([6821180](https://github.com/andyconley/agent-skills/commit/68211809a45613fad84a001a3cddfe637e991099))
+
 ## [1.4.0](https://github.com/andyconley/agent-skills/compare/v1.3.1...v1.4.0) (2026-09-08)
 
 ## [1.3.1](https://github.com/andyconley/agent-skills/compare/v1.3.0...v1.3.1) (2026-09-08)
