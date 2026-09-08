@@ -69,7 +69,7 @@ Each Story must include:
 - failure and authorization scenarios where applicable
 - version or compatibility behavior where applicable
 - the automated integration or functional test that proves each scenario
-- the intended test suite or location, verification environment, and expected evidence
+- the expected evidence, plus the intended test suite or location and the verification environment when they are known
 - contextual documentation: the applicable user, operator, support, API, or other artifact; its audience; intended location; and owner when known
 - packaging or deployment evidence
 

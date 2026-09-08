@@ -136,7 +136,10 @@ def validate_story_description(description)
   test_exception = description["automated_tests_exception"]
   if tests && !tests.empty?
     tests.each do |item|
-      required = %w[scenario_id level suite_or_location environment expected_evidence]
+      # suite_or_location and environment are optional at plan time. A Story can be
+      # IMPLEMENTATION READY before the repo or the environment exists. IN REVIEW
+      # still requires a named environment in the evidence.
+      required = %w[scenario_id level expected_evidence]
       raise ArgumentError, "incomplete automated-test plan" unless required.all? { |key| !item[key].to_s.empty? }
       raise ArgumentError, "manual test is not a substitute" unless %w[integration functional].include?(item["level"])
       raise ArgumentError, "automated test is not mapped to a scenario" unless scenario_ids.include?(item["scenario_id"])
@@ -301,7 +304,10 @@ def validate_story_review(story)
   evidence_scenarios = passing.map { |item| item["scenario_id"] }
   raise ArgumentError, "documentation evidence does not match the plan" unless evidence_documents.sort == planned_documents.sort && evidence_documents.uniq.length == evidence_documents.length
   raise ArgumentError, "automated-test evidence does not match the plan" unless evidence_scenarios.sort == planned_scenarios.sort && evidence_scenarios.uniq.length == evidence_scenarios.length
-  raise ArgumentError, "automated-test evidence uses the wrong environment" unless passing.all? { |item| item["environment"] == planned_environments[item["scenario_id"]] }
+  raise ArgumentError, "automated-test evidence uses the wrong environment" unless passing.all? do |item|
+    planned = planned_environments[item["scenario_id"]]
+    planned.to_s.empty? || item["environment"] == planned
+  end
 end
 
 registry = load_yaml(REGISTRY_PATH)
@@ -499,6 +505,22 @@ story = load_yaml(File.join(FIXTURES, "story-lifecycle.yaml"))
 validate_story_description(story.fetch("description"))
 validate_story_review(story)
 assert(!story.dig("description", "documentation", 0).key?("owner"), "unknown owner must not render an empty field")
+
+# A Story can be IMPLEMENTATION READY before the repo or the environment exists.
+unsited_plan = clone(story)
+unsited_plan["description"]["automated_tests"].first.delete("suite_or_location")
+unsited_plan["description"]["automated_tests"].first.delete("environment")
+validate_story_description(unsited_plan["description"])
+
+# IN REVIEW still demands a named environment in the evidence.
+unsited_review = clone(unsited_plan)
+unsited_review["description"]["review_evidence"]["automated_tests"].first["environment"] = ""
+expect_error("missing passing automated-test evidence") { validate_story_review(unsited_review) }
+
+# With no planned environment, any named environment in the evidence is accepted.
+unsited_elsewhere = clone(unsited_plan)
+unsited_elsewhere["description"]["review_evidence"]["automated_tests"].first["environment"] = "lab-cell-7"
+validate_story_review(unsited_elsewhere)
 
 missing_docs = clone(story)
 missing_docs["description"]["review_evidence"]["documentation"].first["status"] = "planned"

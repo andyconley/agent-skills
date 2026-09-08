@@ -82,7 +82,7 @@ templates:
     variant: behavior
     status: default
     file: story-v2.md
-    sha256: 3e5453d38390f864babd7e6f41a78a45e8a269d6b0de8619d47e66024165a6cf
+    sha256: ca7c5dcf753d6a0e2f432ef436801422ea81ca4c5c20bdabb358197c9c4fc6b4
     description_format: adf
     required_keys: [outcome, scenarios]
     required_one_of:

@@ -95,7 +95,7 @@ children:
     jira_key: null
     type: Story
     template_id: jira-story-v2
-    template_sha256: 3e5453d38390f864babd7e6f41a78a45e8a269d6b0de8619d47e66024165a6cf
+    template_sha256: ca7c5dcf753d6a0e2f432ef436801422ea81ca4c5c20bdabb358197c9c4fc6b4
     disposition: proposed
     fields:
       summary: Prove current state reads
@@ -254,7 +254,7 @@ Every child defines or verifies summary and done_when. Include evidence and esti
 
 changes and fields may contain only summary, done_when, evidence, estimate, and description. A v2 description requires an exact template ID and hash. A schema-2, template-set-1 manifest may omit the hash; the immutable registry entry supplies it. Description keys match the registered required and conditional keys. Apply cannot add template content after approval. Omission of a description preserves the live description.
 
-For a Story, give each scenario and documentation artifact a stable ID. Planned fields cover observable scenarios, contextual documentation, automated integration or functional tests mapped by scenario ID, intended suite or location, verification environment, and expected evidence. For each documentation and automated-test obligation, supply either a nonempty plan or one complete approved exception—not both. An exception names the obligation, reason, approver, and approval evidence. At IN REVIEW, evidence must cover every planned artifact and mapped scenario exactly once.
+For a Story, give each scenario and documentation artifact a stable ID. Planned fields cover observable scenarios, contextual documentation, automated integration or functional tests mapped by scenario ID, and expected evidence. The intended suite or location and the verification environment are optional at plan time; supply them when known and record the gap in `unknowns` when not. For each documentation and automated-test obligation, supply either a nonempty plan or one complete approved exception—not both. An exception names the obligation, reason, approver, and approval evidence. At IN REVIEW, evidence must cover every planned artifact and mapped scenario exactly once, and must name the environment it ran in. Where the plan named an environment, the evidence matches it.
 
 Derive the parent from scope.epic_key and the Jira issue type from type. The manifest cannot delete or archive issues; move issues between projects or parents; change issue type, status, sprint, reporter, security, or permissions; or mutate a link type other than Blocks.
 
