@@ -5,6 +5,10 @@ require "digest"
 require "json"
 require "yaml"
 
+# Repository text is UTF-8. Declare it so File.read does not inherit a
+# US-ASCII default from a C or POSIX locale and reject valid content.
+Encoding.default_external = Encoding::UTF_8
+
 ROOT = File.expand_path("../..", __dir__)
 SKILL = File.join(ROOT, "skills", "workbreakdown")
 REGISTRY_PATH = File.join(SKILL, "assets", "jira-templates", "registry.yaml")
