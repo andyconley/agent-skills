@@ -4,6 +4,10 @@ All notable changes to agent-skills are generated from Conventional Commits. Lon
 
 ## [1.2.0](https://github.com/andyconley/agent-skills/compare/v1.1.0...v1.2.0) (2026-09-08)
 
+### Features
+
+* **workbreakdown:** bundle Jira description templates ([9340cc2](https://github.com/andyconley/agent-skills/commit/9340cc2d497a81e14dd92da53410fb53fbbaff35))
+
 ## [1.1.0](https://github.com/andyconley/agent-skills/compare/v1.0.1...v1.1.0) (2026-09-02)
 
 ## [1.0.1](https://github.com/andyconley/agent-skills/compare/v1.0.0...v1.0.1) (2026-08-16)
