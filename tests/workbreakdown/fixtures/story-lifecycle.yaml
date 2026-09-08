@@ -1,0 +1,26 @@
+description:
+  outcome: An operator recovers a connection after a broker disconnect.
+  scenarios:
+    - id: broker-recovery
+      behavior: Recovery after a broker disconnect
+  documentation:
+    - id: recovery-sop
+      artifact: Connection recovery SOP
+      audience: operator
+      intended_location: docs/operations/recovery.md
+  automated_tests:
+    - scenario_id: broker-recovery
+      level: integration
+      suite_or_location: tests/integration/recovery
+      environment: representative-system
+      expected_evidence: Retained CI result
+review_evidence:
+  documentation:
+    - artifact_id: recovery-sop
+      status: published
+      evidence: docs/operations/recovery.md
+  automated_tests:
+    - scenario_id: broker-recovery
+      status: passed
+      environment: representative-system
+      evidence: CI-123

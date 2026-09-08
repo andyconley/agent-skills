@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "work_id": "workbreakdown-template-guidance-v2",
+  "mode": "delegated",
+  "risk": {
+    "hard_triggers": [],
+    "aggravating_factors": ["concurrency_or_cross_system_coordination"],
+    "classification": "standard",
+    "rationale": "Four read-only planning reviews shaped the plan; no shared or external state was mutated."
+  },
+  "assignments": [
+    {
+      "id": "business-analysis",
+      "lane": "plan",
+      "role": "business-analyst",
+      "provider": {"kind": "agent", "id": "/root/wb_v2_ba"},
+      "brief_path": ".flow/runs/workbreakdown-template-guidance-v2/briefs/business-analysis.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-template-guidance-v2/requirements.md",
+        ".flow/runs/workbreakdown-template-guidance-v2/acceptance-criteria.md"
+      ],
+      "read_scopes": ["skills/workbreakdown"],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [{"name": "filesystem-read", "status": "confirmed"}],
+      "output": {"path": ".flow/runs/workbreakdown-template-guidance-v2/reviews/business-analysis.md", "format": "markdown"},
+      "success_criteria": ["Acceptance and lifecycle gaps are identified with actionable corrections."],
+      "claim_statuses": ["observed", "recommended"],
+      "coordination": {"mode": "concurrent", "group": "planning-review"}
+    },
+    {
+      "id": "product-scope",
+      "lane": "plan",
+      "role": "product-manager",
+      "provider": {"kind": "agent", "id": "/root/wb_v2_pm"},
+      "brief_path": ".flow/runs/workbreakdown-template-guidance-v2/briefs/product-scope.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-template-guidance-v2/requirements.md",
+        ".flow/runs/workbreakdown-template-guidance-v2/acceptance-criteria.md"
+      ],
+      "read_scopes": ["skills/workbreakdown"],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [{"name": "filesystem-read", "status": "confirmed"}],
+      "output": {"path": ".flow/runs/workbreakdown-template-guidance-v2/reviews/product-scope.md", "format": "markdown"},
+      "success_criteria": ["The smallest coherent release scope and exclusions are explicit."],
+      "claim_statuses": ["observed", "recommended"],
+      "coordination": {"mode": "concurrent", "group": "planning-review"}
+    },
+    {
+      "id": "architecture",
+      "lane": "plan",
+      "role": "architect",
+      "provider": {"kind": "agent", "id": "/root/wb_v2_arch"},
+      "brief_path": ".flow/runs/workbreakdown-template-guidance-v2/briefs/architecture.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-template-guidance-v2/requirements.md",
+        ".flow/runs/workbreakdown-template-guidance-v2/acceptance-criteria.md"
+      ],
+      "read_scopes": ["skills/workbreakdown"],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [{"name": "filesystem-read", "status": "confirmed"}],
+      "output": {"path": ".flow/runs/workbreakdown-template-guidance-v2/reviews/architecture.md", "format": "markdown"},
+      "success_criteria": ["Versioning, template variants, manifest interaction, and validation are implementation-ready."],
+      "claim_statuses": ["observed", "inferred", "recommended"],
+      "coordination": {"mode": "concurrent", "group": "planning-review"}
+    },
+    {
+      "id": "test-strategy",
+      "lane": "plan",
+      "role": "test-engineer",
+      "provider": {"kind": "agent", "id": "/root/wb_v2_test"},
+      "brief_path": ".flow/runs/workbreakdown-template-guidance-v2/briefs/test-strategy.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-template-guidance-v2/requirements.md",
+        ".flow/runs/workbreakdown-template-guidance-v2/acceptance-criteria.md",
+        ".flow/runs/workbreakdown-template-guidance-v2/solution.md"
+      ],
+      "read_scopes": ["skills/workbreakdown", "tests"],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [{"name": "filesystem-read", "status": "confirmed"}],
+      "output": {"path": ".flow/runs/workbreakdown-template-guidance-v2/reviews/test-strategy.md", "format": "markdown"},
+      "success_criteria": ["The validation plan covers compatibility, quality gates, mutation safety, and meaningful behavior."],
+      "claim_statuses": ["observed", "recommended"],
+      "coordination": {"mode": "serialized", "group": "test-review"}
+    },
+    {
+      "id": "implementation-sequencing",
+      "lane": "implement",
+      "role": "lead-developer",
+      "provider": {"kind": "agent", "id": "/root/wb_v2_lead"},
+      "brief_path": ".flow/runs/workbreakdown-template-guidance-v2/briefs/implementation-sequencing.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-template-guidance-v2/requirements.md",
+        ".flow/runs/workbreakdown-template-guidance-v2/acceptance-criteria.md",
+        ".flow/runs/workbreakdown-template-guidance-v2/solution.md",
+        ".flow/runs/workbreakdown-template-guidance-v2/plan.md",
+        ".flow/runs/workbreakdown-template-guidance-v2/validation-plan.md"
+      ],
+      "read_scopes": ["skills/workbreakdown", "tests", "scripts"],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [{"name": "filesystem-read", "status": "confirmed"}],
+      "output": {"path": ".flow/runs/workbreakdown-template-guidance-v2/reviews/implementation-sequencing.md", "format": "markdown"},
+      "success_criteria": ["The implementation sequence is file-specific, incremental, and preserves the approved safety boundaries."],
+      "claim_statuses": ["observed", "recommended"],
+      "coordination": {"mode": "concurrent", "group": "implementation-inspection"}
+    },
+    {
+      "id": "implementation-tests",
+      "lane": "implement",
+      "role": "test-engineer",
+      "provider": {"kind": "agent", "id": "/root/wb_v2_test"},
+      "brief_path": ".flow/runs/workbreakdown-template-guidance-v2/briefs/implementation-tests.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-template-guidance-v2/acceptance-criteria.md",
+        ".flow/runs/workbreakdown-template-guidance-v2/plan.md",
+        ".flow/runs/workbreakdown-template-guidance-v2/validation-plan.md"
+      ],
+      "read_scopes": ["skills/workbreakdown", "tests"],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [{"name": "filesystem-read", "status": "confirmed"}],
+      "output": {"path": ".flow/runs/workbreakdown-template-guidance-v2/reviews/implementation-tests.md", "format": "markdown"},
+      "success_criteria": ["The test plan proves behavior and compatibility rather than only text presence."],
+      "claim_statuses": ["observed", "recommended"],
+      "coordination": {"mode": "concurrent", "group": "implementation-inspection"}
+    },
+    {
+      "id": "quality-review",
+      "lane": "implement",
+      "role": "quality-reviewer",
+      "provider": {"kind": "agent", "id": "/root/wb_v2_quality"},
+      "brief_path": ".flow/runs/workbreakdown-template-guidance-v2/briefs/quality-review.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-template-guidance-v2/requirements.md",
+        ".flow/runs/workbreakdown-template-guidance-v2/acceptance-criteria.md",
+        ".flow/runs/workbreakdown-template-guidance-v2/plan.md"
+      ],
+      "read_scopes": ["skills/workbreakdown", "tests", "README.md", "docs/README.md"],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [{"name": "filesystem-read", "status": "confirmed"}],
+      "output": {"path": ".flow/runs/workbreakdown-template-guidance-v2/reviews/quality-review.md", "format": "markdown"},
+      "success_criteria": ["Acceptance, compatibility, concision, packaging, and proof are independently reviewed."],
+      "claim_statuses": ["observed", "recommended"],
+      "coordination": {"mode": "concurrent", "group": "implementation-review"}
+    },
+    {
+      "id": "implementation-architecture",
+      "lane": "implement",
+      "role": "architect",
+      "provider": {"kind": "agent", "id": "/root/wb_v2_arch"},
+      "brief_path": ".flow/runs/workbreakdown-template-guidance-v2/briefs/implementation-architecture.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-template-guidance-v2/acceptance-criteria.md",
+        ".flow/runs/workbreakdown-template-guidance-v2/solution.md"
+      ],
+      "read_scopes": ["skills/workbreakdown", "tests/workbreakdown"],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [{"name": "filesystem-read", "status": "confirmed"}],
+      "output": {"path": ".flow/runs/workbreakdown-template-guidance-v2/reviews/implementation-architecture.md", "format": "markdown"},
+      "success_criteria": ["Schema 2 remains child-only and schema 3 fails closed across every contract surface."],
+      "claim_statuses": ["observed", "recommended"],
+      "coordination": {"mode": "concurrent", "group": "implementation-review"}
+    },
+    {
+      "id": "handback-writing",
+      "lane": "implement",
+      "role": "tech-writer",
+      "provider": {"kind": "agent", "id": "/root/wb_v2_writer"},
+      "brief_path": ".flow/runs/workbreakdown-template-guidance-v2/briefs/handback-writing.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-template-guidance-v2/requirements.md",
+        ".flow/runs/workbreakdown-template-guidance-v2/acceptance-criteria.md",
+        ".flow/runs/workbreakdown-template-guidance-v2/findings-reconciliation.md",
+        ".flow/runs/workbreakdown-template-guidance-v2/reviews/quality-review.md",
+        ".flow/runs/workbreakdown-template-guidance-v2/reviews/implementation-architecture.md"
+      ],
+      "read_scopes": ["skills/workbreakdown", "tests", "README.md", "docs/README.md", ".flow/runs/workbreakdown-template-guidance-v2"],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [{"name": "filesystem-read", "status": "confirmed"}],
+      "output": {"path": ".flow/runs/workbreakdown-template-guidance-v2/HANDOFF.md", "format": "markdown"},
+      "success_criteria": ["The handback is concise, evidence-based, and records limitations without overstating completion."],
+      "claim_statuses": ["observed", "recommended"],
+      "coordination": {"mode": "serialized", "group": "handback"}
+    }
+  ],
+  "shared_state": [],
+  "reconciliation": {
+    "artifact_path": ".flow/runs/workbreakdown-template-guidance-v2/findings-reconciliation.md",
+    "status": "resolved",
+    "claims": []
+  },
+  "verification": {
+    "producer_assignments": ["implementation-sequencing", "implementation-tests"],
+    "evidence_collector_assignment": "implementation-tests",
+    "verifier_assignment": "quality-review",
+    "independent": true,
+    "artifact_path": ".flow/runs/workbreakdown-template-guidance-v2/review.md"
+  }
+}

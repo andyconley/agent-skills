@@ -1,64 +1,131 @@
-schema_version: 1
+schema_version: 2
 registry_id: jira-house-templates
-version: 1
+version: 2
 verified_at: "2026-09-08"
 
+default_set_version: 2
+template_sets:
+  1:
+    defaults:
+      Epic: jira-epic-v1
+      Story: jira-story-v1
+      Task: jira-task-v1
+      Spike: jira-spike-v1
+  2:
+    defaults:
+      Epic: jira-epic-v2
+      Story: jira-story-v2
+      Task: jira-task-v2
+      Spike:
+        design: jira-spike-design-v2
+        investigation: jira-spike-investigation-v2
+
 templates:
-  Epic:
-    id: jira-epic-v1
-    file: epic.md
+  - id: jira-epic-v1
+    set_version: 1
+    issue_type: Epic
+    variant: legacy
+    status: legacy
+    file: epic-v1.md
+    sha256: e6ac1fced57839ccaca7c56fe42cd08b5907af5b15f2f050625350dfaf9c758a
     description_format: adf
-    description_keys:
-      - impacted_okrs
-      - problem_statement
-      - background
-      - high_level_approach
-      - success_criteria
-      - definition_of_done
-      - out_of_scope
-      - acceptance_criteria
-      - figma
-      - open_questions
-      - nonfunctional_requirements
+    required_keys: [impacted_okrs, problem_statement, background, high_level_approach, success_criteria, definition_of_done, out_of_scope, acceptance_criteria, figma, open_questions, nonfunctional_requirements]
+    conditional_keys: []
 
-  Story:
-    id: jira-story-v1
-    file: story.md
+  - id: jira-story-v1
+    set_version: 1
+    issue_type: Story
+    variant: legacy
+    status: legacy
+    file: story-v1.md
+    sha256: b8865258f0a17dd5f495e4b004fa27761af0b89911be405f5f1f6fc2602b3259
     description_format: adf
-    description_keys:
-      - scenarios
-      - figma
-      - assumptions
-      - out_of_scope
-      - technical_considerations
-      - nonfunctional_requirements
-      - documentation_updates
-      - open_questions
+    required_keys: [scenarios, figma, assumptions, out_of_scope, technical_considerations, nonfunctional_requirements, documentation_updates, open_questions]
+    conditional_keys: []
 
-  Task:
-    id: jira-task-v1
-    file: task.md
+  - id: jira-task-v1
+    set_version: 1
+    issue_type: Task
+    variant: legacy
+    status: legacy
+    file: task-v1.md
+    sha256: b7bd307184299f026c25df32903455f0ee6fa60d66e6f08ef747508685adffe6
     description_format: adf
-    description_keys:
-      - context
-      - assumptions
-      - out_of_scope
-      - acceptance_criteria
-      - technical_considerations
-      - open_questions
+    required_keys: [context, assumptions, out_of_scope, acceptance_criteria, technical_considerations, open_questions]
+    conditional_keys: []
 
-  Spike:
-    id: jira-spike-v1
-    file: spike.md
+  - id: jira-spike-v1
+    set_version: 1
+    issue_type: Spike
+    variant: legacy
+    status: legacy
+    file: spike-v1.md
+    sha256: 66dcbb09cbface7f0ceadd8feddb25e2512d4e488f3d414427ba2e7393b3eb88
     description_format: adf
-    description_keys:
-      - objective
-      - design_scope
-      - deliverables
-      - done_when
-      - references
+    required_keys: [objective, design_scope, deliverables, done_when, references]
+    conditional_keys: []
+
+  - id: jira-epic-v2
+    set_version: 2
+    issue_type: Epic
+    variant: milestone
+    status: default
+    file: epic-v2.md
+    sha256: 18fefffa6ebb6fe385616ecc0dce1756a6238ce11cd5f41d972557313d42342e
+    description_format: adf
+    required_keys: [milestone_outcome, problem, acceptance_criteria, success_measures]
+    conditional_keys: [delivery_approach, out_of_scope, release_quality_additions, approved_exceptions, open_decisions]
+
+  - id: jira-story-v2
+    set_version: 2
+    issue_type: Story
+    variant: behavior
+    status: default
+    file: story-v2.md
+    sha256: 3e5453d38390f864babd7e6f41a78a45e8a269d6b0de8619d47e66024165a6cf
+    description_format: adf
+    required_keys: [outcome, scenarios]
+    required_one_of:
+      - [documentation, documentation_exception]
+      - [automated_tests, automated_tests_exception]
+    conditional_keys: [documentation, automated_tests, documentation_exception, automated_tests_exception, context_and_constraints, nonfunctional_requirements, review_evidence, supplemental_demonstration]
+
+  - id: jira-task-v2
+    set_version: 2
+    issue_type: Task
+    variant: artifact
+    status: default
+    file: task-v2.md
+    sha256: fedfeda541933a2a379bf7569703b138e078aa9ee730438a839977824bdd06b3
+    description_format: adf
+    required_keys: [result, context, acceptance_criteria, validation]
+    conditional_keys: [constraints, ticket_quality_additions, approved_exceptions]
+
+  - id: jira-spike-design-v2
+    set_version: 2
+    issue_type: Spike
+    variant: design
+    status: default
+    file: spike-design-v2.md
+    sha256: de1f159a8aa244c6fc4f4149526d84a12555e2ec12f76077010fdb73ff7cdb5f
+    description_format: adf
+    required_keys: [decision, questions_and_constraints, design_artifact, reviewers, checklist_coverage, done_when, downstream_updates]
+    conditional_keys: [references]
+
+  - id: jira-spike-investigation-v2
+    set_version: 2
+    issue_type: Spike
+    variant: investigation
+    status: default
+    file: spike-investigation-v2.md
+    sha256: 30b1b13d625aef4be726c0b1b8ac96a8ebbc9f71bae1da0cc09761ec75c66968
+    description_format: adf
+    required_keys: [question, evidence_needed, done_when, downstream_updates]
+    conditional_keys: [boundaries, references]
 
 rendering:
+  omit_empty_conditionals: true
+  na_policy: fixed_table_cells_only
   preserve_native_adf: true
   regenerate_local_ids: true
   native_lists: true

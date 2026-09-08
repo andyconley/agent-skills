@@ -1,11 +1,11 @@
 ---
 name: workbreakdown
-description: Breaks milestone Epics into direct-child Spikes, Tasks, and Stories with observable completion states, complete templated descriptions, a YAML manifest, hard dependency edges, and verified Jira reconciliation. Use when drafting, reviewing, auditing, or explicitly applying work below an ER or Initiative. Do not use for portfolio hierarchy or unreviewed Jira changes. Version 1.1.0.
+description: Breaks milestone Epics into direct-child Spikes, Tasks, and Stories with observable completion states, concise versioned descriptions, a YAML manifest, hard dependency edges, and verified Jira reconciliation. Use when drafting, reviewing, auditing, or explicitly applying work below an ER or Initiative. Do not use for portfolio hierarchy or unreviewed Jira changes. Version 1.2.0.
 ---
 
 # Work Breakdown
 
-**Version: 1.1.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
+**Version: 1.2.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
 
 Break milestone work into items that can be owned, estimated, sequenced, and proven complete.
 
@@ -25,11 +25,13 @@ Read [references/work-breakdown-sop.md](references/work-breakdown-sop.md) in eve
 
 Read [references/jira-description-templates.md](references/jira-description-templates.md) when drafting, reviewing, or applying Jira descriptions. It owns template selection, content authorization, and rendering rules. The bundled templates live under `assets/jira-templates/`.
 
+Read [references/ticket-quality-and-completion.md](references/ticket-quality-and-completion.md) in every mode. It owns anti-bloat checks, shared completion profiles, Story lifecycle gates, and exception evidence.
+
 ## Select one mode
 
 - **Draft:** Propose a breakdown from source material and available Jira context. Do not change Jira. Read [references/manifest-contract.md](references/manifest-contract.md). Always return the Epic outcome, child table, complete YAML manifest, dependency edge list or graph, graph checks, and material questions.
-- **Review:** Check an existing breakdown or manifest. Do not change Jira or redesign valid work. Read [references/manifest-contract.md](references/manifest-contract.md). Return only material defects, the smallest corrections, and a corrected edge list when edges change.
-- **Audit:** Inspect live Jira or a supplied export. Do not change Jira. Read [references/jira-change-protocol.md](references/jira-change-protocol.md). Return the hierarchy, item table, edge list, graph defects, missing Story evidence, and smallest proposed change set.
+- **Review:** Check an existing breakdown or manifest. Do not change Jira or redesign valid work. Read [references/manifest-contract.md](references/manifest-contract.md). Return only material defects, lifecycle eligibility, the smallest corrections, and a corrected edge list when edges change.
+- **Audit:** Inspect live Jira or a supplied export. Do not change Jira. Read [references/jira-change-protocol.md](references/jira-change-protocol.md). Return the hierarchy, item table, edge list, graph defects, ticket-quality findings, Story lifecycle eligibility, and smallest proposed change set.
 - **Apply:** Reconcile Jira to one specific approved manifest. Read both [references/manifest-contract.md](references/manifest-contract.md) and [references/jira-change-protocol.md](references/jira-change-protocol.md). Apply only after the user directly authorizes the exact manifest revision.
 
 If the user asks to break down, plan, or propose work without explicitly asking for Jira changes, use Draft. Never combine Draft and Apply in one unreviewed pass.
@@ -40,11 +42,16 @@ Ask for every child:
 
 > What will be observably true when this item is finished that is not true now?
 
-- A **Spike** answers one bounded research, design, or feasibility question.
+- A **design Spike** produces one reviewed design decision and linked artifact.
+- An **investigation Spike** answers one bounded research or feasibility question.
 - A **Task** produces one specific implementation or operational artifact.
 - A **Story** packages integrated behavior that a user, partner, or system can demonstrate and that acceptance tests prove.
 
 Every Task must contribute to a Story or an explicit Epic exit condition. Every Spike must inform a Task or Story.
+
+New Drafts use the v2 template defaults. Keep descriptions short: fill required content, include conditional sections only when material, and omit empty sections. An explicitly v1-bound manifest stays on its unchanged v1 asset.
+
+For every Story, plan the contextual documentation and automated integration or functional tests that prove its scenarios. This plan is enough for `IMPLEMENTATION READY`. Before the Story enters `IN REVIEW`, require published or updated documentation, passing mapped tests in the named environment, and reviewable evidence. Do not treat a manual demonstration as an automated-test substitute.
 
 ## Interpret dependencies literally
 
@@ -62,6 +69,8 @@ Automatic skill selection does not authorize Jira changes. Apply requires:
 4. A preflight showing that live drift does not change the approved plan.
 
 If any condition is missing, stop before the first write and return the proposed delta or capability gap. An API success response is not proof. Apply finishes only after final readback matches the approved manifest.
+
+Manifest schema 2 remains child-only. Only schema 3 can verify or update the scoped Epic, and only an explicit `epic.disposition: update` with exact template binding, expected-current ADF digest, and approved description content authorizes that update. Epic creation, deletion, reparenting, retyping, ranking, and status or other omitted-field changes remain forbidden.
 
 Do not invent Jira keys, live state, estimates, evidence, permissions, acceptance criteria, or dependencies. State assumptions as assumptions. Ask only questions that materially change classification, scope, acceptance, or dependency direction.
 

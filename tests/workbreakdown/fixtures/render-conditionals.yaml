@@ -1,0 +1,10 @@
+sections:
+  - heading: Outcome
+    value: Consumers retrieve current state.
+    conditional: false
+  - heading: Constraints
+    value:
+    conditional: true
+  - heading: Open decisions
+    value: []
+    conditional: true

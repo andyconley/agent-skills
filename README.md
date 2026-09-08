@@ -14,7 +14,7 @@ For the deeper strategy, theory, and repo map, see [docs/README.md](docs/README.
 | --- | --- | --- |
 | `doc-flow-review` | Structure, information order, progressive disclosure, argument, and depth | Copyediting, fact-checking, or rewriting prose |
 | `humanizer` | Direct, concise prose in an experienced engineering-leader voice | Structural review or changing protected requirements |
-| `workbreakdown` | Direct Epic-child work, complete Jira descriptions, YAML manifests, hard dependencies, and Jira reconciliation | Portfolio hierarchy or unreviewed Jira changes |
+| `workbreakdown` | Direct Epic-child work, concise versioned Jira descriptions, YAML manifests, hard dependencies, and Jira reconciliation | Portfolio hierarchy or unreviewed Jira changes |
 
 When a document needs both, run `doc-flow-review` first. Apply the structural decisions, then run `humanizer` on the prose.
 
@@ -103,7 +103,7 @@ Give the model the relevant `SKILL.md` as task instructions. Include referenced 
 
 The shared output discipline lives in `shared/agent-output-discipline.md`. Final gates live in `shared/final-gates.md`; pattern classes live in `shared/pattern-classes.md`. The examples in `examples/` show bad and good agent output, plus manual regression prompts for checking whether an agent is getting wordy, using polished review-template headings, or preserving mirrored rhythm.
 
-`doc-flow-review` uses `assets/reviewer-block.md` only when generating a reviewer-request block. `workbreakdown` ships versioned Epic, Story, Task, and Spike description templates under `assets/jira-templates/`. Manifest schema 2 binds proposed Jira work to an exact template set and includes the complete description content in the reviewed change.
+`doc-flow-review` uses `assets/reviewer-block.md` only when generating a reviewer-request block. `workbreakdown` ships immutable v1 templates and concise v2 defaults under `assets/jira-templates/`. Manifest schema 2 remains child-only. Schema 3 adds explicit, drift-checked authority for an approved Epic description update. Story plans name contextual documentation and automated integration or functional tests; delivered evidence gates entry to `IN REVIEW`, not the start of implementation.
 
 The default skill behavior needs no scripts, network access, connectors, or product-specific tools. Strict mode can optionally use the Vale wrapper when available. Optional `agents/openai.yaml` files add Codex UI metadata; other hosts can ignore them.
 

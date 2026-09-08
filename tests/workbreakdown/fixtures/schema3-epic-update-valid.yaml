@@ -1,0 +1,37 @@
+schema_version: 3
+manifest_id: epic-update
+revision: 1
+template_set:
+  id: jira-house-templates
+  version: 2
+scope:
+  parent_key: INIT-1
+  epic_key: EPIC-1
+epic:
+  disposition: update
+  template_id: jira-epic-v2
+  template_sha256: 18fefffa6ebb6fe385616ecc0dce1756a6238ce11cd5f41d972557313d42342e
+  expected_current:
+    description_adf_sha256: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  changes:
+    description:
+      milestone_outcome: Consumers retrieve current state through the supported API.
+      problem: The current interface does not expose a supported state representation.
+      acceptance_criteria:
+        - condition: A permitted consumer retrieves current state.
+          evidence: Passing functional-test report.
+          acceptor: API owner
+        - condition: Stale data is identified.
+          evidence: Passing stale-data scenario.
+          acceptor: Service owner
+        - condition: Unsupported sources return the documented error.
+          evidence: Passing error-contract scenario.
+          acceptor: Support owner
+      success_measures:
+        - Supported consumers complete state reads within the service target.
+children: []
+dependencies: []
+rank:
+  mode: scoped-relative
+  order: []
+unknowns: []

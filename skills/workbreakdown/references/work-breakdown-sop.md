@@ -6,10 +6,10 @@ Use this policy for work below an ER or Initiative.
 
 | Type | Purpose | Done when |
 | --- | --- | --- |
-| Epic | Deliver a milestone capability | The milestone behavior is demonstrated and its Stories pass |
-| Spike | Answer one research, design, or feasibility question | The decision, evidence, constraints, and downstream effect are recorded |
+| Epic | Deliver a milestone capability | Its acceptance conditions pass and the milestone evidence is accepted |
+| Spike | Answer one design, research, or feasibility question | The decision or answer, evidence, constraints, and downstream effect are recorded |
 | Task | Produce a specific implementation or operational artifact | The named code, configuration, infrastructure, test asset, or deployment exists and is verified |
-| Story | Package integrated, observable behavior | Its Gherkin scenarios and integration tests pass against the delivered system |
+| Story | Package integrated, observable behavior | Its documentation is delivered and mapped automated integration or functional tests pass against the delivered system |
 
 Create a direct Epic child when work needs an owner, estimate, status, dependency, or completion evidence. Do not use subtasks for planned milestone work.
 
@@ -61,17 +61,43 @@ Changing an estimate after research is normal.
 
 ## Story acceptance
 
-Each Story should include:
+Each Story must include:
 
 - observable behavior
 - Gherkin scenarios for the main path
+- stable scenario IDs used by test plans and review evidence
 - failure and authorization scenarios where applicable
 - version or compatibility behavior where applicable
-- the integration test that proves each scenario
+- the automated integration or functional test that proves each scenario
+- the intended test suite or location, verification environment, and expected evidence
+- contextual documentation: the applicable user, operator, support, API, or other artifact; its audience; intended location; and owner when known
 - packaging or deployment evidence
-- the environment where the behavior was verified
 
-Integration tests can be written before implementation and remain failing until the Tasks are complete.
+At `IMPLEMENTATION READY`, the documentation and test plans must be specific enough to execute. The artifacts do not need to exist or pass.
+
+Before `IN REVIEW`, the documentation must be published or updated, each mapped automated test must pass in the named environment, and evidence must be linked. A manual demonstration is supplemental. It does not replace automated integration or functional tests.
+
+An exception must name the missing obligation, reason, approver, and approval evidence. Otherwise keep the gap open.
+
+## Epic acceptance
+
+Separate these concepts:
+
+- **Acceptance criteria:** 3–5 binary milestone conditions defined before delivery. Each names observable evidence and an acceptor when known.
+- **Success measures:** business or operational results evaluated after delivery, with a measure and time window.
+- **Release quality:** the shared release profile plus only Epic-specific additions, approved exceptions, and evidence.
+
+Do not use `same as success criteria`. Do not copy success measures into acceptance criteria.
+
+## Task completion
+
+A Task names one concrete artifact or operational result, 2–5 binary acceptance conditions, and the validation that proves it. Reference the ticket completion profile. Add only Task-specific gates or approved exceptions.
+
+## Spike variants
+
+Use a design Spike when the result is a reviewed design decision. Name the decision, material questions and constraints, linked design artifact, reviewers, applicable checklist coverage, closure evidence, and downstream updates. Keep the design in its design artifact; do not copy it into Jira.
+
+Use an investigation Spike for research or feasibility. Name one question, required evidence, closure condition, and downstream effect. Do not require design-only fields.
 
 ## Spike completion
 

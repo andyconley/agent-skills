@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "type": "doc",
+  "content": [
+    {
+      "type": "heading",
+      "attrs": {"level": 2, "localId": "old-heading"},
+      "content": [{"type": "text", "text": "Acceptance criteria"}]
+    },
+    {
+      "type": "paragraph",
+      "attrs": {"localId": "old-paragraph"},
+      "content": [{"type": "text", "text": "A permitted consumer retrieves current state."}]
+    }
+  ]
+}

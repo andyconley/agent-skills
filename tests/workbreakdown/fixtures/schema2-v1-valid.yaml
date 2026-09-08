@@ -1,0 +1,25 @@
+schema_version: 2
+manifest_id: legacy-check
+revision: 1
+template_set:
+  id: jira-house-templates
+  version: 1
+scope:
+  parent_key: INIT-1
+  epic_key: EPIC-1
+epic:
+  outcome: Preserve the approved legacy breakdown.
+children:
+  - ref: legacy-task
+    jira_key: WORK-1
+    type: Task
+    template_id: jira-task-v1
+    disposition: existing
+    verify:
+      summary: Preserve legacy task
+      done_when: The approved legacy task remains unchanged.
+dependencies: []
+rank:
+  mode: scoped-relative
+  order: [legacy-task]
+unknowns: []

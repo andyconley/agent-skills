@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Check shell syntax
-        run: bash -n install.sh scripts/*.sh tests/*.sh
+        run: bash -n install.sh scripts/*.sh tests/*.sh tests/workbreakdown/*.sh
       - name: Validate skills
         run: ./scripts/validate-skills.sh
       - name: Test installer
