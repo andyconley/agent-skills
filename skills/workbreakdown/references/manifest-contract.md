@@ -18,6 +18,8 @@ template_set names the registry and version. The selected template must belong t
 
 New Drafts use template-set version 2. A pre-v2 schema-2 manifest bound to version 1 may omit template_sha256; resolve its template_id through the immutable v1 registry entry and verify the packaged asset hash. Never require a rewrite, migrate it to v2, or add fields to the approved artifact.
 
+Grandfathering covers the template asset and its declared key set. It does not cover content. The quality rules in [ticket-quality-and-completion.md](ticket-quality-and-completion.md) apply to every description in every template set. A v1-bound description with an unresolved placeholder, an `N/A` or `None` filler value, or generic evidence is rejected, and it may still use only the keys its own registry entry declares.
+
 Reject an unknown set version or a template whose registered set_version does not match template_set.version.
 
 ## Closed shapes
@@ -61,7 +63,7 @@ children:
     type: Spike
     variant: investigation
     template_id: jira-spike-investigation-v2
-    template_sha256: 30b1b13d625aef4be726c0b1b8ac96a8ebbc9f71bae1da0cc09761ec75c66968
+    template_sha256: 988d1188e66b2afe7932b5dc6be0da2f29af51b62cff483df91855056fb7e960
     disposition: existing
     verify:
       summary: Inventory supported state sources
@@ -93,7 +95,7 @@ children:
     jira_key: null
     type: Story
     template_id: jira-story-v2
-    template_sha256: 3e5453d38390f864babd7e6f41a78a45e8a269d6b0de8619d47e66024165a6cf
+    template_sha256: ca7c5dcf753d6a0e2f432ef436801422ea81ca4c5c20bdabb358197c9c4fc6b4
     disposition: proposed
     fields:
       summary: Prove current state reads
@@ -141,7 +143,7 @@ Reject schema 2 when epic contains disposition, verify, expected_current, or cha
 
 ## Schema 3: scoped Epic authority
 
-Schema 3 keeps the child contract and adds exactly one Epic disposition.
+Schema 3 keeps the child contract and adds exactly one Epic disposition. epic.disposition must be exactly `existing` or `update`. Reject any other value instead of interpreting it.
 
 ### Verify only
 
@@ -157,7 +159,7 @@ epic:
   verify:
     template_id: jira-epic-v2
     template_sha256: 18fefffa6ebb6fe385616ecc0dce1756a6238ce11cd5f41d972557313d42342e
-    description_adf_sha256: <normalized-live-adf-digest>
+    description_adf_sha256: 9f2c4b7a1e5d8036c4a91b2e7f60d3a85c19e4b70d2f6a83915ce4d70b8a2f61
     description:
       milestone_outcome: A consumer retrieves current system state through the supported API.
       problem: Current integrations cannot retrieve one supported, current representation of system state.
@@ -196,7 +198,7 @@ epic:
   template_id: jira-epic-v2
   template_sha256: 18fefffa6ebb6fe385616ecc0dce1756a6238ce11cd5f41d972557313d42342e
   expected_current:
-    description_adf_sha256: <normalized-live-adf-digest>
+    description_adf_sha256: 9f2c4b7a1e5d8036c4a91b2e7f60d3a85c19e4b70d2f6a83915ce4d70b8a2f61
   changes:
     description:
       milestone_outcome: A consumer retrieves current system state through the supported API.
@@ -225,13 +227,16 @@ For update:
 - scope.epic_key is the only Epic identity.
 - template-set version must be 2.
 - template_id must be jira-epic-v2 and the asset hash must match the installed registry.
-- expected_current.description_adf_sha256 is required. Remove only `localId` properties from raw live ADF, serialize UTF-8 JSON with sorted object keys, preserved array order, and no insignificant whitespace, then calculate SHA-256.
+- expected_current.description_adf_sha256 is required and must be exactly 64 lowercase hexadecimal characters. Any other value, including a template token, an empty string, or a description of how to obtain the digest, is a manifest rejection.
+- Compute it by removing only `localId` properties from raw live ADF, then serializing UTF-8 JSON with sorted object keys, preserved array order, and no insignificant whitespace, then calculating SHA-256.
+- Capture the digest from live Jira before approval. Apply never computes, fills, refreshes, or substitutes this value. A digest derived from the state Apply just read proves nothing and satisfies no gate.
+- When the live Epic has no description, or its description is empty, the digest is the digest of the empty document `{"type":"doc","version":1,"content":[]}`. A manifest naming that sentinel is rejected when the live description is non-empty, and a manifest naming any other digest is rejected when the live description is absent or empty. Either mismatch is material drift and produces zero writes.
 - changes may contain only description.
 - The description contains every required key and only approved conditional keys.
 - Acceptance criteria contain 3–5 binary conditions with evidence and an acceptor when known.
 - Omitted Epic fields are preserved. They never become empty write values.
 
-Schema 3 does not authorize Epic creation, deletion, reparenting, retyping, ranking, or project, status, sprint, security, reporter, or arbitrary-field changes.
+Schema 3 does not authorize Epic creation, deletion, reparenting, retyping, ranking, or project, status, sprint, security, reporter, or arbitrary-field changes. It also does not authorize any non-field write on the Epic, including comments, attachments, watchers, worklogs, and labels.
 
 ## Child invariants
 
@@ -249,7 +254,7 @@ Every child defines or verifies summary and done_when. Include evidence and esti
 
 changes and fields may contain only summary, done_when, evidence, estimate, and description. A v2 description requires an exact template ID and hash. A schema-2, template-set-1 manifest may omit the hash; the immutable registry entry supplies it. Description keys match the registered required and conditional keys. Apply cannot add template content after approval. Omission of a description preserves the live description.
 
-For a Story, give each scenario and documentation artifact a stable ID. Planned fields cover observable scenarios, contextual documentation, automated integration or functional tests mapped by scenario ID, intended suite or location, verification environment, and expected evidence. For each documentation and automated-test obligation, supply either a nonempty plan or one complete approved exception—not both. An exception names the obligation, reason, approver, and approval evidence. At IN REVIEW, evidence must cover every planned artifact and mapped scenario exactly once.
+For a Story, give each scenario and documentation artifact a stable ID. Planned fields cover observable scenarios, contextual documentation, automated integration or functional tests mapped by scenario ID, and expected evidence. The intended suite or location and the verification environment are optional at plan time; supply them when known and record the gap in `unknowns` when not. For each documentation and automated-test obligation, supply either a nonempty plan or one complete approved exception—not both. An exception names the obligation, reason, approver, and approval evidence. At IN REVIEW, evidence must cover every planned artifact and mapped scenario exactly once, and must name the environment it ran in. Where the plan named an environment, the evidence matches it.
 
 Derive the parent from scope.epic_key and the Jira issue type from type. The manifest cannot delete or archive issues; move issues between projects or parents; change issue type, status, sprint, reporter, security, or permissions; or mutate a link type other than Blocks.
 

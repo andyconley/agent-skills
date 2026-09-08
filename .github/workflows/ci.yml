@@ -24,6 +24,8 @@ jobs:
         run: ./tests/install-test.sh
       - name: Test workbreakdown contract
         run: ./tests/workbreakdown-contract-test.sh
+      - name: Test workbreakdown contract in a C locale
+        run: LC_ALL=C LANG=C ./tests/workbreakdown-contract-test.sh
       - name: Lint prose
         uses: vale-cli/vale-action@v3
         with:

@@ -18,7 +18,8 @@ for required_file in "$SKILL_FILE" "$SOP_FILE" "$MANIFEST_FILE" "$JIRA_FILE" "$T
 done
 
 for mode in Draft Review Audit Apply; do require_text "$SKILL_FILE" "**$mode:**"; done
-require_text "$SKILL_FILE" "**Version: 1.2.0.**"
+# Pin the declared version to the VERSION file so the two cannot drift apart.
+require_text "$SKILL_FILE" "**Version: $(cat "$REPO_ROOT/skills/workbreakdown/VERSION").**"
 require_text "$SKILL_FILE" "IMPLEMENTATION READY"
 require_text "$SKILL_FILE" "IN REVIEW"
 require_text "$SKILL_FILE" "Manifest schema 2 remains child-only."

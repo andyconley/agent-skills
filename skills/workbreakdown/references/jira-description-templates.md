@@ -2,7 +2,7 @@
 
 The registry at `assets/jira-templates/registry.yaml` is the source of truth for template identity, version, issue type, variant, required keys, conditional keys, and asset hash.
 
-Read [ticket-quality-and-completion.md](ticket-quality-and-completion.md) before drafting or reviewing v2 descriptions.
+Read [ticket-quality-and-completion.md](ticket-quality-and-completion.md) before drafting or reviewing any description. Its content rules apply to every template set, not only to v2.
 
 ## Selection
 
@@ -31,6 +31,35 @@ Every proposed issue names its `template_id` and includes its complete required 
 For Story documentation, render the owner only when known. Do not leave an empty owner cell. A documentation or automated-test obligation may use a complete approved exception instead of a plan; never render both for the same obligation.
 
 Existing issues do not need reformatting because a newer template exists. Change a description only when the approved manifest supplies an exact template ID, asset hash, and complete authorized content under `changes`.
+
+## Key rendering
+
+A description key renders into the template section whose heading is the key name in sentence case, with underscores replaced by spaces. `milestone_outcome` renders under `## Milestone outcome`, `done_when` under `## Done when`.
+
+These keys do not follow that rule. Render them exactly here:
+
+| Template | Key | Renders as |
+| --- | --- | --- |
+| Epic v2 | out_of_scope | `**Out:**` bullet under `## Scope` |
+| Epic v2 | release_quality_additions | `**Additions:**` bullet under `## Release quality` |
+| Epic v2 | approved_exceptions | `**Approved exceptions:**` bullet under `## Release quality` |
+| Story v2 | scenarios | `## Acceptance scenarios` |
+| Story v2 | documentation | `### Documentation` under `## Delivery evidence plan` |
+| Story v2 | automated_tests | `### Automated tests` under `## Delivery evidence plan` |
+| Story v2 | documentation_exception | `### Documentation exception` under `## Delivery evidence plan` |
+| Story v2 | automated_tests_exception | `### Automated-test exception` under `## Delivery evidence plan` |
+| Story v2 | nonfunctional_requirements | `## Non-functional requirements` |
+| Story v2 | review_evidence | `## Review evidence`, with its `documentation` and `automated_tests` entries as the matching bullets |
+| Story v2 | supplemental_demonstration | `**Supplemental demonstration:**` bullet under `## Review evidence` |
+| Task v2 | ticket_quality_additions | `**Additions:**` bullet under `## Ticket quality` |
+| Task v2 | approved_exceptions | `**Approved exceptions:**` bullet under `## Ticket quality` |
+| Design Spike v2 | design_artifact | `**Artifact:**` bullet under `## Design artifact` |
+| Design Spike v2 | reviewers | `**Reviewers:**` bullet under `## Design artifact` |
+| Design Spike v2 | checklist_coverage | `**Checklist coverage:**` bullet under `## Design artifact` |
+
+The `**Profile:**` line under `## Release quality` and `## Ticket quality` names the completion profile from [ticket-quality-and-completion.md](ticket-quality-and-completion.md). It is fixed template text with no manifest key. Keep it. It is a reference, not the copied checklist the anti-bloat rule forbids.
+
+The `**Approved exceptions:**` bullet under Story `## Review evidence` confirms that an exception recorded in the delivery evidence plan still applies. It carries no separate key.
 
 ## Authorization boundary
 

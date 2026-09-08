@@ -38,9 +38,11 @@
 - Codex: `/Users/andyconley/.agents/skills/workbreakdown` reports 1.2.0.
 - Claude Code: `/Users/andyconley/.claude/skills/workbreakdown` reports 1.2.0.
 - Implementation commit: `4324cc5 feat(workbreakdown): add concise v2 ticket contracts`.
-- Remote push and release: not performed.
+- Remote push and release: performed after this handback was written. `main` was pushed on 2026-09-08, and semantic-release published repository releases v1.3.0 and v1.3.1. The skill version is unchanged at 1.2.0; repository and skill versions are separate streams.
+- Acceptance review followed the push rather than preceding it. See `review.md` for the findings and `validation-results.md` for the corrected evidence record.
 
 ## Remaining limits
 
 - Fresh-agent behavior prompts were not run. Start new Codex and Claude Code sessions before evaluating discovery behavior.
-- Live Jira Apply was not run. Use the manual controlled-Apply matrix only with explicit authorization and an isolated Jira project.
+- Live Jira Apply was not run. Use the manual controlled-Apply matrix only with explicit authorization and an isolated Jira project. Acceptance review recommends that the first live Apply run in an isolated project against both a bare and a populated Epic, with a deliberately induced drift case.
+- All ten manual behavior checks remain unrun. Review follow-up added static fixture coverage for parts of checks 1, 2, 7, and 8: every declared v2 key now needs a render target in the shipped template, Epic acceptance criteria that duplicate a success measure are rejected, and Task and both Spike variants validate their description keys and variant binding. The judgment halves of those checks, and checks 3, 4, 5, 6, 9, and 10, still need a live agent or live Jira.

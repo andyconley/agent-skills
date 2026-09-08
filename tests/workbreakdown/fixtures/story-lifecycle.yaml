@@ -14,13 +14,13 @@ description:
       suite_or_location: tests/integration/recovery
       environment: representative-system
       expected_evidence: Retained CI result
-review_evidence:
-  documentation:
-    - artifact_id: recovery-sop
-      status: published
-      evidence: docs/operations/recovery.md
-  automated_tests:
-    - scenario_id: broker-recovery
-      status: passed
-      environment: representative-system
-      evidence: CI-123
+  review_evidence:
+    documentation:
+      - artifact_id: recovery-sop
+        status: published
+        evidence: docs/operations/recovery.md
+    automated_tests:
+      - scenario_id: broker-recovery
+        status: passed
+        environment: representative-system
+        evidence: CI-123

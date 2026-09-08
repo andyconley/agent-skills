@@ -30,7 +30,7 @@ Add an owner to an artifact only when the owner is known.
 
 | Scenario ID | Level | Suite or location | Environment | Expected evidence |
 | --- | --- | --- | --- | --- |
-| <mapped scenario> | <integration or functional> | <suite or proposed location> | <verification environment> | <retained result> |
+| <mapped scenario> | <integration or functional> | <suite or proposed location, when known> | <verification environment, when known> | <retained result> |
 
 ### Documentation exception
 

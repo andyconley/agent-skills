@@ -2,6 +2,8 @@
 
 Use this reference to keep tickets concise and to separate planning readiness from delivered evidence.
 
+These rules apply to every ticket regardless of template set. A manifest bound to template set 1 keeps its frozen template and its own declared keys, and still meets this content bar. Where a v1 template has no key for an obligation below, Review and Audit enforce the obligation as a lifecycle judgment rather than as a manifest field.
+
 ## Content rule
 
 Keep content only when it helps someone implement, sequence, accept, operate, or support the work.
@@ -52,7 +54,9 @@ The team can start when the Story defines:
 
 - observable acceptance scenarios with stable IDs
 - the applicable documentation artifact, audience, intended location, and owner when known
-- an automated integration or functional test mapped to each scenario ID, including level, suite or proposed location, environment, and expected evidence
+- an automated integration or functional test mapped to each scenario ID, including level and expected evidence
+
+Name the intended suite or location and the verification environment when they are known. Leave them out when they are not, and record the gap in `unknowns`. A Story is not blocked from starting because the repository, suite, or environment has not been chosen yet. Do not invent either value to satisfy the field.
 
 The documentation and tests do not need to exist or pass yet.
 
@@ -61,7 +65,8 @@ The documentation and tests do not need to exist or pass yet.
 Block entry to review until:
 
 - each applicable documentation artifact ID has published or updated evidence
-- each mapped scenario ID has passing automated integration or functional-test evidence in the named environment
+- each mapped scenario ID has passing automated integration or functional-test evidence in a named environment
+- the evidence names the environment it ran in, and matches the planned environment when the plan named one
 - evidence is available to the reviewer
 
 A demonstration can supplement this evidence. It cannot replace the automated tests.
