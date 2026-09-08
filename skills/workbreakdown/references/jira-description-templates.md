@@ -2,7 +2,7 @@
 
 The registry at `assets/jira-templates/registry.yaml` is the source of truth for template identity, version, issue type, variant, required keys, conditional keys, and asset hash.
 
-Read [ticket-quality-and-completion.md](ticket-quality-and-completion.md) before drafting or reviewing v2 descriptions.
+Read [ticket-quality-and-completion.md](ticket-quality-and-completion.md) before drafting or reviewing any description. Its content rules apply to every template set, not only to v2.
 
 ## Selection
 

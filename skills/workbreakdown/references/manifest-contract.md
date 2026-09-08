@@ -18,6 +18,8 @@ template_set names the registry and version. The selected template must belong t
 
 New Drafts use template-set version 2. A pre-v2 schema-2 manifest bound to version 1 may omit template_sha256; resolve its template_id through the immutable v1 registry entry and verify the packaged asset hash. Never require a rewrite, migrate it to v2, or add fields to the approved artifact.
 
+Grandfathering covers the template asset and its declared key set. It does not cover content. The quality rules in [ticket-quality-and-completion.md](ticket-quality-and-completion.md) apply to every description in every template set. A v1-bound description with an unresolved placeholder, an `N/A` or `None` filler value, or generic evidence is rejected, and it may still use only the keys its own registry entry declares.
+
 Reject an unknown set version or a template whose registered set_version does not match template_set.version.
 
 ## Closed shapes

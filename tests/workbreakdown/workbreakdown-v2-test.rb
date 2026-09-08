@@ -109,10 +109,15 @@ def validate_exception(exception, obligation)
   raise ArgumentError, "exception covers wrong obligation" unless exception["obligation"] == obligation
 end
 
-def validate_story_description(description)
+def validate_scenario_ids(description)
   scenarios = description.fetch("scenarios")
-  scenario_ids = scenarios.map { |item| item["id"] }
-  raise ArgumentError, "Story scenarios require unique IDs" if scenario_ids.any? { |id| id.to_s.empty? } || scenario_ids.uniq.length != scenario_ids.length
+  ids = scenarios.map { |item| item["id"] }
+  raise ArgumentError, "Story scenarios require unique IDs" if ids.any? { |id| id.to_s.empty? } || ids.uniq.length != ids.length
+  ids
+end
+
+def validate_story_description(description)
+  scenario_ids = validate_scenario_ids(description)
 
   documents = description["documentation"]
   document_exception = description["documentation_exception"]
@@ -170,8 +175,14 @@ def validate_description(description, template)
     raise ArgumentError, "conflicting obligation and exception" if present.length > 1
   end
 
-  validate_story_description(description) if template["issue_type"] == "Story" && template["set_version"] == 2
-  validate_quality(description) if template["set_version"] == 2
+  # Content expectations apply to every template set. Only the template asset and
+  # its declared key set are grandfathered; the content bar never is. A v1-bound
+  # Story cannot declare v2 evidence keys, so its documentation and automated-test
+  # obligations are enforced as Review and Audit lifecycle judgments instead.
+  if template["issue_type"] == "Story"
+    template["set_version"] == 2 ? validate_story_description(description) : validate_scenario_ids(description)
+  end
+  validate_quality(description)
 end
 
 def validate_epic_description(description, template)
@@ -334,6 +345,35 @@ assert(v2_defaults.dig("Spike", "investigation") == "jira-spike-investigation-v2
 legacy = load_yaml(File.join(FIXTURES, "schema2-v1-valid.yaml"))
 validate_manifest(legacy, index, registry)
 assert(!legacy["children"].first.key?("template_sha256"), "legacy fixture is not a pre-v2 manifest")
+
+# v1-bound manifests keep their frozen templates but are held to the v2 content bar.
+v1_description = {
+  "context" => "The legacy task still needs its recorded context.",
+  "assumptions" => "The approved legacy scope is unchanged.",
+  "out_of_scope" => "No new interface work.",
+  "acceptance_criteria" => ["The approved legacy task completes unchanged."],
+  "technical_considerations" => "Reuses the existing pipeline.",
+  "open_questions" => "None recorded."
+}
+legacy_with_description = clone(legacy)
+legacy_with_description["children"].first["verify"]["description"] = clone(v1_description)
+validate_manifest(legacy_with_description, index, registry)
+
+legacy_placeholder = clone(legacy_with_description)
+legacy_placeholder["children"].first["verify"]["description"]["context"] = "<fill in the context>"
+expect_error("unresolved placeholder") { validate_manifest(legacy_placeholder, index, registry) }
+
+legacy_filler = clone(legacy_with_description)
+legacy_filler["children"].first["verify"]["description"]["technical_considerations"] = "N/A"
+expect_error("empty filler value") { validate_manifest(legacy_filler, index, registry) }
+
+legacy_generic = clone(legacy_with_description)
+legacy_generic["children"].first["verify"]["description"]["acceptance_criteria"] = ["Tests added"]
+expect_error("generic evidence") { validate_manifest(legacy_generic, index, registry) }
+
+legacy_unapproved_key = clone(legacy_with_description)
+legacy_unapproved_key["children"].first["verify"]["description"]["automated_tests"] = []
+expect_error("unapproved description key") { validate_manifest(legacy_unapproved_key, index, registry) }
 
 mixed_version = clone(legacy)
 mixed_version["children"].first["template_id"] = "jira-task-v2"

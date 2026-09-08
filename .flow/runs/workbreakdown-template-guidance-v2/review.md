@@ -70,7 +70,7 @@ Addressed on 2026-09-08 on branch `claude/review-findings-v2`. Every change was 
 | Suggestion: prohibit non-field Epic writes | Done. Comments, attachments, watchers, worklogs, and labels are now named prohibitions. |
 | Suggestion: neutralize echoed untrusted text | Done. Live Jira text renders as quoted data in Audit tables, drift reports, and journals. |
 | Suggestion: convert manual checks | Partial. Static parts of checks 1, 2, 7, and 8 are now fixtures. The judgment halves still need a live agent. |
-| Suggestion: enforce v2 for new manifests | Not done. Still advisory. Enforcing it needs a rule for what counts as a new manifest, which is a design decision rather than a defect fix. |
+| Suggestion: enforce v2 for new manifests | Resolved by user decision on 2026-09-08: apply the v2 content bar to every template set. Grandfathering now covers the frozen template asset and its declared key set only, never content. `validate_quality` runs on every description, and v1-bound descriptions are rejected for placeholders, `N/A`/`None` filler, and generic evidence, while still being limited to the keys their own registry entry declares. A v1 Story cannot express the v2 evidence keys, so its documentation and automated-test obligations stay Review and Audit lifecycle judgments; scenario-ID uniqueness is enforced structurally for both sets. Skill version bumped to 1.3.0 because existing v1-bound manifests that previously validated can now be rejected. |
 
 Not addressed, and deliberately so: the residual risks below. They need a live Jira Apply in an isolated project, which was not authorized.
 

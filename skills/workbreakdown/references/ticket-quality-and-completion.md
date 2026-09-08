@@ -2,6 +2,8 @@
 
 Use this reference to keep tickets concise and to separate planning readiness from delivered evidence.
 
+These rules apply to every ticket regardless of template set. A manifest bound to template set 1 keeps its frozen template and its own declared keys, and still meets this content bar. Where a v1 template has no key for an obligation below, Review and Audit enforce the obligation as a lifecycle judgment rather than as a manifest field.
+
 ## Content rule
 
 Keep content only when it helps someone implement, sequence, accept, operate, or support the work.

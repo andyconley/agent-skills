@@ -10,7 +10,7 @@ Prompt:
 What version of workbreakdown are you using?
 ~~~
 
-Pass when both hosts report 1.2.0 from the distributed skill.
+Pass when both hosts report 1.3.0 from the distributed skill.
 
 ## Concise v2 Draft
 
