@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "work_id": "workbreakdown-story-evidence-v3",
+  "mode": "delegated",
+  "risk": {
+    "hard_triggers": [],
+    "aggravating_factors": ["concurrency_or_cross_system_coordination"],
+    "classification": "standard",
+    "rationale": "The change is a versioned local contract update with preserved legacy identities and recoverable Git history."
+  },
+  "assignments": [
+    {
+      "id": "implementation-owner",
+      "lane": "implement",
+      "role": "lead-developer",
+      "provider": {"kind": "agent", "id": "/root"},
+      "brief_path": ".flow/runs/workbreakdown-story-evidence-v3/implementation-handoff.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-story-evidence-v3/requirements.md",
+        ".flow/runs/workbreakdown-story-evidence-v3/acceptance-criteria.md",
+        ".flow/runs/workbreakdown-story-evidence-v3/plan.md"
+      ],
+      "read_scopes": ["skills/workbreakdown", "tests", "scripts", "README.md", "docs/README.md"],
+      "write_scopes": ["skills/workbreakdown", "tests", "README.md", "docs/README.md", "skills/manifest.tsv", ".flow/runs/workbreakdown-story-evidence-v3"],
+      "read_only": false,
+      "required_capabilities": [{"name": "filesystem-write", "status": "confirmed"}],
+      "output": {"path": ".flow/runs/workbreakdown-story-evidence-v3/validation-results.md", "format": "markdown"},
+      "success_criteria": ["The versioned Story evidence contract is implemented and all targeted checks pass."],
+      "claim_statuses": ["observed", "recommended"],
+      "coordination": {"mode": "serialized", "group": "implementation"}
+    },
+    {
+      "id": "test-strategy",
+      "lane": "implement",
+      "role": "test-engineer",
+      "provider": {"kind": "agent", "id": "/root/impl_test"},
+      "brief_path": ".flow/runs/workbreakdown-story-evidence-v3/validation-plan.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-story-evidence-v3/acceptance-criteria.md",
+        ".flow/runs/workbreakdown-story-evidence-v3/plan.md"
+      ],
+      "read_scopes": ["skills/workbreakdown", "tests"],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [{"name": "filesystem-read", "status": "confirmed"}],
+      "output": {"path": ".flow/runs/workbreakdown-story-evidence-v3/test-strategy.md", "format": "markdown"},
+      "success_criteria": ["Coverage can fail for every new lifecycle and compatibility obligation."],
+      "claim_statuses": ["observed", "recommended"],
+      "coordination": {"mode": "concurrent", "group": "inspection"}
+    },
+    {
+      "id": "quality-review",
+      "lane": "implement",
+      "role": "quality-reviewer",
+      "provider": {"kind": "agent", "id": "/root/quality_review"},
+      "brief_path": ".flow/runs/workbreakdown-story-evidence-v3/quality-review-brief.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-story-evidence-v3/requirements.md",
+        ".flow/runs/workbreakdown-story-evidence-v3/acceptance-criteria.md",
+        ".flow/runs/workbreakdown-story-evidence-v3/plan.md",
+        ".flow/runs/workbreakdown-story-evidence-v3/validation-plan.md"
+      ],
+      "read_scopes": ["skills/workbreakdown", "tests", "README.md", "docs/README.md", ".flow/runs/workbreakdown-story-evidence-v3"],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [{"name": "filesystem-read", "status": "confirmed"}],
+      "output": {"path": ".flow/runs/workbreakdown-story-evidence-v3/quality-review.md", "format": "markdown"},
+      "success_criteria": ["Material acceptance, compatibility, enforcement, concision, and portability defects are identified."],
+      "claim_statuses": ["observed", "inferred", "recommended"],
+      "coordination": {"mode": "serialized", "group": "review"}
+    },
+    {
+      "id": "handback-writing",
+      "lane": "implement",
+      "role": "tech-writer",
+      "provider": {"kind": "agent", "id": "/root/handback_writer"},
+      "brief_path": ".flow/runs/workbreakdown-story-evidence-v3/handback-writing-brief.txt",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-story-evidence-v3/requirements.md",
+        ".flow/runs/workbreakdown-story-evidence-v3/acceptance-criteria.md",
+        ".flow/runs/workbreakdown-story-evidence-v3/quality-review.md",
+        ".flow/runs/workbreakdown-story-evidence-v3/validation-results.md"
+      ],
+      "read_scopes": [".flow/runs/workbreakdown-story-evidence-v3", "skills/workbreakdown", "tests", "README.md", "docs/README.md"],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [{"name": "filesystem-read", "status": "confirmed"}],
+      "output": {"path": ".flow/runs/workbreakdown-story-evidence-v3/HANDOFF.md", "format": "markdown"},
+      "success_criteria": ["Handback states shipped behavior, proof, limitations, and next actions without overclaiming."],
+      "claim_statuses": ["observed", "recommended"],
+      "coordination": {"mode": "serialized", "group": "handback"}
+    }
+  ],
+  "shared_state": [],
+  "reconciliation": {
+    "artifact_path": ".flow/runs/workbreakdown-story-evidence-v3/findings-reconciliation.md",
+    "status": "resolved",
+    "claims": []
+  },
+  "verification": {
+    "producer_assignments": ["implementation-owner"],
+    "evidence_collector_assignment": "test-strategy",
+    "verifier_assignment": "quality-review",
+    "independent": true,
+    "artifact_path": ".flow/runs/workbreakdown-story-evidence-v3/quality-review.md"
+  }
+}

@@ -1,0 +1,1 @@
+Write a concise HANDOFF.md from the approved requirements, implementation diff, quality review, and validation results. Separate shipped behavior, proof, limitations, and next actions. Do not claim that fresh-agent manual prompts ran unless evidence says they did. Do not edit product files.
