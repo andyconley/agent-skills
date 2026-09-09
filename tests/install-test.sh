@@ -53,7 +53,7 @@ assert_link "$TEST_ROOT/claude/workbreakdown" "$REPO_ROOT/skills/workbreakdown"
 [ -f "$TEST_ROOT/claude/workbreakdown/references/manifest-contract.md" ] || fail "workbreakdown references are not distributed"
 for runtime in "$TEST_ROOT/codex" "$TEST_ROOT/claude"; do
   [ -f "$runtime/workbreakdown/assets/jira-templates/registry.yaml" ] || fail "workbreakdown registry is not distributed to $runtime"
-  for asset in epic-v1.md epic-v2.md story-v1.md story-v2.md task-v1.md task-v2.md spike-v1.md spike-design-v2.md spike-investigation-v2.md; do
+  for asset in epic-v1.md epic-v2.md story-v1.md story-v2.md story-v3.md task-v1.md task-v2.md spike-v1.md spike-design-v2.md spike-investigation-v2.md; do
     [ -f "$runtime/workbreakdown/assets/jira-templates/$asset" ] || fail "workbreakdown asset $asset is not distributed to $runtime"
   done
   [ -f "$runtime/workbreakdown/references/ticket-quality-and-completion.md" ] || fail "workbreakdown quality reference is not distributed to $runtime"

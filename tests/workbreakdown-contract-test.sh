@@ -41,11 +41,13 @@ require_text "$MANIFEST_FILE" "Absence from dependencies means preserve the live
 require_text "$MANIFEST_FILE" "Never change a link between two external issues."
 require_text "$MANIFEST_FILE" "template_sha256:"
 
-for template in epic-v1 epic-v2 story-v1 story-v2 task-v1 task-v2 spike-v1 spike-design-v2 spike-investigation-v2; do
+for template in epic-v1 epic-v2 story-v1 story-v2 story-v3 task-v1 task-v2 spike-v1 spike-design-v2 spike-investigation-v2; do
   [ -f "$REPO_ROOT/skills/workbreakdown/assets/jira-templates/$template.md" ] || fail "missing bundled $template template"
 done
 require_text "$TEMPLATE_REGISTRY" "schema_version: 2"
-require_text "$TEMPLATE_REGISTRY" "version: 2"
+require_text "$TEMPLATE_REGISTRY" "version: 3"
+require_text "$TEMPLATE_REGISTRY" "default_set_version: 3"
+require_text "$TEMPLATE_REGISTRY" "jira-story-v3"
 require_text "$TEMPLATE_REGISTRY" "registry_id: jira-house-templates"
 require_text "$TEMPLATE_REGISTRY" "jira-spike-design-v2"
 require_text "$TEMPLATE_REGISTRY" "jira-spike-investigation-v2"
@@ -53,9 +55,10 @@ require_text "$TEMPLATE_GUIDE" "The template controls structure. It does not aut
 require_text "$TEMPLATE_GUIDE" "Regenerate"
 require_text "$TEMPLATE_GUIDE" "Omit unused conditional sections."
 
-require_text "$QUALITY_FILE" "The documentation and tests do not need to exist or pass yet."
+require_text "$QUALITY_FILE" "The documentation, tests, and instrumentation do not need to exist, pass, or emit yet."
 require_text "$QUALITY_FILE" "Block entry to review until:"
-require_text "$QUALITY_FILE" "It cannot replace the automated tests."
+require_text "$QUALITY_FILE" "They cannot replace automated integration or functional tests."
+require_text "$QUALITY_FILE" "observed output from a named representative environment"
 
 require_text "$SOP_FILE" "Do not use subtasks for planned milestone work."
 require_text "$SOP_FILE" "Treat five points as a review trigger."
@@ -77,6 +80,6 @@ if grep -Eq 'dependencies:|type:[[:space:]]*"mcp"|https?://[^ )]*atlassian|https
   fail "Codex metadata must not require a host-specific Jira integration"
 fi
 
-"$REPO_ROOT/tests/workbreakdown/workbreakdown-v2-test.sh"
+"$REPO_ROOT/tests/workbreakdown/workbreakdown-template-contract-test.sh"
 
 printf 'Workbreakdown contract checks passed.\n'

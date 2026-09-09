@@ -14,7 +14,7 @@ Reject:
 
 - unresolved placeholders or empty headings
 - repeated facts or acceptance conditions
-- generic claims such as `tests added` or `documentation updated`
+- generic claims such as `tests added`, `metrics added`, `dashboard updated`, or `docs reviewed`
 - generic Definition-of-Done text copied into every ticket
 - unsupported owners, paths, environments, dependencies, or evidence
 - criteria that describe activity instead of an observable result
@@ -30,6 +30,7 @@ Reference the applicable profile. Do not copy the checklist into the ticket. Ren
 - Required unit or component tests pass.
 - Review is complete.
 - Contextual documentation is updated.
+- Applicable instrumentation is implemented and produces observable output.
 - Completion evidence is attached or linked.
 
 ### Sprint profile
@@ -55,22 +56,34 @@ The team can start when the Story defines:
 - observable acceptance scenarios with stable IDs
 - the applicable documentation artifact, audience, intended location, and owner when known
 - an automated integration or functional test mapped to each scenario ID, including level and expected evidence
+- the smallest instrumentation plan that proves the Story outcome or an operational decision: operational signals, business metrics, or both, with a stable ID, purpose, implementation target, and expected observation
 
 Name the intended suite or location and the verification environment when they are known. Leave them out when they are not, and record the gap in `unknowns`. A Story is not blocked from starting because the repository, suite, or environment has not been chosen yet. Do not invent either value to satisfy the field.
 
-The documentation and tests do not need to exist or pass yet.
+The documentation, tests, and instrumentation do not need to exist, pass, or emit yet.
 
 ### IN REVIEW
 
 Block entry to review until:
 
-- each applicable documentation artifact ID has published or updated evidence
+- each applicable documentation artifact ID has evidence that it was published, updated, or reviewed and confirmed current
 - each mapped scenario ID has passing automated integration or functional-test evidence in a named environment
 - the evidence names the environment it ran in, and matches the planned environment when the plan named one
+- each planned signal has implementation evidence and observed output from a named representative environment
 - evidence is available to the reviewer
 
-A demonstration can supplement this evidence. It cannot replace the automated tests.
+A confirmed-current document identifies the reviewer and applicable revision or review record.
+
+Unit tests and demonstrations can supplement this evidence. They cannot replace automated integration or functional tests. Instrumentation code without observed output, or output without implementation evidence, does not pass the gate.
+
+### Legacy Story evidence
+
+Do not rewrite an approved older description only to add current evidence fields. Review and Audit may evaluate a linked or supplied lifecycle-evidence record that identifies the Story key and selected template. The record contains the same three evidence classes or their separate approved exceptions. Automated evidence maps the Story's stable scenario IDs.
+
+When an older description has no scenario IDs, the record assigns a unique ID to each exact scenario text and maps automated evidence to that ID. The binding must cover the existing scenarios exactly once; it does not edit the description. Instrumentation contains a signal ID, class, purpose, implementation evidence, observed output, retained evidence, and a named representative environment.
+
+This record is review input. It does not authorize a Jira mutation or change the approved manifest. Missing legacy evidence still blocks `IN REVIEW`.
 
 ## Exceptions
 
-An exception must name the obligation, reason, approver, and approval evidence. A missing or proposed approval is not an approved exception. Keep the gap open. For each obligation, use either the plan or its approved exception, never both.
+An exception must name one evidence class, its obligation, reason, approver, and approval evidence. A missing or proposed approval is not an approved exception. Keep the gap open. For each class, use either the plan or its approved exception, never both.

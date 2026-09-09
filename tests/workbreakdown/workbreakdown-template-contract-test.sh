@@ -8,4 +8,4 @@ if ! command -v ruby >/dev/null 2>&1; then
   exit 127
 fi
 
-exec ruby "$REPO_ROOT/tests/workbreakdown/workbreakdown-v2-test.rb"
+exec ruby "$REPO_ROOT/tests/workbreakdown/workbreakdown-template-contract-test.rb"

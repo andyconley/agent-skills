@@ -14,13 +14,13 @@ The manifest is the reviewed desired-state contract between planning and Jira. E
 
 ## Template binding
 
-template_set names the registry and version. The selected template must belong to that set version. Every v2 or schema-3 description names an exact template_id and template_sha256 and contains all reviewed values needed by that template.
+template_set names the registry and version. The selected template must declare compatibility with that set version. Every nonlegacy or schema-3 description names an exact template_id and template_sha256 and contains all reviewed values needed by that template.
 
-New Drafts use template-set version 2. A pre-v2 schema-2 manifest bound to version 1 may omit template_sha256; resolve its template_id through the immutable v1 registry entry and verify the packaged asset hash. Never require a rewrite, migrate it to v2, or add fields to the approved artifact.
+New Drafts use template-set version 3. A schema-2 manifest bound to version 1 may omit template_sha256; resolve its template_id through the immutable v1 registry entry and verify the packaged asset hash. Never require a rewrite, migrate an approved manifest, or add fields to it.
 
 Grandfathering covers the template asset and its declared key set. It does not cover content. The quality rules in [ticket-quality-and-completion.md](ticket-quality-and-completion.md) apply to every description in every template set. A v1-bound description with an unresolved placeholder, an `N/A` or `None` filler value, or generic evidence is rejected, and it may still use only the keys its own registry entry declares.
 
-Reject an unknown set version or a template whose registered set_version does not match template_set.version.
+Reject an unknown set version or a template that does not list template_set.version in `compatible_set_versions`. When that metadata is absent, only the template's own `set_version` is compatible.
 
 ## Closed shapes
 
@@ -47,7 +47,7 @@ revision: 1
 
 template_set:
   id: jira-house-templates
-  version: 2
+  version: 3
 
 scope:
   parent_key: INIT-100
@@ -94,8 +94,8 @@ children:
   - ref: prove-status
     jira_key: null
     type: Story
-    template_id: jira-story-v2
-    template_sha256: ca7c5dcf753d6a0e2f432ef436801422ea81ca4c5c20bdabb358197c9c4fc6b4
+    template_id: jira-story-v3
+    template_sha256: c19201ccb6e6f59671c0d33b45df3524d9d0662b3563d133e1f6f02c2774fef4
     disposition: proposed
     fields:
       summary: Prove current state reads
@@ -122,6 +122,13 @@ children:
             suite_or_location: tests/functional/state-read
             environment: representative-system
             expected_evidence: Retained CI result
+        instrumentation:
+          - id: state-read-success
+            class: operational
+            signal: Successful current-state reads
+            purpose: Shows that permitted consumers receive current state
+            implementation_target: State-read service telemetry
+            expected_observation: The counter increases during the functional scenario
 
 dependencies:
   - action: ensure
@@ -225,7 +232,7 @@ unknowns: []
 For update:
 
 - scope.epic_key is the only Epic identity.
-- template-set version must be 2.
+- the selected template set must be compatible with `jira-epic-v2`.
 - template_id must be jira-epic-v2 and the asset hash must match the installed registry.
 - expected_current.description_adf_sha256 is required and must be exactly 64 lowercase hexadecimal characters. Any other value, including a template token, an empty string, or a description of how to obtain the digest, is a manifest rejection.
 - Compute it by removing only `localId` properties from raw live ADF, then serializing UTF-8 JSON with sorted object keys, preserved array order, and no insignificant whitespace, then calculating SHA-256.
@@ -252,9 +259,17 @@ Allowed child types are Spike, Task, and Story. A v2 Spike also names variant: d
 
 Every child defines or verifies summary and done_when. Include evidence and estimate when known. Put material gaps in unknowns; do not invent values.
 
-changes and fields may contain only summary, done_when, evidence, estimate, and description. A v2 description requires an exact template ID and hash. A schema-2, template-set-1 manifest may omit the hash; the immutable registry entry supplies it. Description keys match the registered required and conditional keys. Apply cannot add template content after approval. Omission of a description preserves the live description.
+changes and fields may contain only summary, done_when, evidence, estimate, and description. A nonlegacy description requires an exact template ID and hash. A schema-2, template-set-1 manifest may omit the hash; the immutable registry entry supplies it. Description keys match the registered required and conditional keys. Apply cannot add template content after approval. Omission of a description preserves the live description.
 
-For a Story, give each scenario and documentation artifact a stable ID. Planned fields cover observable scenarios, contextual documentation, automated integration or functional tests mapped by scenario ID, and expected evidence. The intended suite or location and the verification environment are optional at plan time; supply them when known and record the gap in `unknowns` when not. For each documentation and automated-test obligation, supply either a nonempty plan or one complete approved exception—not both. An exception names the obligation, reason, approver, and approval evidence. At IN REVIEW, evidence must cover every planned artifact and mapped scenario exactly once, and must name the environment it ran in. Where the plan named an environment, the evidence matches it.
+For a Story, give each scenario, documentation artifact, and instrumentation signal a stable ID. Planned fields cover observable scenarios, contextual documentation, automated integration or functional tests mapped by scenario ID, and the smallest signal set that proves the Story outcome or an operational decision. Each signal names its class, precise signal, purpose, implementation target, and expected observation. The intended suite, location, and environment are optional at plan time; supply them when known and record material gaps in `unknowns`.
+
+For each documentation, automated-test, and instrumentation obligation, supply either a nonempty plan or one complete approved exception—not both. An exception names the obligation, reason, approver, and approval evidence.
+
+At `IN REVIEW`, evidence covers every planned artifact, scenario, and signal exactly once. Tests have status `passed` and use the planned environment when one was named. Documentation is `published`, `updated`, or `confirmed_current`; confirmation identifies the reviewer and applicable revision or review record. Instrumentation evidence names a representative environment and contains implementation evidence, observed output, and a retained reference. Unit tests, manual tests, instrumentation code without output, and output without implementation evidence do not satisfy the gate.
+
+For every excepted class, `review_evidence.approved_exceptions` contains the obligation, status `confirmed`, and the same approval-evidence reference recorded in the plan. It contains no entry for a planned class and does not repeat the reason or approver.
+
+For a Story whose approved template cannot represent the current evidence fields, Review or Audit may consume a separate lifecycle-evidence record. It identifies the exact Story key and template, maps automated evidence to stable scenario IDs, and supplies documentation, automated-test, and instrumentation evidence or a complete exception for each class. When the old description has no IDs, the record binds one unique ID to each exact scenario text. The bindings cover the existing scenarios exactly once. The record is evidence only: it does not become manifest content, migrate the template, or authorize Apply.
 
 Derive the parent from scope.epic_key and the Jira issue type from type. The manifest cannot delete or archive issues; move issues between projects or parents; change issue type, status, sprint, reporter, security, or permissions; or mutate a link type other than Blocks.
 
@@ -296,7 +311,7 @@ Report only material defects and the smallest corrections:
 - wrong issue type or Spike variant
 - no independently verifiable completion
 - missing implementation work
-- missing Story scenarios, contextual documentation, or mapped automated tests
+- missing Story scenarios, contextual documentation, mapped automated tests, or instrumentation that proves the Story outcome or an operational decision
 - review-entry evidence missing for a Story entering IN REVIEW
 - vague, trivial, repeated, or unsupported content
 - work too broad to execute safely

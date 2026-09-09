@@ -1,11 +1,11 @@
 ---
 name: workbreakdown
-description: Breaks milestone Epics into direct-child Spikes, Tasks, and Stories with observable completion states, concise versioned descriptions, a YAML manifest, hard dependency edges, and verified Jira reconciliation. Use when drafting, reviewing, auditing, or explicitly applying work below an ER or Initiative. Do not use for portfolio hierarchy or unreviewed Jira changes. Version 1.3.0.
+description: Breaks milestone Epics into direct-child Spikes, Tasks, and Stories with observable completion states, concise versioned descriptions, a YAML manifest, hard dependency edges, and verified Jira reconciliation. Use when drafting, reviewing, auditing, or explicitly applying work below an ER or Initiative. Do not use for portfolio hierarchy or unreviewed Jira changes. Version 1.4.0.
 ---
 
 # Work Breakdown
 
-**Version: 1.3.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
+**Version: 1.4.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
 
 Break milestone work into items that can be owned, estimated, sequenced, and proven complete.
 
@@ -49,9 +49,9 @@ Ask for every child:
 
 Every Task must contribute to a Story or an explicit Epic exit condition. Every Spike must inform a Task or Story.
 
-New Drafts use the v2 template defaults. Keep descriptions short: fill required content, include conditional sections only when material, and omit empty sections. An explicitly v1-bound manifest stays on its unchanged v1 asset and still meets the same content bar.
+New Drafts use the template-set-3 defaults. Keep descriptions short: fill required content, include conditional sections only when material, and omit empty sections. An explicitly older manifest stays on its approved template and still meets the current lifecycle bar.
 
-For every Story, plan the contextual documentation and automated integration or functional tests that prove its scenarios. This plan is enough for `IMPLEMENTATION READY`. Before the Story enters `IN REVIEW`, require published or updated documentation, passing mapped tests in the named environment, and reviewable evidence. Do not treat a manual demonstration as an automated-test substitute.
+For every Story, plan contextual documentation, automated integration or functional tests that prove its scenarios, and the smallest set of operational signals and business metrics that proves the Story outcome or an operational decision. This plan is enough for `IMPLEMENTATION READY`. Before the Story enters `IN REVIEW`, require appropriate documentation evidence, passing mapped tests, implemented instrumentation, observed output from a named representative environment, and reviewable evidence. A unit test or manual demonstration cannot satisfy the automated-test obligation. Each evidence class may instead use one complete approved exception.
 
 ## Interpret dependencies literally
 

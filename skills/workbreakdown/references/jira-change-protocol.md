@@ -35,7 +35,7 @@ Return:
 7. Stories that block their own prerequisites.
 8. Cycles, duplicate links, redundant links, and cross-Epic links.
 9. Stories without Gherkin or integration evidence.
-10. Stories entering `IN REVIEW` without published documentation and passing mapped automated tests.
+10. Stories entering `IN REVIEW` without appropriate documentation evidence, passing mapped integration or functional tests, and implemented instrumentation with observed output from a named representative environment.
 11. Descriptions that fail their registered required or conditional-content rules.
 12. Smallest proposed change set.
 

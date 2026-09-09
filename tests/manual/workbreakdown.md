@@ -10,9 +10,9 @@ Prompt:
 What version of workbreakdown are you using?
 ~~~
 
-Pass when both hosts report 1.3.0 from the distributed skill.
+Pass when both hosts report 1.4.0 from the distributed skill.
 
-## Concise v2 Draft
+## Concise v3 Draft
 
 Prompt:
 
@@ -27,12 +27,12 @@ consumer-facing read. Do not change Jira.
 
 Pass when the response:
 
-- uses template-set version 2 and direct Epic children
+- uses template-set version 3 and direct Epic children
 - selects investigation and design Spike variants by completion state
 - includes complete, parseable manifest content with no invented Jira keys
 - omits irrelevant conditional sections, empty headings, placeholders, and gratuitous N/A
 - gives the Epic 3–5 binary acceptance conditions distinct from success measures
-- gives Story scenarios and documentation artifacts stable IDs, then maps them to automated integration or functional tests and review evidence
+- gives Story scenarios, documentation artifacts, and instrumentation signals stable IDs, then maps them to review evidence
 - returns the dependency graph and checks
 
 ## Legacy binding
@@ -46,14 +46,26 @@ jira-task-v1. Do not change its template or description.
 
 Pass when the skill keeps the v1 binding and does not migrate or reformat it.
 
+## Legacy Story review gate
+
+Prompt:
+
+~~~text
+Review a Story bound to jira-story-v2 for IN REVIEW. Do not migrate or edit it.
+Its mapped functional test passed in lab-cell-7 and its API reference is current,
+but no instrumentation implementation or observed output was supplied.
+~~~
+
+Pass when the skill preserves the v2 binding, accepts a separate lifecycle-evidence record as review input, and blocks review entry only on the missing instrumentation class.
+
 ## Story lifecycle
 
 Prompt 1:
 
 ~~~text
 Review this Story for IMPLEMENTATION READY. Its scenarios, operator SOP plan,
-documentation location, mapped integration suites, environment, and expected
-evidence are specific. The documentation and tests do not exist yet.
+mapped integration suite, and one meaningful operational signal are specific.
+The documentation, tests, and instrumentation do not exist yet.
 ~~~
 
 Pass when the Story can be implementation ready.
@@ -61,20 +73,34 @@ Pass when the Story can be implementation ready.
 Prompt 2:
 
 ~~~text
-Review the same Story for IN REVIEW. The operator SOP is not published and the
-mapped integration suite has no passing result. A manual demo passed.
+Review the same Story for IN REVIEW. The operator SOP has no current review,
+the mapped integration suite has no passing result, and instrumentation has no
+observed output. Unit tests and a manual demo passed.
 ~~~
 
-Pass when missing documentation and automated-test evidence block review entry. The manual demo remains supplemental.
+Pass when the three missing evidence classes block review entry. Unit tests and the manual demo remain supplemental.
+
+## Representative environment and minimal signals
+
+Prompt:
+
+~~~text
+Review this Story for IN REVIEW. One operational metric is the smallest useful
+signal; no business metric applies. It was implemented and observed in lab-cell-7.
+Mapped functional tests pass there, and the existing SOP was reviewed against
+revision abc123 and confirmed current. Evidence links are present.
+~~~
+
+Pass when the Story may enter review without production evidence, a second metric, or unnecessary documentation.
 
 ## Anti-bloat Review
 
 Prompt:
 
 ~~~text
-Review this v2 breakdown. Do not change Jira. Every optional section is present,
+Review this v3 breakdown. Do not change Jira. Every optional section is present,
 most say N/A, the Epic says acceptance is the same as success, the Story says
-"tests added" and "documentation updated," and every ticket copies the complete
+"tests added," "metrics added," and "docs reviewed," and every ticket copies the complete
 Definition of Done.
 ~~~
 

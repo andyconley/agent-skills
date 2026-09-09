@@ -1,0 +1,42 @@
+description:
+  outcome: An operator identifies and recovers a stalled transfer.
+  scenarios:
+    - id: stalled-transfer-recovery
+      given: A transfer has stopped making progress.
+      when: The operator follows the recovery procedure.
+      then: Processing resumes without losing accepted work.
+  documentation:
+    - id: recovery-sop
+      artifact: Stalled-transfer recovery procedure
+      audience: operator
+      intended_location: docs/operations/recovery.md
+  automated_tests:
+    - scenario_id: stalled-transfer-recovery
+      level: integration
+      suite_or_location: tests/integration/recovery
+      expected_evidence: Retained CI result
+  instrumentation:
+    - id: transfer-progress-age
+      class: operational
+      signal: Age of the last accepted transfer progress
+      purpose: Distinguishes a stalled transfer from a slow active transfer
+      implementation_target: Transfer service telemetry
+      expected_observation: Age rises during the injected stall and resets after recovery
+  review_evidence:
+    documentation:
+      - artifact_id: recovery-sop
+        status: confirmed_current
+        reviewer: Operations owner
+        review_record: docs-review-42
+        evidence: docs/operations/recovery.md@abc123
+    automated_tests:
+      - scenario_id: stalled-transfer-recovery
+        status: passed
+        environment: lab-cell-7
+        evidence: CI-456
+    instrumentation:
+      - signal_id: transfer-progress-age
+        environment: lab-cell-7
+        implementation_evidence: telemetry/transfer_progress_age.yaml@abc123
+        observed_output: Age exceeded the stall threshold and reset after recovery
+        evidence: dashboard-snapshot-17

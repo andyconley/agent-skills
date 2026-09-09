@@ -67,10 +67,11 @@ end
 
 def validate_registry(registry)
   raise ArgumentError, "registry schema must be 2" unless registry["schema_version"] == 2
-  raise ArgumentError, "default template set must be 2" unless registry["default_set_version"] == 2
+  raise ArgumentError, "default template set must be 3" unless registry["default_set_version"] == 3
   sets = registry.fetch("template_sets")
   raise ArgumentError, "missing template set 1" unless sets.key?(1)
   raise ArgumentError, "missing template set 2" unless sets.key?(2)
+  raise ArgumentError, "missing template set 3" unless sets.key?(3)
 
   templates = registry.fetch("templates")
   ids = templates.map { |template| template.fetch("id") }
@@ -78,6 +79,9 @@ def validate_registry(registry)
 
   templates.each do |template|
     raise ArgumentError, "unknown template set" unless sets.key?(template["set_version"])
+    compatible = template.fetch("compatible_set_versions", [template["set_version"]])
+    raise ArgumentError, "native template set must remain compatible" unless compatible.include?(template["set_version"])
+    raise ArgumentError, "unknown compatible template set" unless compatible.all? { |version| sets.key?(version) }
     file = File.join(SKILL, "assets", "jira-templates", template.fetch("file"))
     raise ArgumentError, "missing template asset" unless File.file?(file)
     raise ArgumentError, "template hash drift" unless Digest::SHA256.file(file).hexdigest == template["sha256"]
@@ -94,12 +98,17 @@ def validate_registry(registry)
       variants.each do |variant, id|
         raise ArgumentError, "unknown default template" unless known[id]
         template = index.fetch(id)
-        raise ArgumentError, "default template-set mismatch" unless template["set_version"] == version
+        compatible = template.fetch("compatible_set_versions", [template["set_version"]])
+        raise ArgumentError, "default template-set mismatch" unless compatible.include?(version)
         raise ArgumentError, "default issue-type mismatch" unless template["issue_type"] == issue_type
         raise ArgumentError, "default Spike variant mismatch" if variant && template["variant"] != variant
       end
     end
   end
+end
+
+def template_supports_set?(template, set_version)
+  template.fetch("compatible_set_versions", [template["set_version"]]).include?(set_version)
 end
 
 def validate_exception(exception, obligation)
@@ -116,7 +125,7 @@ def validate_scenario_ids(description)
   ids
 end
 
-def validate_story_description(description)
+def validate_story_description(description, instrumentation_required: false)
   scenario_ids = validate_scenario_ids(description)
 
   documents = description["documentation"]
@@ -149,6 +158,23 @@ def validate_story_description(description)
   else
     validate_exception(test_exception, "automated_tests")
   end
+
+
+  if instrumentation_required
+    signals = description["instrumentation"]
+    instrumentation_exception = description["instrumentation_exception"]
+    if signals && !signals.empty?
+      signals.each do |item|
+    required = %w[id class signal purpose implementation_target expected_observation]
+        raise ArgumentError, "incomplete instrumentation plan" unless required.all? { |key| !item[key].to_s.empty? }
+        raise ArgumentError, "invalid instrumentation class" unless %w[operational business].include?(item["class"])
+      end
+      signal_ids = signals.map { |item| item["id"] }
+      raise ArgumentError, "instrumentation IDs must be unique" if signal_ids.any? { |id| id.to_s.empty? } || signal_ids.uniq.length != signal_ids.length
+    else
+      validate_exception(instrumentation_exception, "instrumentation")
+    end
+  end
   validate_quality(description)
 end
 
@@ -162,7 +188,7 @@ def validate_quality(value)
     normalized = value.strip.downcase
     raise ArgumentError, "unresolved placeholder" if value.match?(/<[^>]+>/)
     raise ArgumentError, "empty filler value" if %w[n/a none].include?(normalized)
-    raise ArgumentError, "generic evidence" if ["tests added", "documentation updated"].include?(normalized)
+    raise ArgumentError, "generic evidence" if ["tests added", "documentation updated", "docs reviewed", "metrics added", "dashboard updated", "add logging"].include?(normalized)
   end
 end
 
@@ -183,7 +209,12 @@ def validate_description(description, template)
   # Story cannot declare v2 evidence keys, so its documentation and automated-test
   # obligations are enforced as Review and Audit lifecycle judgments instead.
   if template["issue_type"] == "Story"
-    template["set_version"] == 2 ? validate_story_description(description) : validate_scenario_ids(description)
+    case template["id"]
+    when "jira-story-v2"
+      validate_story_description(description)
+    when "jira-story-v3"
+      validate_story_description(description, instrumentation_required: true)
+    end
   end
   validate_quality(description)
 end
@@ -226,9 +257,9 @@ def validate_child(child, templates, set_version)
 
   template = templates[template_id]
   raise ArgumentError, "unknown child template" unless template
-  raise ArgumentError, "template-set mismatch" unless template["set_version"] == set_version
+  raise ArgumentError, "template-set mismatch" unless template_supports_set?(template, set_version)
   raise ArgumentError, "child type/template mismatch" unless child["type"] == template["issue_type"]
-  if child["type"] == "Spike" && template["set_version"] == 2
+  if child["type"] == "Spike" && template["variant"] != "legacy"
     raise ArgumentError, "Spike variant mismatch" unless child["variant"] == template["variant"]
   end
   if set_version == 1
@@ -254,7 +285,7 @@ def validate_manifest(manifest, templates, registry)
   if schema == 2
     reject_unknown_keys(epic, %w[outcome target_duration], "schema-2 Epic")
   else
-    raise ArgumentError, "schema 3 requires template-set version 2" unless set_version == 2
+    raise ArgumentError, "schema 3 requires an Epic-compatible template set" unless template_supports_set?(templates.fetch("jira-epic-v2"), set_version)
     disposition = epic["disposition"]
     raise ArgumentError, "missing Epic disposition" unless %w[existing update].include?(disposition)
     if disposition == "existing"
@@ -291,23 +322,104 @@ end
 def validate_story_review(story)
   description = story.fetch("description")
   review = description.fetch("review_evidence")
-  published = review.fetch("documentation")
-  passing = review.fetch("automated_tests")
+  published = review.fetch("documentation", [])
+  passing = review.fetch("automated_tests", [])
+  observed = review.fetch("instrumentation", [])
+  confirmed_exceptions = review.fetch("approved_exceptions", [])
   planned_documents = description.fetch("documentation", []).map { |item| item["id"] }
   planned_scenarios = description.fetch("automated_tests", []).map { |item| item["scenario_id"] }
   planned_environments = description.fetch("automated_tests", []).to_h { |item| [item["scenario_id"], item["environment"]] }
+  planned_signals = description.fetch("instrumentation", []).map { |item| item["id"] }
   raise ArgumentError, "missing published documentation evidence" if planned_documents.any? && published.empty?
   raise ArgumentError, "missing passing automated-test evidence" if planned_scenarios.any? && passing.empty?
-  raise ArgumentError, "missing published documentation evidence" unless published.all? { |item| item["status"] == "published" && !item["evidence"].to_s.empty? }
+  raise ArgumentError, "missing published documentation evidence" unless published.all? do |item|
+    valid_status = %w[published updated confirmed_current].include?(item["status"])
+    confirmed = item["status"] != "confirmed_current" || (!item["reviewer"].to_s.empty? && !item["review_record"].to_s.empty?)
+    valid_status && confirmed && !item["evidence"].to_s.empty?
+  end
   raise ArgumentError, "missing passing automated-test evidence" unless passing.all? { |item| item["status"] == "passed" && !item["environment"].to_s.empty? && !item["evidence"].to_s.empty? }
+  raise ArgumentError, "missing instrumentation evidence" if planned_signals.any? && observed.empty?
+  raise ArgumentError, "incomplete instrumentation evidence" unless observed.all? do |item|
+    %w[signal_id environment implementation_evidence observed_output evidence].all? { |key| !item[key].to_s.empty? }
+  end
   evidence_documents = published.map { |item| item["artifact_id"] }
   evidence_scenarios = passing.map { |item| item["scenario_id"] }
+  evidence_signals = observed.map { |item| item["signal_id"] }
   raise ArgumentError, "documentation evidence does not match the plan" unless evidence_documents.sort == planned_documents.sort && evidence_documents.uniq.length == evidence_documents.length
   raise ArgumentError, "automated-test evidence does not match the plan" unless evidence_scenarios.sort == planned_scenarios.sort && evidence_scenarios.uniq.length == evidence_scenarios.length
+  raise ArgumentError, "instrumentation evidence does not match the plan" unless evidence_signals.sort == planned_signals.sort && evidence_signals.uniq.length == evidence_signals.length
   raise ArgumentError, "automated-test evidence uses the wrong environment" unless passing.all? do |item|
     planned = planned_environments[item["scenario_id"]]
     planned.to_s.empty? || item["environment"] == planned
   end
+
+  expected_exceptions = %w[documentation automated_tests instrumentation].each_with_object([]) do |obligation, memo|
+    exception = description["#{obligation}_exception"]
+    memo << [obligation, exception["approval_evidence"]] if exception
+  end
+  actual_exceptions = confirmed_exceptions.map do |item|
+    raise ArgumentError, "invalid exception confirmation" unless item["status"] == "confirmed"
+    raise ArgumentError, "invalid exception confirmation" if item["obligation"].to_s.empty? || item["approval_evidence"].to_s.empty?
+    [item["obligation"], item["approval_evidence"]]
+  end
+  raise ArgumentError, "exception confirmation does not match the plan" unless actual_exceptions.sort == expected_exceptions.sort && actual_exceptions.uniq.length == actual_exceptions.length
+end
+
+def validate_legacy_story_review(story, lifecycle_evidence)
+  description = story.fetch("description")
+  raise ArgumentError, "legacy evidence identifies the wrong Story" unless lifecycle_evidence["story_key"] == story["jira_key"]
+  raise ArgumentError, "legacy evidence identifies the wrong template" unless lifecycle_evidence["template_id"] == story["template_id"]
+
+  scenarios = description.fetch("scenarios")
+  if scenarios.all? { |item| item.is_a?(Hash) && !item["id"].to_s.empty? }
+    scenario_ids = validate_scenario_ids(description)
+  else
+    raise ArgumentError, "mixed legacy scenario shapes" unless scenarios.none? { |item| item.is_a?(Hash) }
+    bindings = lifecycle_evidence.fetch("scenario_bindings", [])
+    scenario_ids = bindings.map { |item| item["id"] }
+    source_texts = bindings.map { |item| item["source_text"] }
+    raise ArgumentError, "invalid legacy scenario binding" if scenario_ids.any? { |id| id.to_s.empty? } || scenario_ids.uniq.length != scenario_ids.length
+    raise ArgumentError, "legacy scenario binding does not match the Story" unless source_texts.sort == scenarios.map(&:to_s).sort && source_texts.uniq.length == source_texts.length
+  end
+  classes = %w[documentation automated_tests instrumentation]
+
+  classes.each do |obligation|
+    evidence = lifecycle_evidence.fetch(obligation, [])
+    exception = lifecycle_evidence["#{obligation}_exception"]
+    raise ArgumentError, "conflicting legacy evidence and exception" if !evidence.empty? && exception
+    if evidence.empty?
+      validate_exception(exception, obligation)
+    end
+  end
+
+  documents = lifecycle_evidence.fetch("documentation", [])
+  documents.each do |item|
+    allowed = %w[published updated confirmed_current]
+    raise ArgumentError, "invalid legacy documentation evidence" unless allowed.include?(item["status"]) && !item["artifact"].to_s.empty? && !item["evidence"].to_s.empty?
+    if item["status"] == "confirmed_current"
+      raise ArgumentError, "invalid legacy documentation evidence" if item["reviewer"].to_s.empty? || item["review_record"].to_s.empty?
+    end
+  end
+
+  tests = lifecycle_evidence.fetch("automated_tests", [])
+  tests.each do |item|
+    required = %w[scenario_id level status environment evidence]
+    raise ArgumentError, "invalid legacy automated-test evidence" unless required.all? { |key| !item[key].to_s.empty? }
+    raise ArgumentError, "unit or manual test is not a substitute" unless %w[integration functional].include?(item["level"])
+    raise ArgumentError, "legacy automated test is not mapped to a scenario" unless scenario_ids.include?(item["scenario_id"])
+    raise ArgumentError, "invalid legacy automated-test evidence" unless item["status"] == "passed"
+  end
+  covered_scenarios = tests.map { |item| item["scenario_id"] }
+  if tests.any?
+    raise ArgumentError, "legacy automated tests must cover every scenario exactly once" unless covered_scenarios.sort == scenario_ids.sort && covered_scenarios.uniq.length == covered_scenarios.length
+  end
+
+  lifecycle_evidence.fetch("instrumentation", []).each do |item|
+    required = %w[signal_id class purpose environment implementation_evidence observed_output evidence]
+    raise ArgumentError, "invalid legacy instrumentation evidence" unless required.all? { |key| !item[key].to_s.empty? }
+    raise ArgumentError, "invalid instrumentation class" unless %w[operational business].include?(item["class"])
+  end
+  validate_quality(lifecycle_evidence)
 end
 
 registry = load_yaml(REGISTRY_PATH)
@@ -341,12 +453,17 @@ expected_v1.each { |id, digest| assert(index.dig(id, "sha256") == digest, "#{id}
 
 v1_defaults = registry.dig("template_sets", 1, "defaults")
 v2_defaults = registry.dig("template_sets", 2, "defaults")
+v3_defaults = registry.dig("template_sets", 3, "defaults")
 assert(v1_defaults["Task"] == "jira-task-v1", "template set 1 lost its defaults")
 assert(v2_defaults["Epic"] == "jira-epic-v2", "Epic v2 is not default")
 assert(v2_defaults["Story"] == "jira-story-v2", "Story v2 is not default")
 assert(v2_defaults["Task"] == "jira-task-v2", "Task v2 is not default")
 assert(v2_defaults.dig("Spike", "design") == "jira-spike-design-v2", "design Spike v2 is not default")
 assert(v2_defaults.dig("Spike", "investigation") == "jira-spike-investigation-v2", "investigation Spike v2 is not default")
+assert(v3_defaults["Story"] == "jira-story-v3", "Story v3 is not the new default")
+assert(v3_defaults["Epic"] == "jira-epic-v2", "template set 3 lost the compatible Epic")
+assert(index.dig("jira-story-v2", "sha256") == "ca7c5dcf753d6a0e2f432ef436801422ea81ca4c5c20bdabb358197c9c4fc6b4", "Story v2 identity changed")
+assert(index.dig("jira-story-v3", "sha256") == "c19201ccb6e6f59671c0d33b45df3524d9d0662b3563d133e1f6f02c2774fef4", "Story v3 identity changed")
 
 legacy = load_yaml(File.join(FIXTURES, "schema2-v1-valid.yaml"))
 validate_manifest(legacy, index, registry)
@@ -569,6 +686,198 @@ unapproved_exception = clone(exception_story)
 unapproved_exception["documentation_exception"].delete("approval_evidence")
 expect_error("invalid approved exception") { validate_story_description(unapproved_exception) }
 
+story_v3 = load_yaml(File.join(FIXTURES, "story-v3-lifecycle.yaml"))
+validate_story_description(story_v3.fetch("description"), instrumentation_required: true)
+validate_story_review(story_v3)
+
+v3_manifest = clone(v2_children)
+v3_manifest["template_set"]["version"] = 3
+v3_manifest["children"] << {
+  "ref" => "prove-recovery",
+  "jira_key" => nil,
+  "type" => "Story",
+  "template_id" => "jira-story-v3",
+  "template_sha256" => index.dig("jira-story-v3", "sha256"),
+  "disposition" => "proposed",
+  "fields" => {
+    "summary" => "Prove stalled-transfer recovery",
+    "done_when" => "The integrated recovery behavior and its delivery evidence pass review.",
+    "description" => clone(story_v3["description"])
+  }
+}
+v3_manifest["rank"]["order"] << "prove-recovery"
+validate_manifest(v3_manifest, index, registry)
+
+v2_story_in_v3 = clone(v3_manifest)
+v2_child = v2_story_in_v3["children"].last
+v2_child["template_id"] = "jira-story-v2"
+v2_child["template_sha256"] = index.dig("jira-story-v2", "sha256")
+expect_error("template-set mismatch") { validate_manifest(v2_story_in_v3, index, registry) }
+
+v3_story_in_v2 = clone(v3_manifest)
+v3_story_in_v2["template_set"]["version"] = 2
+expect_error("template-set mismatch") { validate_manifest(v3_story_in_v2, index, registry) }
+
+schema3_set3 = clone(schema3)
+schema3_set3["template_set"]["version"] = 3
+validate_manifest(schema3_set3, index, registry)
+
+set3_manifest = clone(v2_children)
+set3_manifest["template_set"]["version"] = 3
+set3_manifest["children"] << {
+  "ref" => "prove-recovery",
+  "jira_key" => nil,
+  "type" => "Story",
+  "template_id" => "jira-story-v3",
+  "template_sha256" => index.dig("jira-story-v3", "sha256"),
+  "disposition" => "proposed",
+  "fields" => {
+    "summary" => "Prove stalled-transfer recovery",
+    "done_when" => "The recovery behavior and delivery evidence pass review.",
+    "description" => clone(story_v3["description"])
+  }
+}
+validate_manifest(set3_manifest, index, registry)
+
+v2_story_in_set3 = clone(set3_manifest)
+v2_story_in_set3["children"].last["template_id"] = "jira-story-v2"
+v2_story_in_set3["children"].last["template_sha256"] = index.dig("jira-story-v2", "sha256")
+expect_error("template-set mismatch") { validate_manifest(v2_story_in_set3, index, registry) }
+
+schema3_set3 = clone(schema3)
+schema3_set3["template_set"]["version"] = 3
+validate_manifest(schema3_set3, index, registry)
+
+business_signal = clone(story_v3["description"])
+business_signal["instrumentation"].first["class"] = "business"
+validate_story_description(business_signal, instrumentation_required: true)
+
+invalid_signal_class = clone(story_v3["description"])
+invalid_signal_class["instrumentation"].first["class"] = "logging"
+expect_error("invalid instrumentation class") { validate_story_description(invalid_signal_class, instrumentation_required: true) }
+
+unit_only = clone(story_v3["description"])
+unit_only["automated_tests"].first["level"] = "unit"
+expect_error("manual test is not a substitute") { validate_story_description(unit_only, instrumentation_required: true) }
+
+duplicate_signal = clone(story_v3["description"])
+duplicate_signal["instrumentation"] << clone(duplicate_signal["instrumentation"].first)
+expect_error("instrumentation IDs must be unique") { validate_story_description(duplicate_signal, instrumentation_required: true) }
+
+missing_instrumentation = clone(story_v3["description"])
+missing_instrumentation.delete("instrumentation")
+expect_error("invalid approved exception") { validate_story_description(missing_instrumentation, instrumentation_required: true) }
+
+instrumentation_exception = clone(missing_instrumentation)
+instrumentation_exception["instrumentation_exception"] = {
+  "obligation" => "instrumentation",
+  "reason" => "The Story changes only static explanatory text.",
+  "approver" => "Service owner",
+  "approval_evidence" => "review-84"
+}
+validate_story_description(instrumentation_exception, instrumentation_required: true)
+
+excepted_story = clone(story_v3)
+excepted_description = excepted_story["description"]
+excepted_description.delete("instrumentation")
+excepted_description["instrumentation_exception"] = clone(instrumentation_exception["instrumentation_exception"])
+excepted_description["review_evidence"].delete("instrumentation")
+excepted_description["review_evidence"]["approved_exceptions"] = [
+  {
+    "obligation" => "instrumentation",
+    "status" => "confirmed",
+    "approval_evidence" => "review-84"
+  }
+]
+validate_story_description(excepted_description, instrumentation_required: true)
+validate_story_review(excepted_story)
+
+missing_confirmation = clone(excepted_story)
+missing_confirmation["description"]["review_evidence"].delete("approved_exceptions")
+expect_error("exception confirmation does not match the plan") { validate_story_review(missing_confirmation) }
+
+stale_confirmation = clone(excepted_story)
+stale_confirmation["description"]["review_evidence"]["approved_exceptions"].first["status"] = "proposed"
+expect_error("invalid exception confirmation") { validate_story_review(stale_confirmation) }
+
+wrong_confirmation = clone(excepted_story)
+wrong_confirmation["description"]["review_evidence"]["approved_exceptions"].first["approval_evidence"] = "review-other"
+expect_error("exception confirmation does not match the plan") { validate_story_review(wrong_confirmation) }
+
+plan_and_exception = clone(v3_manifest)
+plan_and_exception["children"].last["fields"]["description"]["instrumentation_exception"] = {
+  "obligation" => "instrumentation",
+  "reason" => "This must not coexist with a plan.",
+  "approver" => "Service owner",
+  "approval_evidence" => "review-85"
+}
+expect_error("conflicting obligation and exception") { validate_manifest(plan_and_exception, index, registry) }
+
+missing_observation = clone(story_v3)
+missing_observation["description"]["review_evidence"]["instrumentation"].first["observed_output"] = ""
+expect_error("incomplete instrumentation evidence") { validate_story_review(missing_observation) }
+
+missing_implementation = clone(story_v3)
+missing_implementation["description"]["review_evidence"]["instrumentation"].first["implementation_evidence"] = ""
+expect_error("incomplete instrumentation evidence") { validate_story_review(missing_implementation) }
+
+missing_signal_environment = clone(story_v3)
+missing_signal_environment["description"]["review_evidence"]["instrumentation"].first["environment"] = ""
+expect_error("incomplete instrumentation evidence") { validate_story_review(missing_signal_environment) }
+
+unmapped_signal = clone(story_v3)
+unmapped_signal["description"]["review_evidence"]["instrumentation"].first["signal_id"] = "other-signal"
+expect_error("instrumentation evidence does not match the plan") { validate_story_review(unmapped_signal) }
+
+unreviewed_current_doc = clone(story_v3)
+unreviewed_current_doc["description"]["review_evidence"]["documentation"].first.delete("review_record")
+expect_error("missing published documentation evidence") { validate_story_review(unreviewed_current_doc) }
+
+updated_doc = clone(story_v3)
+updated_doc["description"]["review_evidence"]["documentation"].first["status"] = "updated"
+updated_doc["description"]["review_evidence"]["documentation"].first.delete("reviewer")
+updated_doc["description"]["review_evidence"]["documentation"].first.delete("review_record")
+validate_story_review(updated_doc)
+
+generic_metric = clone(story_v3["description"])
+generic_metric["instrumentation"].first["expected_observation"] = "metrics added"
+expect_error("generic evidence") { validate_story_description(generic_metric, instrumentation_required: true) }
+
+legacy_v1 = load_yaml(File.join(FIXTURES, "story-v1-lifecycle.yaml"))
+legacy_story = legacy_v1.fetch("story")
+legacy_lifecycle = legacy_v1.fetch("lifecycle_evidence")
+validate_description(legacy_story.fetch("description"), index.fetch("jira-story-v1"))
+validate_legacy_story_review(legacy_story, legacy_lifecycle)
+
+wrong_legacy_story = clone(legacy_lifecycle)
+wrong_legacy_story["story_key"] = "WORK-999"
+expect_error("legacy evidence identifies the wrong Story") { validate_legacy_story_review(legacy_story, wrong_legacy_story) }
+
+wrong_legacy_template = clone(legacy_lifecycle)
+wrong_legacy_template["template_id"] = "jira-story-v2"
+expect_error("legacy evidence identifies the wrong template") { validate_legacy_story_review(legacy_story, wrong_legacy_template) }
+
+wrong_scenario_binding = clone(legacy_lifecycle)
+wrong_scenario_binding["scenario_bindings"].first["source_text"] = "A different scenario"
+expect_error("legacy scenario binding does not match the Story") { validate_legacy_story_review(legacy_story, wrong_scenario_binding) }
+
+legacy_missing_instrumentation = clone(legacy_lifecycle)
+legacy_missing_instrumentation.delete("instrumentation")
+expect_error("invalid approved exception") { validate_legacy_story_review(legacy_story, legacy_missing_instrumentation) }
+
+legacy_unit_only = clone(legacy_lifecycle)
+legacy_unit_only["automated_tests"].first["level"] = "unit"
+expect_error("unit or manual test is not a substitute") { validate_legacy_story_review(legacy_story, legacy_unit_only) }
+
+legacy_instrumentation_exception = clone(legacy_missing_instrumentation)
+legacy_instrumentation_exception["instrumentation_exception"] = {
+  "obligation" => "instrumentation",
+  "reason" => "The legacy Story changes only static explanatory text.",
+  "approver" => "Service owner",
+  "approval_evidence" => "review-legacy-12"
+}
+validate_legacy_story_review(legacy_story, legacy_instrumentation_exception)
+
 placeholder = clone(schema3)
 placeholder["epic"]["changes"]["description"]["problem"] = "<problem>"
 expect_error("unresolved placeholder") { validate_manifest(placeholder, index, registry) }
@@ -596,6 +905,18 @@ RENDER_EXCEPTIONS = {
     "review_evidence" => "## Review evidence",
     "supplemental_demonstration" => "**Supplemental demonstration:**"
   },
+  "jira-story-v3" => {
+    "scenarios" => "## Acceptance scenarios",
+    "documentation" => "### Documentation",
+    "automated_tests" => "### Automated tests",
+    "instrumentation" => "### Instrumentation",
+    "documentation_exception" => "### Documentation exception",
+    "automated_tests_exception" => "### Automated-test exception",
+    "instrumentation_exception" => "### Instrumentation exception",
+    "nonfunctional_requirements" => "## Non-functional requirements",
+    "review_evidence" => "## Review evidence",
+    "supplemental_demonstration" => "**Supplemental demonstration:**"
+  },
   "jira-task-v2" => {
     "ticket_quality_additions" => "**Additions:**",
     "approved_exceptions" => "**Approved exceptions:**"
@@ -611,7 +932,7 @@ def render_target(template_id, key)
   RENDER_EXCEPTIONS.dig(template_id, key) || "## #{key.tr("_", " ").capitalize}"
 end
 
-templates.select { |template| template["set_version"] == 2 }.each do |template|
+templates.select { |template| template["set_version"] >= 2 }.each do |template|
   id = template.fetch("id")
   body = File.read(File.join(SKILL, "assets", "jira-templates", template.fetch("file")))
   template.fetch("required_keys").each do |key|
@@ -637,6 +958,10 @@ story_template = File.read(File.join(SKILL, "assets", "jira-templates", "story-v
 assert(!story_template.include?("| Owner |"), "Story template forces an optional owner cell")
 assert(story_template.include?("### Documentation exception"), "Story template cannot render a documentation exception")
 assert(story_template.include?("### Automated-test exception"), "Story template cannot render an automated-test exception")
+
+story_v3_template = File.read(File.join(SKILL, "assets", "jira-templates", "story-v3.md"))
+assert(story_v3_template.include?("### Instrumentation"), "Story v3 cannot render instrumentation")
+assert(story_v3_template.include?("### Instrumentation exception"), "Story v3 cannot render an instrumentation exception")
 
 before = JSON.parse(File.read(File.join(FIXTURES, "adf-before.json")))
 new_ids = JSON.parse(File.read(File.join(FIXTURES, "adf-new-localids.json")))
@@ -670,4 +995,4 @@ assert(journal.last["result"] == "failed", "partial failure was not recorded")
 public_text = Dir[File.join(SKILL, "**", "*")].select { |path| File.file?(path) }.map { |path| File.read(path) }.join("\n")
 assert(!public_text.match?(/pathrobotics\.atlassian\.net|\b(?:AE|ER)-\d+\b/i), "public package contains an internal reference")
 
-puts "workbreakdown v2 fixture tests passed"
+puts "workbreakdown template contract tests passed"

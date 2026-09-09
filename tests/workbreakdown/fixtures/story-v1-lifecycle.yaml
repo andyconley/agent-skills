@@ -1,0 +1,43 @@
+story:
+  jira_key: WORK-101
+  template_id: jira-story-v1
+  description:
+    scenarios:
+      - |-
+        GIVEN a permitted consumer with access to a supported system
+        WHEN the consumer requests current state
+        THEN the response returns the current canonical state
+    figma: Existing API behavior; no interface artifact required
+    assumptions: Supported sources are unchanged
+    out_of_scope: Adding a new source
+    technical_considerations: Preserve the existing response contract
+    nonfunctional_requirements: The existing service target still applies
+    documentation_updates: Review the state API reference
+    open_questions: No unresolved question
+lifecycle_evidence:
+  story_key: WORK-101
+  template_id: jira-story-v1
+  scenario_bindings:
+    - id: legacy-current-state-read
+      source_text: |-
+        GIVEN a permitted consumer with access to a supported system
+        WHEN the consumer requests current state
+        THEN the response returns the current canonical state
+  documentation:
+    - artifact: State API reference
+      status: updated
+      evidence: docs/api/state.md@abc123
+  automated_tests:
+    - scenario_id: legacy-current-state-read
+      level: functional
+      status: passed
+      environment: lab-cell-7
+      evidence: CI-900
+  instrumentation:
+    - signal_id: legacy-read-success
+      class: operational
+      purpose: Shows successful current-state reads
+      environment: lab-cell-7
+      implementation_evidence: telemetry/state_reads.yaml@abc123
+      observed_output: Counter increased during the functional run
+      evidence: snapshot-900

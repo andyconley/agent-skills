@@ -9,7 +9,7 @@ Use this policy for work below an ER or Initiative.
 | Epic | Deliver a milestone capability | Its acceptance conditions pass and the milestone evidence is accepted |
 | Spike | Answer one design, research, or feasibility question | The decision or answer, evidence, constraints, and downstream effect are recorded |
 | Task | Produce a specific implementation or operational artifact | The named code, configuration, infrastructure, test asset, or deployment exists and is verified |
-| Story | Package integrated, observable behavior | Its documentation is delivered and mapped automated integration or functional tests pass against the delivered system |
+| Story | Package integrated, observable behavior | Its documentation is current, mapped automated integration or functional tests pass, and its instrumentation produces observed output |
 
 Create a direct Epic child when work needs an owner, estimate, status, dependency, or completion evidence. Do not use subtasks for planned milestone work.
 
@@ -71,13 +71,16 @@ Each Story must include:
 - the automated integration or functional test that proves each scenario
 - the expected evidence, plus the intended test suite or location and the verification environment when they are known
 - contextual documentation: the applicable user, operator, support, API, or other artifact; its audience; intended location; and owner when known
+- the smallest set of operational signals and business metrics that proves the Story outcome or an operational decision, including where each signal will be implemented
 - packaging or deployment evidence
 
-At `IMPLEMENTATION READY`, the documentation and test plans must be specific enough to execute. The artifacts do not need to exist or pass.
+At `IMPLEMENTATION READY`, the documentation, test, and instrumentation plans must be specific enough to execute. The artifacts do not need to exist, pass, or emit yet. The intended environment may remain unknown when the gap is recorded.
 
-Before `IN REVIEW`, the documentation must be published or updated, each mapped automated test must pass in the named environment, and evidence must be linked. A manual demonstration is supplemental. It does not replace automated integration or functional tests.
+Before `IN REVIEW`, each mapped automated integration or functional test must pass, instrumentation must be implemented and produce observed output in a named representative environment, and appropriate documentation must be published, updated, or reviewed and confirmed current. Evidence must be linked. Unit tests and manual demonstrations are supplemental; neither replaces automated integration or functional tests.
 
-An exception must name the missing obligation, reason, approver, and approval evidence. Otherwise keep the gap open.
+Use the smallest signal set that proves the Story outcome or an operational decision. Do not require both operational and business signals when one class is sufficient, and do not invent a metric to fill a table.
+
+Each evidence class may instead use one approved exception. It must name the obligation, reason, approver, and approval evidence. Otherwise keep the gap open.
 
 ## Epic acceptance
 

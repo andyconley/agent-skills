@@ -1,9 +1,9 @@
 schema_version: 2
 registry_id: jira-house-templates
-version: 2
-verified_at: "2026-09-08"
+version: 3
+verified_at: "2026-09-09"
 
-default_set_version: 2
+default_set_version: 3
 template_sets:
   1:
     defaults:
@@ -15,6 +15,14 @@ template_sets:
     defaults:
       Epic: jira-epic-v2
       Story: jira-story-v2
+      Task: jira-task-v2
+      Spike:
+        design: jira-spike-design-v2
+        investigation: jira-spike-investigation-v2
+  3:
+    defaults:
+      Epic: jira-epic-v2
+      Story: jira-story-v3
       Task: jira-task-v2
       Spike:
         design: jira-spike-design-v2
@@ -67,6 +75,7 @@ templates:
 
   - id: jira-epic-v2
     set_version: 2
+    compatible_set_versions: [2, 3]
     issue_type: Epic
     variant: milestone
     status: default
@@ -92,6 +101,7 @@ templates:
 
   - id: jira-task-v2
     set_version: 2
+    compatible_set_versions: [2, 3]
     issue_type: Task
     variant: artifact
     status: default
@@ -103,6 +113,7 @@ templates:
 
   - id: jira-spike-design-v2
     set_version: 2
+    compatible_set_versions: [2, 3]
     issue_type: Spike
     variant: design
     status: default
@@ -114,6 +125,7 @@ templates:
 
   - id: jira-spike-investigation-v2
     set_version: 2
+    compatible_set_versions: [2, 3]
     issue_type: Spike
     variant: investigation
     status: default
@@ -122,6 +134,21 @@ templates:
     description_format: adf
     required_keys: [question, evidence_needed, done_when, downstream_updates]
     conditional_keys: [boundaries, references]
+
+  - id: jira-story-v3
+    set_version: 3
+    issue_type: Story
+    variant: behavior-evidence
+    status: default
+    file: story-v3.md
+    sha256: c19201ccb6e6f59671c0d33b45df3524d9d0662b3563d133e1f6f02c2774fef4
+    description_format: adf
+    required_keys: [outcome, scenarios]
+    required_one_of:
+      - [documentation, documentation_exception]
+      - [automated_tests, automated_tests_exception]
+      - [instrumentation, instrumentation_exception]
+    conditional_keys: [documentation, automated_tests, instrumentation, documentation_exception, automated_tests_exception, instrumentation_exception, context_and_constraints, nonfunctional_requirements, review_evidence, supplemental_demonstration]
 
 rendering:
   omit_empty_conditionals: true
