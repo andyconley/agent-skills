@@ -2,6 +2,16 @@
 
 All notable changes to agent-skills are generated from Conventional Commits. Longer design context belongs in the documentation changed by the release.
 
+## [1.5.0](https://github.com/andyconley/agent-skills/compare/v1.4.1...v1.5.0) (2026-09-09)
+
+### Features
+
+* **workbreakdown:** require Story delivery evidence ([673ed56](https://github.com/andyconley/agent-skills/commit/673ed56c2970f38f316f962a3f598de84c50c7ce))
+
+### Documentation
+
+* **flow:** record Story evidence handback ([275ea0a](https://github.com/andyconley/agent-skills/commit/275ea0aef109c97df89230f2d215acbb751aa191))
+
 ## [1.4.1](https://github.com/andyconley/agent-skills/compare/v1.4.0...v1.4.1) (2026-09-08)
 
 ### Bug Fixes
