@@ -7,6 +7,7 @@
     "orchestration_manifest": ".flow/runs/workbreakdown-story-evidence-v3/orchestration.json",
     "plan": ".flow/runs/workbreakdown-story-evidence-v3/plan.md",
     "requirements": ".flow/runs/workbreakdown-story-evidence-v3/requirements.md",
+    "review": ".flow/runs/workbreakdown-story-evidence-v3/review.md",
     "solution": ".flow/runs/workbreakdown-story-evidence-v3/solution.md",
     "validation_plan": ".flow/runs/workbreakdown-story-evidence-v3/validation-plan.md"
   },
@@ -15,6 +16,7 @@
     "risk": "owned"
   },
   "gates": {
+    "accept-review": "2026-09-09T23:59:22Z",
     "approve-definition": "2026-09-09T20:06:53Z",
     "approve-plan": "2026-09-09T20:06:53Z",
     "approve-solution": "2026-09-09T20:06:53Z",
@@ -22,14 +24,15 @@
     "start-definition": "2026-09-09T20:06:13Z",
     "start-implementation": "2026-09-09T20:07:15Z",
     "start-plan": "2026-09-09T20:06:53Z",
+    "start-review": "2026-09-09T22:04:20Z",
     "start-solution": "2026-09-09T20:06:53Z"
   },
-  "lane": "implement",
-  "last_event": "mark-handback-ready",
-  "phase": "handback_ready",
+  "lane": "review",
+  "last_event": "accept-review",
+  "phase": "review_accepted",
   "protocol_revision": 2,
   "schema_version": 1,
-  "state": "handback_ready",
-  "updated_at": "2026-09-09T21:56:55Z",
+  "state": "review_accepted",
+  "updated_at": "2026-09-09T23:59:22Z",
   "work_id": "workbreakdown-story-evidence-v3"
 }

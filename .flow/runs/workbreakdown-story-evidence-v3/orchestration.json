@@ -89,6 +89,47 @@
       "success_criteria": ["Handback states shipped behavior, proof, limitations, and next actions without overclaiming."],
       "claim_statuses": ["observed", "recommended"],
       "coordination": {"mode": "serialized", "group": "handback"}
+    },
+    {
+      "id": "acceptance-test-review",
+      "lane": "review",
+      "role": "test-engineer",
+      "provider": {"kind": "agent", "id": "/root/review_tests"},
+      "brief_path": ".flow/runs/workbreakdown-story-evidence-v3/review-test-brief.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-story-evidence-v3/requirements.md",
+        ".flow/runs/workbreakdown-story-evidence-v3/acceptance-criteria.md",
+        ".flow/runs/workbreakdown-story-evidence-v3/validation-results.md"
+      ],
+      "read_scopes": ["skills/workbreakdown", "tests", ".flow/runs/workbreakdown-story-evidence-v3"],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [{"name": "filesystem-read", "status": "confirmed"}],
+      "output": {"path": ".flow/runs/workbreakdown-story-evidence-v3/test-acceptance-review.md", "format": "markdown"},
+      "success_criteria": ["Every material acceptance obligation has evidence that could fail, or the missing proof is identified."],
+      "claim_statuses": ["observed", "inferred", "recommended"],
+      "coordination": {"mode": "concurrent", "group": "acceptance-review"}
+    },
+    {
+      "id": "acceptance-quality-review",
+      "lane": "review",
+      "role": "quality-reviewer",
+      "provider": {"kind": "agent", "id": "/root/review_quality"},
+      "brief_path": ".flow/runs/workbreakdown-story-evidence-v3/review-quality-brief.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-story-evidence-v3/requirements.md",
+        ".flow/runs/workbreakdown-story-evidence-v3/acceptance-criteria.md",
+        ".flow/runs/workbreakdown-story-evidence-v3/plan.md",
+        ".flow/runs/workbreakdown-story-evidence-v3/validation-results.md"
+      ],
+      "read_scopes": ["skills/workbreakdown", "tests", "README.md", "docs/README.md", ".flow/runs/workbreakdown-story-evidence-v3"],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [{"name": "filesystem-read", "status": "confirmed"}],
+      "output": {"path": ".flow/runs/workbreakdown-story-evidence-v3/quality-acceptance-review.md", "format": "markdown"},
+      "success_criteria": ["The published implementation is compared against every requirement and acceptance criterion."],
+      "claim_statuses": ["observed", "inferred", "recommended"],
+      "coordination": {"mode": "concurrent", "group": "acceptance-review"}
     }
   ],
   "shared_state": [],
@@ -99,9 +140,9 @@
   },
   "verification": {
     "producer_assignments": ["implementation-owner"],
-    "evidence_collector_assignment": "test-strategy",
-    "verifier_assignment": "quality-review",
+    "evidence_collector_assignment": "acceptance-test-review",
+    "verifier_assignment": "acceptance-quality-review",
     "independent": true,
-    "artifact_path": ".flow/runs/workbreakdown-story-evidence-v3/quality-review.md"
+    "artifact_path": ".flow/runs/workbreakdown-story-evidence-v3/quality-acceptance-review.md"
   }
 }

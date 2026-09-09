@@ -6,3 +6,5 @@
 {"artifacts": {"handoff": ".flow/runs/workbreakdown-story-evidence-v3/implementation-handoff.md", "plan": ".flow/runs/workbreakdown-story-evidence-v3/plan.md", "validation_plan": ".flow/runs/workbreakdown-story-evidence-v3/validation-plan.md"}, "at": "2026-09-09T20:06:53Z", "dispositions": {}, "event": "approve-plan", "from": "planning", "to": "plan_approved"}
 {"artifacts": {}, "at": "2026-09-09T20:07:15Z", "dispositions": {}, "event": "start-implementation", "from": "plan_approved", "to": "implementing"}
 {"artifacts": {"handback": ".flow/runs/workbreakdown-story-evidence-v3/HANDOFF.md", "implementation_evidence": ".flow/runs/workbreakdown-story-evidence-v3/validation-results.md"}, "at": "2026-09-09T21:56:55Z", "dispositions": {}, "event": "mark-handback-ready", "from": "implementing", "to": "handback_ready"}
+{"artifacts": {}, "at": "2026-09-09T22:04:20Z", "dispositions": {}, "event": "start-review", "from": "handback_ready", "to": "reviewing"}
+{"artifacts": {"review": ".flow/runs/workbreakdown-story-evidence-v3/review.md"}, "at": "2026-09-09T23:59:22Z", "dispositions": {}, "event": "accept-review", "from": "reviewing", "to": "review_accepted"}

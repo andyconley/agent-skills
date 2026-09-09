@@ -24,7 +24,13 @@ Ran. Removed `observed_output` from the instrumentation review requirements. The
 
 Independent quality review initially found two enforcement gaps: review-time exception confirmation and legacy Story identity/scenario binding. Both were fixed and re-reviewed. Final verdict: approved with no remaining material defect.
 
+## Host smoke tests
+
+- Fresh nonpersistent Codex and Claude sessions reported workbreakdown `1.4.0`.
+- Both allowed the planning-only `IMPLEMENTATION READY` case and blocked the evidence-missing `IN REVIEW` case.
+- Full prompt and result evidence is recorded in `host-smoke-results.md`.
+
 ## Not run
 
-- Fresh interactive Codex and Claude manual prompts were not run. The manual cases were updated for later host-level smoke testing.
+- The remaining manual host matrix was not run: full v3 Draft, legacy Story review, exceptions, and controlled Apply.
 - No live Jira mutation was needed or authorized; this change affects the portable skill contract and local tests only.

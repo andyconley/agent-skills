@@ -29,15 +29,16 @@ Passed:
 - `git diff --check`
 - Targeted mutation test proving missing instrumentation output fails validation
 - Independent quality review after correcting exception confirmation and legacy evidence binding
+- Fresh Codex and Claude gate smoke tests
 
 Both local runtime links resolve to this repository and report workbreakdown `1.4.0`.
 
 ## Limitations
 
-- Fresh interactive Codex and Claude prompts were not run.
+- The full manual host matrix was not run; the version and lifecycle-gate smoke passed on both hosts.
 - No live Jira mutation was needed or performed.
 - Organization-specific rules for authorized exception approvers remain outside this portable skill.
 
 ## Next actions
 
-Run the documented Codex and Claude smoke prompts. A controlled live Jira validation remains optional and requires separate authorization.
+Run the remaining documented Codex and Claude prompts when practical. A controlled live Jira validation remains optional and requires separate authorization.
