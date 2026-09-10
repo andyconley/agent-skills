@@ -2,6 +2,12 @@
 
 All notable changes to agent-skills are generated from Conventional Commits. Longer design context belongs in the documentation changed by the release.
 
+## [1.5.1](https://github.com/andyconley/agent-skills/compare/v1.5.0...v1.5.1) (2026-09-10)
+
+### Documentation
+
+* **flow:** accept Story evidence review ([85bd4bd](https://github.com/andyconley/agent-skills/commit/85bd4bdde5490e012ef009f260cbd374381b1352))
+
 ## [1.5.0](https://github.com/andyconley/agent-skills/compare/v1.4.1...v1.5.0) (2026-09-09)
 
 ### Features
