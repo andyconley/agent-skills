@@ -2,6 +2,12 @@
 
 All notable changes to agent-skills are generated from Conventional Commits. Longer design context belongs in the documentation changed by the release.
 
+## [1.6.0](https://github.com/andyconley/agent-skills/compare/v1.5.1...v1.6.0) (2026-09-14)
+
+### Features
+
+* **humanizer:** add engineering and personal modes ([111f8c9](https://github.com/andyconley/agent-skills/commit/111f8c9fd50306226591bdd382e384948a6b412d))
+
 ## [1.5.1](https://github.com/andyconley/agent-skills/compare/v1.5.0...v1.5.1) (2026-09-10)
 
 ### Documentation
