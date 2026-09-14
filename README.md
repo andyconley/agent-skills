@@ -13,16 +13,35 @@ For the deeper strategy, theory, and repo map, see [docs/README.md](docs/README.
 | Skill | Use it for | Do not use it for |
 | --- | --- | --- |
 | `doc-flow-review` | Structure, information order, progressive disclosure, argument, and depth | Copyediting, fact-checking, or rewriting prose |
-| `humanizer` | Direct, concise prose in an experienced engineering-leader voice | Structural review or changing protected requirements |
+| `humanizer` | Engineering rewrites, personal edits, and pattern audits | Structural review or changing protected requirements |
 | `workbreakdown` | Direct Epic-child work, concise versioned Jira descriptions, YAML manifests, hard dependencies, and Jira reconciliation | Portfolio hierarchy or unreviewed Jira changes |
 
 When a document needs both, run `doc-flow-review` first. Apply the structural decisions, then run `humanizer` on the prose.
 
 All skills are host-agnostic. The optional `agents/openai.yaml` files provide Codex UI metadata, but the behavior lives in Markdown skill files and references that Claude Code and other hosts can read.
 
-Both writing skills run the shared construction sweep in normal mode. The sweep removes mirrored rhythm, stance headings, aphoristic closers, signpost nominalization, decorative contrast, and similar agent-shaped prose from the skill output.
+Both writing skills check construction patterns in normal mode. Humanizer engineering edits and doc-flow-review output retain the shared discipline. Personal humanizer edits diagnose those patterns under the local policy; a match alone does not justify changing effective source prose.
 
-Both writing skills support optional strict mode. Trigger it with wording such as `strict`, `high`, `hard pass`, `vale pass`, or `lint pass`. Strict mode runs Vale when shell access exists and Vale is installed, then falls back to the shared final gates and pattern classes when it cannot run.
+Both writing skills support optional strict mode. Trigger it with wording such as `strict`, `high`, `hard pass`, `vale pass`, or `lint pass`. Strict mode applies the selected policy and uses applicable Vale checks when available. Missing tools are reported accurately. Personal lint findings are advisory; they do not override source voice or prove factual accuracy.
+
+## Humanizer requests
+
+Engineering is the default. Personal mode requires an explicit request; document genre or a request to make text natural does not select it.
+
+```text
+Use humanizer to rewrite this engineering proposal.
+Use humanizer personal mode. Keep my voice and make minimal edits.
+Use humanizer to audit this draft without rewriting it.
+Use humanizer personal mode with strict validation.
+```
+
+Audit follows the selected mode and defaults to engineering, including for journal entries. It identifies source spans, reader problems, and repair directions. It does not infer authorship or return a replacement draft.
+
+Personal mode preserves useful humor, cadence, admissions, and digressions already in the draft. It does not invent personality or require a separate voice sample. An actual procedure or reference section retains engineering discipline across the document. A command quoted in a personal story does not change the story's mode; the command remains exact.
+
+Humanizer loads [its local policy](skills/humanizer/references/policy.md) for each edit or audit. Shared agent commentary and doc-flow-review keep their existing rules.
+
+Humanizer 4.8 is a best-effort writing aid. In source-verified candidate tests, Claude sometimes omitted a required personal lint check, missed excessive bold formatting, retained mirrored engineering prose, or lost a numeric threshold, an unknown rollback duration, or the distinction between `job` and `task`. An earlier Codex candidate dropped a source expectation and the `config` target from an operational step; both were retained in a focused retake after the policy fix. Review consequential edits against the source, especially procedures and requirements. The [validation record](.flow/runs/20260911-humanizer-modes/validation-results.md) gives the cases and observed results.
 
 ## Simplified Technical English
 
@@ -30,7 +49,7 @@ The writing discipline is STE-inspired: short sentences, active voice, one term 
 
 Reference documents, checklists, and procedures take a stricter set of word-choice rules drawn from ASD-STE100: one term per thing, plain verbs instead of phrasal verbs, no idioms, and numbers instead of adjectives. The same rules govern the agent's own replies through `shared/agent-output-discipline.md`.
 
-A document takes these rules as a whole. If any section is reference, checklist, or procedure, the rules apply everywhere in it and the conversational moves are dropped, so a reader working through a procedure never switches registers.
+An operational or reference document takes these rules as a whole. If any section is reference, checklist, or procedure, the rules apply everywhere in it and the conversational moves are dropped, so a reader working through a procedure never switches registers.
 
 These skills implement applicable rules. They do not include the approved-word dictionary, which is the substance of ASD-STE100 and is licensed. Do not describe their output as STE-conformant.
 
@@ -124,6 +143,8 @@ To retire a skill, move its declaration from `skills/manifest.tsv` to `skills/re
 ```bash
 ./scripts/validate-skills.sh
 ./tests/install-test.sh
+./tests/lint-prose-test.sh
+python3 tests/humanizer-fixture-test.py
 ```
 
 For behavior checks after editing the writing skills, run the prompts in `examples/agent-output-regression-prompts.md` against the target agent. These are manual checks, not an objective scoring system.
@@ -137,11 +158,11 @@ For mechanical prose linting, install Vale through the installer or your package
 
 ```bash
 ./scripts/lint-prose.sh
-./scripts/lint-prose.sh path/to/draft.md
-./scripts/lint-prose.sh path/to/pasted-text.txt
+./scripts/lint-prose.sh --profile engineering -- path/to/draft.md
+./scripts/lint-prose.sh --profile personal -- path/to/pasted-text.txt
 ```
 
-The repo-local Vale config lives in `tools/vale/`. CI runs the same rules against the repo's Markdown docs and fixtures.
+The Vale profiles live in `tools/vale/`. CI and local checks use the same repository profile. Governing documentation stays under engineering lint; intentional fixture data has separate behavioral checks. Personal diagnostics are advisory, while invalid requests and tool failures still fail the command. Use `--help` for the supported interface; pass artifact profiles explicitly when checking a draft.
 
 ## License
 
