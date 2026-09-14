@@ -97,7 +97,7 @@ Before you deploy, turn off the scheduler and set up the replacement config. Car
 Passes if:
 
 - phrasal verbs are replaced with plain verbs
-- `job` and `task` collapse to one name, and `folder` and `directory` collapse to one name
+- `folder` and `directory` use one name for the same path; `job` and `task` stay distinct unless evidence shows they are the same work unit
 - the question-as-condition is gone, because the document carries a procedure
 - `pretty fast` becomes a number or an explicit unknown
 - steps read as commands
@@ -105,7 +105,7 @@ Passes if:
 Fails if:
 
 - the output keeps `turn off`, `set up`, `carry out`, `find out`, or `get rid of`
-- the output alternates between `job` and `task`
+- the output silently treats `job` and `task` as interchangeable without source evidence
 - the output keeps `Older than six months? It's expired.`
 - the output keeps `pretty fast` without a number or an unknown
 - the output applies the rules to only one section of the passage
@@ -135,3 +135,13 @@ Fails if:
 
 - the rules are applied to the rollback steps only
 - the argument paragraph is flattened into a bare requirement and loses the reason
+
+## Mode and audit cases
+
+Run the constructed cases in `tests/fixtures/humanizer/cases.json` in fresh Codex and Claude sessions. Supply only each instruction and source to the writing agent. The reviewer uses the checks after receiving the output. Keep source data outside repository prose lint.
+
+Record the input, actual output, loaded skill and policy path, runtime version, and each check's outcome. For personal edits, record why each changed span needed editing. Do not require one exact rewrite. Run independent default-selection cases in fresh sessions so an earlier personal instruction cannot change the result.
+
+The cases cover engineering defaults, minimum personal edits, clean text, explicit equivalent requests, operational and incidental technical content, clean and defective audits, strict personal validation, and contextual portability. The doc-flow case checks the unchanged review-only boundary.
+
+Audit defaults to engineering even for journal entries. Ask for personal mode explicitly when the audit should preserve personal constructions. An omission is located by the affected passage and missing information; do not fabricate a quotation for text that is absent.

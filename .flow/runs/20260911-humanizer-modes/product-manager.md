@@ -1,0 +1,4 @@
+# Product review — coordinator summary of role reports
+Observed: existing engineering contract and confirmed user choices support a bounded two-mode update. Recommended: retain engineering default, add explicit personal minimum-edit policy, independent audit operation, portability diagnostic and targeted examples. No further external research needed for definition; output quality remains unverified.
+Adversarial findings: personal voice must not be an unlimited exemption; audit must not become authorship detection; portability must not penalize supported conclusions. Strict personal must enforce personal rules. Mixed-content boundary needs explicit decision.
+Second review of proposal.md: no additional blocker beyond mixed-content boundary. Recommends flow-plan after approval. Mode-specific paired rewrite/audit cases should prove different expected handling.

@@ -1,0 +1,2 @@
+# Product review — coordinator summary
+One release-sized delivery with internal checkpoints. Baseline/fixtures first, local policy plus engineering cleanup, personal/audit/strict together, lint+CI consistency, docs/metadata/install surfaces, complete validation then PR/merge/canonical install/live both runtimes. No separate partly functioning releases. Required installed behavior: engineering protection, personal retained traits and audit findings-only. Version/path must be actually loaded. No new scope question.

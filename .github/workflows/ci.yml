@@ -20,15 +20,32 @@ jobs:
         run: bash -n install.sh scripts/*.sh tests/*.sh tests/workbreakdown/*.sh
       - name: Validate skills
         run: ./scripts/validate-skills.sh
+      - name: Test humanizer fixtures
+        run: python3 tests/humanizer-fixture-test.py
       - name: Test installer
         run: ./tests/install-test.sh
       - name: Test workbreakdown contract
         run: ./tests/workbreakdown-contract-test.sh
       - name: Test workbreakdown contract in a C locale
         run: LC_ALL=C LANG=C ./tests/workbreakdown-contract-test.sh
+      - name: Install Vale 3.17.1
+        shell: bash
+        run: |
+          case "$(uname -s):$(uname -m)" in
+            Linux:x86_64|Linux:amd64) vale_archive="vale_3.17.1_Linux_64-bit.tar.gz" ;;
+            Linux:arm64|Linux:aarch64) vale_archive="vale_3.17.1_Linux_arm64.tar.gz" ;;
+            Darwin:x86_64) vale_archive="vale_3.17.1_macOS_64-bit.tar.gz" ;;
+            Darwin:arm64) vale_archive="vale_3.17.1_macOS_arm64.tar.gz" ;;
+            *) echo "Unsupported runner platform: $(uname -s):$(uname -m)" >&2; exit 1 ;;
+          esac
+          curl --fail --location --retry 3 \
+            "https://github.com/errata-ai/vale/releases/download/v3.17.1/${vale_archive}" \
+            --output "$RUNNER_TEMP/$vale_archive"
+          tar -xzf "$RUNNER_TEMP/$vale_archive" -C "$RUNNER_TEMP"
+          mkdir -p "$RUNNER_TEMP/bin"
+          install "$RUNNER_TEMP/vale" "$RUNNER_TEMP/bin/vale"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Test prose lint wrapper
+        run: ./tests/lint-prose-test.sh
       - name: Lint prose
-        uses: vale-cli/vale-action@v3
-        with:
-          config: tools/vale/.vale.ini
-          files: '["README.md","CONTRIBUTING.md","CODE_OF_CONDUCT.md","SECURITY.md","docs","skills","shared","examples","tests/manual"]'
-          fail_on_error: true
+        run: ./scripts/lint-prose.sh --profile repository
