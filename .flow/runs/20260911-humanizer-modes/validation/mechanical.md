@@ -1,9 +1,9 @@
 # Mechanical validation
 
-2026-09-14T17:48:21.647334+00:00
+2026-09-14T18:06:32.242386+00:00
 
-- SKILL.md: SHA-256 `48749ba8ef8aa949de5c32724536d8c9d2eb9b8ff297ca2d2b7ba513602c64f9`
-- references/policy.md: SHA-256 `860b0cf0ee4071628aa2740e9e5c2d187ee4f76b40d2fb8807650ef2e75838d3`
+- SKILL.md: SHA-256 `61c6d7577d99f8debc557b1abbbb066369e5462df14c45164ec62204f9c7f293`
+- references/policy.md: SHA-256 `53a8a9b787777f4ce0d011fdb1dfd4075c943947801760f97abd8aa3c3565cf2`
 
 ## `bash -n install.sh scripts/*.sh tests/*.sh tests/workbreakdown/*.sh`
 
@@ -88,7 +88,7 @@ Workbreakdown contract checks passed.
 Exit: 0
 
 ```text
-✔ 0 errors, 0 warnings and 0 suggestions in 47 files.
+✔ 0 errors, 0 warnings and 0 suggestions in 50 files.
 ```
 
 ## `./scripts/lint-prose.sh --help`
