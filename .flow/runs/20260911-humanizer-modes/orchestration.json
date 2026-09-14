@@ -408,7 +408,8 @@
       "readback_artifact": ".flow/runs/20260911-humanizer-modes/delivery-results.md",
       "comparison_artifact": ".flow/runs/20260911-humanizer-modes/delivery-results.md",
       "recovery_state": "available_unexercised",
-      "unexpected_delta_status": "none"
+      "unexpected_delta_status": "resolved",
+      "unexpected_delta_disposition": "A second release was needed to repair the installed-path defect; PR #16 and v1.6.1 delivered and verified it."
     },
     {
       "id": "canonical",
@@ -450,13 +451,40 @@
       "readback_artifact": ".flow/runs/20260911-humanizer-modes/delivery-results.md",
       "comparison_artifact": ".flow/runs/20260911-humanizer-modes/delivery-results.md",
       "recovery_state": "available_unexercised",
-      "unexpected_delta_status": "none"
+      "unexpected_delta_status": "resolved",
+      "unexpected_delta_disposition": "Initial 4.8.0 install exposed missing shared paths; 4.8.1 reinstallation and fresh Claude readback resolved the defect."
     }
   ],
   "reconciliation": {
     "artifact_path": ".flow/runs/20260911-humanizer-modes/implementation-reconciliation.md",
-    "status": "pending",
-    "claims": []
+    "status": "resolved",
+    "claims": [
+      {
+        "id": "delivered-release",
+        "status": "observed",
+        "evidence": [
+          ".flow/runs/20260911-humanizer-modes/delivery-results.md"
+        ],
+        "disposition": "accepted"
+      },
+      {
+        "id": "packaging-fixed",
+        "status": "observed",
+        "evidence": [
+          ".flow/runs/20260911-humanizer-modes/validation/installed-4.8.1.md"
+        ],
+        "disposition": "accepted"
+      },
+      {
+        "id": "behavioral-failures",
+        "status": "observed",
+        "evidence": [
+          ".flow/runs/20260911-humanizer-modes/acceptance-deviation.md",
+          ".flow/runs/20260911-humanizer-modes/validation/installed-4.8.1.md"
+        ],
+        "disposition": "accepted"
+      }
+    ]
   },
   "verification": {
     "producer_assignments": [
