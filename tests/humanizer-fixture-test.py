@@ -35,6 +35,7 @@ import tempfile
 with tempfile.TemporaryDirectory(prefix='humanizer-package-') as directory:
     copy = Path(directory)
     shutil.copytree(root / 'skills', copy / 'skills')
+    shutil.copytree(root / 'shared', copy / 'shared')
     (copy / 'scripts').mkdir()
     shutil.copy2(root / 'scripts/validate-skills.sh', copy / 'scripts/validate-skills.sh')
     command = ['bash', str(copy / 'scripts/validate-skills.sh')]
