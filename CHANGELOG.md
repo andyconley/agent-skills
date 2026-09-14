@@ -2,6 +2,12 @@
 
 All notable changes to agent-skills are generated from Conventional Commits. Longer design context belongs in the documentation changed by the release.
 
+## [1.6.2](https://github.com/andyconley/agent-skills/compare/v1.6.1...v1.6.2) (2026-09-14)
+
+### Documentation
+
+* **flow:** record humanizer release handback ([74b5451](https://github.com/andyconley/agent-skills/commit/74b54519d5d536479cf0895e996f72744b207ae8))
+
 ## [1.6.1](https://github.com/andyconley/agent-skills/compare/v1.6.0...v1.6.1) (2026-09-14)
 
 ### Bug Fixes
