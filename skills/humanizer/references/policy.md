@@ -58,7 +58,7 @@ Check these classes separately, in this order:
 9. aphoristic close
 10. em-dash appositive
 
-Use `../../../shared/pattern-classes.md` for class definitions. Remove a construction unless changing it would damage quoted text, identifiers, commands, source structure, a `DO` / `DO NOT` pair, repeated evidence markers, or a comparison where different values require different handling. When retaining a pattern, be able to name the technical meaning that plain prose would lose.
+Use `pattern-classes.md` for class definitions. Remove a construction unless changing it would damage quoted text, identifiers, commands, source structure, a `DO` / `DO NOT` pair, repeated evidence markers, or a comparison where different values require different handling. When retaining a pattern, be able to name the technical meaning that plain prose would lose.
 
 For author-state narration, make the subject the finding, correction, limit, or unknown. Do not retain `I concluded` or substitute a new first-person conclusion. State the finding only when the source identifies it. For mirrored rhythm, map each clause’s subject and relationship before rewriting. Remove the form without deciding an unclear referent or adding a causal claim.
 

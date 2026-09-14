@@ -49,6 +49,12 @@ for reference in policy; do
   grep -Fq "(references/$reference.md)" "$REPO_ROOT/skills/humanizer/SKILL.md" || fail "humanizer entry point does not link its required $reference reference"
 done
 
+for reference in agent-output-discipline final-gates pattern-classes; do
+  [ -f "$REPO_ROOT/skills/humanizer/references/$reference.md" ] || fail "missing humanizer $reference reference"
+  cmp -s "$REPO_ROOT/shared/$reference.md" "$REPO_ROOT/skills/humanizer/references/$reference.md" || fail "humanizer $reference differs from shared source"
+  grep -Fq "references/$reference.md" "$REPO_ROOT/skills/humanizer/SKILL.md" || fail "humanizer entry point does not name its packaged $reference reference"
+done
+
 [ -s "$names_file" ] || fail "manifest has no skills"
 find "$REPO_ROOT/skills" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort > "$dirs_file"
 sort -o "$names_file" "$names_file"

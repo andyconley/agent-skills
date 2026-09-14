@@ -1,6 +1,6 @@
 # Validation results
 
-Status: implementing; Andy Conley accepted a best-effort release with behavioral failures documented. The complete pre-change candidate suite and affected-case retake are complete; remote and installed delivery evidence is pending. Updated 2026-09-14.
+Status: implementing; Andy Conley accepted a best-effort release with behavioral failures documented. Release v1.6.0 shipped; installed validation exposed a shared-reference packaging defect now being patched in 4.8.1. Updated 2026-09-14.
 
 ## Current candidate
 
@@ -36,6 +36,12 @@ A narrow general policy change then required operational instructions to keep th
 
 The user-facing README names the best-effort limitations. Source accuracy in consequential procedures remains a manual review need. No failed live assertion is represented as passed.
 
+## Published release and installed-path result
+
+PR [#15](https://github.com/andyconley/agent-skills/pull/15) merged as Conventional Commit `111f8c9`; PR CI and the release workflow passed, and [v1.6.0](https://github.com/andyconley/agent-skills/releases/tag/v1.6.0) was published. The canonical checkout fast-forwarded to `v1.6.0` and `install.sh --all --no-vale` refreshed both runtime links. The installed entry/policy hashes matched the release, and the canonical static checks passed.
+
+Fresh installed-path sessions source-admitted 16/16 sampled calls. Codex met all eight sampled checks; Claude had clear failures in file-target strict validation, runbook uncertainty, and engineering construction, plus an audit-formatting review concern. The `regression-word-choice` Claude output also reported three required shared files missing from the installed path. This is a newly discovered packaging failure, not a waived prose judgment. `validation/installed-4.8.0.md` records the case-level evidence. The 4.8.1 patch places readable local links at the paths named by the skill and adds package/installer checks. Its static checks pass; patch CI, release, installed readback, and fresh post-patch live checks are pending.
+
 ## Delivery state
 
-Andy Conley explicitly selected a best-effort release with known failures documented; see `acceptance-deviation.md`. This waives the requirement that every behavioral assertion pass, not the duty to report failures accurately. The complete 27-case candidate suite and the final affected-case retake have run; the independent review and this record describe their limitations. No Conventional Commit, PR, merge, release, canonical sync, installation, or fresh installed-runtime proof has occurred. Do not mark the Flow run handback-ready or claim semantic acceptance yet. Refresh orchestration/shared-mutation baselines before external or global writes.
+Andy Conley explicitly selected a best-effort release with known failures documented; see `acceptance-deviation.md`. This waives the requirement that every behavioral assertion pass, not the duty to report failures accurately. The complete 27-case candidate suite and the final affected-case retake have run; the independent review and this record describe their limitations. The initial release, canonical sync, installation, and fresh installed-path checks occurred. The packaging patch and final handback remain. Do not mark the Flow run handback-ready or claim semantic acceptance until the patch is delivered and its installed links are checked. Refresh orchestration/shared-mutation baselines before external or global writes.

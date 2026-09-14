@@ -1,19 +1,19 @@
 ---
 name: humanizer
-description: Audit or rewrite engineering prose by default, or explicitly requested personal prose with minimum effective edits. Preserve facts and protected text; preserve source voice in personal mode. Use doc-flow-review first for structural review. Version 4.8.0.
+description: Audit or rewrite engineering prose by default, or explicitly requested personal prose with minimum effective edits. Preserve facts and protected text; preserve source voice in personal mode. Use doc-flow-review first for structural review. Version 4.8.1.
 ---
 
 # Humanizer
 
-**Version: 4.8.0.** Report this value exactly when asked which version is running.
+**Version: 4.8.1.** Report this value exactly when asked which version is running.
 
 Edit or audit the supplied draft. Engineering mode is the default. It rebuilds AI-shaped prose into direct technical writing. Personal mode is an explicit exception for a personal draft where the user wants minimum effective edits and source voice preserved.
 
 Read [the policy](references/policy.md) before editing or auditing. It is required. If it is unavailable, say that the humanizer policy cannot be loaded and do not claim a compliant rewrite, audit, or validation result.
 
-For an engineering sweep, also read `../../shared/pattern-classes.md` and `../../shared/final-gates.md` before applying a class. They define the classes and gates. A list of class names is not enough.
+For an engineering sweep, also read `references/pattern-classes.md` and `references/final-gates.md` before applying a class. They define the classes and gates. A list of class names is not enough.
 
-The policy governs the edited artifact. The shared contract in `../../shared/agent-output-discipline.md` governs your response around it. Personal mode does not change shared agent-output discipline or doc-flow-review.
+The policy governs the edited artifact. The shared contract in `references/agent-output-discipline.md` governs your response around it. Personal mode does not change shared agent-output discipline or doc-flow-review.
 
 ## Resolve the request
 
@@ -61,6 +61,5 @@ Use the profile that matches the selected policy. Personal candidates are adviso
 ## References
 
 - [Policy matrix and mode rules](references/policy.md) — required for every edit and audit.
-- `../../shared/agent-output-discipline.md` — response contract and engineering construction names.
-- `../../shared/final-gates.md` and `../../shared/pattern-classes.md` — final gates and diagnostic classes.
-- `../../examples/humanizer-agent-output.md` and `../../examples/regression/` — output and regression examples.
+- `references/agent-output-discipline.md` — response contract and engineering construction names.
+- `references/final-gates.md` and `references/pattern-classes.md` — final gates and diagnostic classes.
