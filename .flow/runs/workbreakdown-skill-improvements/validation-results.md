@@ -89,10 +89,19 @@ The first round's helper judged each mutant by grepping the suite output for `FA
 
 ## Date-check follow-up (maintainer request, after review acceptance)
 
-The error for an impossible date now reads "conflict source date must be a valid YYYY-MM-DD date". New cases reject 2026-13-45, 2026-02-29 and 2026-04-31, and a positive control accepts the leap day 2024-02-29. Mutants were judged by exit code:
+The error for an impossible date now reads "conflict source date must be a valid YYYY-MM-DD date".
+
+New cases:
+- Impossible dates are rejected: 2026-13-45, 2026-02-29 and 2026-04-31.
+- Other ISO 8601 forms are rejected: 20260203, 2026-W06-2 and 2026-034.
+- A positive control accepts the leap day 2024-02-29.
+
+These landed in commits b9d4bfc and 5816ae2. Mutants were judged by exit code at 5816ae2:
 
 | Mutant | Result |
 | --- | --- |
 | M7: format-only check | caught |
 | M16: drop the format regex | caught |
 | M17: reject a valid leap day | caught |
+
+**Correction.** At b9d4bfc, M16 survived: without the regex, `Date.iso8601` accepts the other ISO forms, and no test covered them. The first version of this note, committed in 8557497, wrongly recorded M16 as caught. Commit 5816ae2 added the other-form cases, and M16 is now caught.
