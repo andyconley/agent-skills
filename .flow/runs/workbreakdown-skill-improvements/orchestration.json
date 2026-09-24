@@ -21,7 +21,8 @@
       "input_evidence": [
         ".flow/runs/workbreakdown-skill-improvements/definition.md",
         ".flow/runs/workbreakdown-skill-improvements/acceptance-criteria.md",
-        ".flow/runs/workbreakdown-skill-improvements/solution.md"
+        ".flow/runs/workbreakdown-skill-improvements/solution.md",
+        ".flow/runs/workbreakdown-skill-improvements/plan.md"
       ],
       "read_scopes": [
         "skills/workbreakdown",
