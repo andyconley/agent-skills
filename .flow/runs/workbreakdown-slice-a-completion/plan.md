@@ -7,7 +7,7 @@
   - `../workbreakdown-skill-improvements/solution.md`.
   - `../workbreakdown-skill-improvements/review.md`: chunk 1's residual risks.
   - `reviews/plan-*.md`: input from the business analyst, product manager and architect.
-- **Status:** approved by the maintainer on 2026-09-24.
+- **Status:** approved by the maintainer on 2026-09-24. After the approve-plan transition, the reviewer-key wording in step 2 was corrected. In design-v3, `reviewers` moves from required to conditional. The maintainer confirmed that change the same day.
 
 ## Problem statement
 
