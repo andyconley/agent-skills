@@ -69,6 +69,7 @@ Automatic skill selection does not authorize Jira changes. Apply requires:
 2. Direct user authorization naming its immutable revision or digest.
 3. Live Jira read and write capabilities sufficient for the complete change.
 4. A preflight showing that live drift does not change the approved plan.
+5. For an Epic update, the Epic owner's agreement.
 
 If any condition is missing, stop before the first write and return the proposed delta or capability gap. An API success response is not proof. Apply finishes only after final readback matches the approved manifest.
 

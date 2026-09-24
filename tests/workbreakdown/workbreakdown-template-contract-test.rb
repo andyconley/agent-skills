@@ -700,6 +700,16 @@ verified_panel["epic"] = {
 }
 verified_panel["shaping"]["task_granularity"]["value"] = "finer"
 validate_manifest(verified_panel, index, registry)
+malformed_verified_panel = clone(verified_panel)
+malformed_verified_panel["epic"]["verify"]["description"]["breakdown_conventions"]["spike_shape"]["value"] = "by-component"
+expect_error("invalid spike_shape value") { validate_manifest(malformed_verified_panel, index, registry) }
+
+# Schema 3 can bind epic-v3 on set 4 when the description carries no panel.
+schema3_epic_v3 = clone(panel)
+schema3_epic_v3["schema_version"] = 3
+%w[shaping sources].each { |key| schema3_epic_v3.delete(key) }
+schema3_epic_v3["epic"]["changes"]["description"].delete("breakdown_conventions")
+validate_manifest(schema3_epic_v3, index, registry)
 
 epic_v3_in_set3 = clone(panel)
 epic_v3_in_set3["template_set"]["version"] = 3

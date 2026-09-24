@@ -337,7 +337,7 @@ shaping records the answers that shaped the Draft. Its entries are spike_shape, 
 - spike_shape.value is vertical-slice or by-layer.
 - task_granularity.value is per-flow or finer.
 - reviewers.value lists at least one nonempty reviewer name, and its source is asked or reused, never default. When no reviewer is known, omit the entry and record the gap in unknowns.
-- source_order.value lists at least one nonempty source kind, most authoritative first.
+- source_order.value lists at least one nonempty source kind, most authoritative first. The portable default is [jira-amendment, jira-description, design-page].
 
 ### sources
 
@@ -377,6 +377,8 @@ breakdown_conventions is an optional description key of jira-epic-v3. It renders
 - On an Epic update, it must equal the manifest's shaping block exactly.
 - On a verified Epic, it is the live Epic's record and may differ from this Draft's shaping.
 - It is written only through the guarded Epic description update. Schema 4 adds no other Epic write.
+- An update replaces the whole description. When the live Epic has a panel, the update carries breakdown_conventions. Draft states any panel removal in its output, and Review reports an unstated removal as `invalid-manifest`.
+- A verified panel that is malformed makes the manifest invalid. Draft reports it instead of verifying it.
 
 ### Migration
 
@@ -436,12 +438,13 @@ Return:
 2. Epic outcome.
 3. Reconciliation table: each proposed item, mapped to the existing Jira key it reconciles to or to `new`.
 4. Material conflicts: each with both sources, their dates, and the winner, matching `sources.conflicts`.
-5. Divergence list: each shaping answer that differs from a sibling Epic's panel, naming the answer, the sibling Epic, the sibling's value, and the proposed value. Write `No divergence` when there is none.
-6. Proposed child table.
-7. Complete YAML manifest.
-8. Dependency edge list or graph using A -> B for A blocks B.
-9. Cycle, direction, duplicate, redundancy, missing-edge, and orphan checks.
-10. Questions that materially affect the breakdown.
+5. Shaping: whether the run was interactive or non-interactive, each answer with its source, which answers used a default, and any reviewer gap.
+6. Divergence list: each shaping answer that differs from a sibling Epic's panel, naming the answer, the sibling Epic, the sibling's value, and the proposed value. Write `No divergence` when sibling panels were read and none differs, and `No sibling panels read` when there were none to read.
+7. Proposed child table.
+8. Complete YAML manifest.
+9. Dependency edge list or graph using A -> B for A blocks B.
+10. Cycle, direction, duplicate, redundancy, missing-edge, and orphan checks.
+11. Questions that materially affect the breakdown.
 
 Use temporary references until Jira assigns keys. Do not create placeholder Jira keys.
 

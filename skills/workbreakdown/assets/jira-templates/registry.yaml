@@ -200,7 +200,7 @@ templates:
     variant: milestone
     status: default
     file: epic-v3.md
-    sha256: 374650d662bb9305fdb25c27a06872e68ed80fd65293156ac24f19ec49c145a8
+    sha256: 7e98f9517d7d2e6edb6a0b8936b9947798f621f21022411adb8e36a16d22000b
     description_format: adf
     required_keys: [milestone_outcome, problem, acceptance_criteria, success_measures]
     conditional_keys: [delivery_approach, out_of_scope, release_quality_additions, approved_exceptions, breakdown_conventions, open_decisions]

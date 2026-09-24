@@ -10,7 +10,7 @@ scope:
 epic:
   disposition: update
   template_id: jira-epic-v3
-  template_sha256: 374650d662bb9305fdb25c27a06872e68ed80fd65293156ac24f19ec49c145a8
+  template_sha256: 7e98f9517d7d2e6edb6a0b8936b9947798f621f21022411adb8e36a16d22000b
   expected_current:
     description_adf_sha256: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   changes:

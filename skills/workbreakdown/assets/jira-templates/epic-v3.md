@@ -36,9 +36,9 @@ List 3–5 independently verifiable milestone conditions. Each condition names i
 
 ## Breakdown conventions
 
-Render as a native panel. List one bullet per recorded shaping answer: its name, value, source, and the sibling Epic it came from when reused. Omit the section when no answer is recorded.
+Render as a native panel. List one bullet per recorded shaping answer: its name, value, source, and the sibling Epic it came from when reused. Separate list values with commas. Render the sibling Epic as an inline card. Omit the section when no answer is recorded.
 
-- **<spike_shape, task_granularity, reviewers, or source_order>:** <value> (<asked, reused from sibling Epic, or default>)
+- **<spike_shape, task_granularity, reviewers, or source_order>:** <value or comma-separated values> (<asked, default, or reused from the sibling Epic card>)
 
 ## Open decisions
 
