@@ -25,6 +25,11 @@ SHAPING_VALUES = {
   "source_order" => :list
 }.freeze
 SOURCES_READ = %w[description amendments status links link_history].freeze
+SHAPING_SOURCES = %w[asked reused default].freeze
+JIRA_CONTEXTS = %w[present absent].freeze
+SOURCES_KEYS = %w[jira_context existing_children conflicts].freeze
+CLASSIFICATION_KEYS = %w[question precedent placeholder].freeze
+PRECEDENT_VERDICTS = %w[none found unverified].freeze
 JIRA_KEY = /\A[A-Z][A-Z0-9]+-\d+\z/.freeze
 
 def fail_test(message)
@@ -257,7 +262,7 @@ def validate_shaping(shaping)
   shaping.each do |name, answer|
     raise ArgumentError, "shaping #{name} must be a map" unless answer.is_a?(Hash)
     reject_unknown_keys(answer, %w[value source from_epic], "shaping #{name}")
-    raise ArgumentError, "invalid shaping source" unless %w[asked reused default].include?(answer["source"])
+    raise ArgumentError, "invalid shaping source" unless SHAPING_SOURCES.include?(answer["source"])
     raise ArgumentError, "reviewers cannot come from a default" if name == "reviewers" && answer["source"] == "default"
     if answer["source"] == "reused"
       raise ArgumentError, "reused shaping answer requires from_epic" if answer["from_epic"].to_s.strip.empty?
@@ -276,9 +281,9 @@ end
 
 def validate_sources(sources)
   raise ArgumentError, "sources must be a map" unless sources.is_a?(Hash)
-  reject_unknown_keys(sources, %w[jira_context existing_children conflicts], "sources")
+  reject_unknown_keys(sources, SOURCES_KEYS, "sources")
   context = sources["jira_context"]
-  raise ArgumentError, "invalid jira_context" unless context.nil? || %w[present absent].include?(context)
+  raise ArgumentError, "invalid jira_context" unless context.nil? || JIRA_CONTEXTS.include?(context)
 
   existing = sources.fetch("existing_children", [])
   raise ArgumentError, "existing_children must be a list" unless existing.is_a?(Array)
@@ -315,7 +320,7 @@ end
 
 def validate_classification(classification, child)
   raise ArgumentError, "classification must be a map" unless classification.is_a?(Hash)
-  reject_unknown_keys(classification, %w[question precedent placeholder], "classification")
+  reject_unknown_keys(classification, CLASSIFICATION_KEYS, "classification")
   if classification.key?("question")
     raise ArgumentError, "classification question must be text" unless classification["question"].is_a?(String) && !classification["question"].strip.empty?
   end
@@ -324,7 +329,7 @@ def validate_classification(classification, child)
     raise ArgumentError, "precedent must be a map" unless precedent.is_a?(Hash)
     reject_unknown_keys(precedent, %w[searched verdict location], "precedent")
     raise ArgumentError, "precedent searched must list locations" unless nonempty_string_list?(precedent["searched"])
-    raise ArgumentError, "invalid precedent verdict" unless %w[none found unverified].include?(precedent["verdict"])
+    raise ArgumentError, "invalid precedent verdict" unless PRECEDENT_VERDICTS.include?(precedent["verdict"])
     if precedent["verdict"] == "found"
       raise ArgumentError, "found precedent requires location" if precedent["location"].to_s.strip.empty?
     end
@@ -944,6 +949,24 @@ schema4_tokens = SCHEMA4_ROOT_KEYS + SHAPING_VALUES.keys + SHAPING_VALUES.values
   %w[classification question precedent searched verdict location placeholder defined_by none found unverified] +
   %w[value source from_epic asked reused default]
 schema4_tokens.each { |token| assert(schema4_prose.match?(/\b#{Regexp.escape(token)}\b/), "schema 4 prose does not name #{token}") }
+
+# Pin each enumerated rule sentence, generated from the validator's own value sets.
+def prose_list(values)
+  values.length == 2 ? values.join(" or ") : "#{values[0..-2].join(", ")}, or #{values.last}"
+end
+schema4_rules = [
+  "source is #{prose_list(SHAPING_SOURCES)}.",
+  "spike_shape.value is #{prose_list(SHAPING_VALUES.fetch("spike_shape"))}.",
+  "task_granularity.value is #{prose_list(SHAPING_VALUES.fetch("task_granularity"))}.",
+  "jira_context is #{prose_list(JIRA_CONTEXTS)}.",
+  "read is a nonempty subset of #{prose_list(SOURCES_READ).sub(", or ", ", and ")}",
+  "verdict is #{prose_list(PRECEDENT_VERDICTS)}.",
+  "material and stale are true or false.",
+  "Its entries are #{prose_list(SHAPING_VALUES.keys).sub(", or ", ", and ")}",
+  "Its keys are #{prose_list(CLASSIFICATION_KEYS).sub(", or ", ", and ")}.",
+  "Its keys are #{prose_list(SOURCES_KEYS).sub(", or ", ", and ")}"
+]
+schema4_rules.each { |rule| assert(schema4_prose.include?(rule), "schema 4 prose lost rule: #{rule}") }
 
 schema5 = clone(schema4_minimal)
 schema5["schema_version"] = 5
