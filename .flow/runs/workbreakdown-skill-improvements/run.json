@@ -1,0 +1,27 @@
+{
+  "artifacts": {
+    "acceptance_criteria": ".flow/runs/workbreakdown-skill-improvements/acceptance-criteria.md",
+    "orchestration_manifest": ".flow/runs/workbreakdown-skill-improvements/orchestration.json",
+    "requirements": ".flow/runs/workbreakdown-skill-improvements/definition.md",
+    "solution": ".flow/runs/workbreakdown-skill-improvements/solution.md"
+  },
+  "created_at": "2026-09-24T20:10:08Z",
+  "dispositions": {
+    "risk": "owned"
+  },
+  "gates": {
+    "approve-definition": "2026-09-24T20:10:08Z",
+    "approve-solution": "2026-09-24T20:10:08Z",
+    "start-definition": "2026-09-24T20:10:08Z",
+    "start-plan": "2026-09-24T20:10:08Z",
+    "start-solution": "2026-09-24T20:10:08Z"
+  },
+  "lane": "plan",
+  "last_event": "start-plan",
+  "phase": "planning",
+  "protocol_revision": 2,
+  "schema_version": 1,
+  "state": "planning",
+  "updated_at": "2026-09-24T20:10:08Z",
+  "work_id": "workbreakdown-skill-improvements"
+}

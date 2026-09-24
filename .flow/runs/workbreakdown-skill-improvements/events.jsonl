@@ -1,0 +1,5 @@
+{"artifacts": {}, "at": "2026-09-24T20:10:08Z", "dispositions": {}, "event": "start-definition", "from": null, "to": "defining"}
+{"artifacts": {"acceptance_criteria": ".flow/runs/workbreakdown-skill-improvements/acceptance-criteria.md", "orchestration_manifest": ".flow/runs/workbreakdown-skill-improvements/orchestration.json", "requirements": ".flow/runs/workbreakdown-skill-improvements/definition.md"}, "at": "2026-09-24T20:10:08Z", "dispositions": {}, "event": "approve-definition", "from": "defining", "to": "definition_approved"}
+{"artifacts": {}, "at": "2026-09-24T20:10:08Z", "dispositions": {}, "event": "start-solution", "from": "definition_approved", "to": "solutioning"}
+{"artifacts": {"orchestration_manifest": ".flow/runs/workbreakdown-skill-improvements/orchestration.json", "solution": ".flow/runs/workbreakdown-skill-improvements/solution.md"}, "at": "2026-09-24T20:10:08Z", "dispositions": {"risk": "owned"}, "event": "approve-solution", "from": "solutioning", "to": "solution_approved"}
+{"artifacts": {}, "at": "2026-09-24T20:10:08Z", "dispositions": {}, "event": "start-plan", "from": "solution_approved", "to": "planning"}

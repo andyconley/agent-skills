@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "work_id": "workbreakdown-skill-improvements",
+  "mode": "single",
+  "risk": {
+    "hard_triggers": [],
+    "aggravating_factors": [],
+    "classification": "standard",
+    "rationale": "Local skill source change in a feature branch; no shared or external mutation."
+  },
+  "assignments": [
+    {
+      "id": "coordinator",
+      "lane": "plan",
+      "role": "architect",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/coordinator"
+      },
+      "brief_path": ".flow/runs/workbreakdown-skill-improvements/solution.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-skill-improvements/definition.md",
+        ".flow/runs/workbreakdown-skill-improvements/acceptance-criteria.md",
+        ".flow/runs/workbreakdown-skill-improvements/solution.md"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow"
+      ],
+      "write_scopes": [
+        ".flow/runs/workbreakdown-skill-improvements"
+      ],
+      "read_only": false,
+      "required_capabilities": [
+        {
+          "name": "filesystem-write",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-skill-improvements/plan.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "plan implementable without chat context"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "serialized",
+        "group": "coordinator"
+      }
+    }
+  ],
+  "shared_state": [],
+  "reconciliation": {
+    "artifact_path": ".flow/runs/workbreakdown-skill-improvements/solution.md",
+    "status": "resolved",
+    "claims": []
+  },
+  "verification": {
+    "producer_assignments": [
+      "coordinator"
+    ],
+    "evidence_collector_assignment": "coordinator",
+    "verifier_assignment": "coordinator",
+    "independent": false,
+    "artifact_path": ".flow/runs/workbreakdown-skill-improvements/solution.md"
+  }
+}
