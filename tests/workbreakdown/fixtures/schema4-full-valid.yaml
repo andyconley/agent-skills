@@ -52,6 +52,7 @@ sources:
     - jira_key: WORK-301
       read:
         - description
+        - amendments
         - status
         - links
         - link_history

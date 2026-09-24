@@ -5,7 +5,7 @@ The manifest is the reviewed desired-state contract between planning and Jira. E
 ## Identity and approval
 
 - Use schema version 2 for child-only reconciliation.
-- Use schema version 3 only when the manifest must verify or update the scoped Epic.
+- Use schema version 3 or 4 only when the manifest must verify or update the scoped Epic.
 - Schema version 4 adds optional Draft provenance and per-child classification. Its Epic rules are the schema-3 rules.
 - Give the manifest a stable manifest ID and integer revision.
 - Bind approval to the exact content. For a standalone YAML file, calculate SHA-256 over its exact UTF-8 bytes after converting line endings to LF; include the final trailing newline.
@@ -250,9 +250,9 @@ Schema 3 does not authorize Epic creation, deletion, reparenting, retyping, rank
 
 ## Schema 4: Draft provenance and classification
 
-Schema 4 records how a Draft was shaped, which sources it read, and why each child has its classification. All three blocks are optional, and a schema-4 manifest without them is valid. The Epic block follows the schema-3 rules unchanged. Reject shaping, sources, or a child classification in a schema-2 or schema-3 manifest.
+Schema 4 records how a Draft was shaped, which sources it read, and why each child has its classification. All three blocks are optional, and a schema-4 manifest without them is valid. The example is abridged: its Epic description and child template bindings follow the schema-3 and child rules. The Epic block follows the schema-3 rules unchanged. Reject shaping, sources, or a child classification in a schema-2 or schema-3 manifest.
 
-```yaml
+~~~yaml
 schema_version: 4
 manifest_id: state-read-breakdown
 revision: 1
@@ -260,8 +260,8 @@ template_set:
   id: jira-house-templates
   version: 2
 scope:
-  parent_key: INIT-1
-  epic_key: EPIC-1
+  parent_key: INIT-100
+  epic_key: EPIC-200
 epic:
   disposition: existing
   verify:
@@ -273,7 +273,7 @@ shaping:
   spike_shape:
     value: vertical-slice
     source: reused
-    from_epic: EPIC-2
+    from_epic: EPIC-201
   task_granularity:
     value: per-flow
     source: asked
@@ -286,16 +286,16 @@ shaping:
 sources:
   jira_context: present
   existing_children:
-    - jira_key: WORK-301
+    - jira_key: WORK-203
       read: [description, status, links, link_history]
   conflicts:
     - claim: State reads use the cached projection.
       sources:
         - ref: docs/design/state.md
           date: "2026-01-10"
-        - ref: WORK-301
+        - ref: WORK-203
           date: "2026-02-03"
-      winner: WORK-301
+      winner: WORK-203
       material: true
       stale: true
 children:
@@ -325,7 +325,7 @@ rank:
   mode: scoped-relative
   order: [choose-transport, build-endpoint]
 unknowns: []
-```
+~~~
 
 ### shaping
 
@@ -336,7 +336,8 @@ shaping records the answers that shaped the Draft. Its entries are spike_shape, 
 - from_epic is the Jira key of the sibling Epic the answer came from. It is required when source is reused and rejected otherwise.
 - spike_shape.value is vertical-slice or by-layer.
 - task_granularity.value is per-flow or finer.
-- reviewers.value and source_order.value are lists of nonempty names.
+- reviewers.value is a list of nonempty reviewer names.
+- source_order.value is a list of nonempty source kinds, most authoritative first.
 
 ### sources
 
@@ -354,7 +355,7 @@ sources records what the Draft read and how it resolved disagreements between so
 classification is an optional child key. Its keys are question, precedent, and placeholder. Reject any other key.
 
 - question is the nonempty open question the child answers.
-- precedent contains searched, verdict, and location.
+- precedent contains searched and verdict, and may contain location.
   - searched lists the nonempty locations the Draft looked in.
   - verdict is none, found, or unverified.
   - location is where the precedent lives. It is required when verdict is found and optional otherwise.

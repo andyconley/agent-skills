@@ -340,6 +340,7 @@ end
 def validate_child(child, templates, set_version, schema)
   if child.key?("classification")
     raise ArgumentError, "classification requires schema 4" unless schema == 4
+    raise ArgumentError, "unsupported child type" unless %w[Spike Task Story].include?(child["type"])
     validate_classification(child["classification"], child)
   end
   reject_unknown_keys(child, schema == 4 ? CHILD_KEYS + %w[classification] : CHILD_KEYS, "child")
@@ -746,6 +747,7 @@ schema4 = load_yaml(File.join(FIXTURES, "schema4-full-valid.yaml"))
 validate_manifest(schema4, index, registry)
 assert(%w[spike_shape task_granularity reviewers source_order].all? { |key| schema4["shaping"].key?(key) }, "full schema-4 fixture lost a shaping entry")
 assert(schema4["children"].all? { |child| child.key?("classification") }, "full schema-4 fixture lost a classification")
+assert(schema4.dig("sources", "existing_children").flat_map { |item| item["read"] }.sort == SOURCES_READ.sort, "full schema-4 fixture does not read every source kind")
 
 def schema4_child(manifest, ref)
   manifest["children"].find { |child| child["ref"] == ref }
@@ -837,6 +839,38 @@ expect_error("shaping requires schema 4") { validate_manifest(schema3_shaping, i
 schema3_sources = clone(schema3)
 schema3_sources["sources"] = clone(schema4["sources"])
 expect_error("sources requires schema 4") { validate_manifest(schema3_sources, index, registry) }
+
+bad_granularity = clone(schema4)
+bad_granularity["shaping"]["task_granularity"]["value"] = "per-layer"
+expect_error("invalid task_granularity value") { validate_manifest(bad_granularity, index, registry) }
+
+%w[reviewers source_order].each do |entry|
+  empty_name = clone(schema4)
+  empty_name["shaping"][entry]["value"] = ["  "]
+  expect_error("shaping #{entry} value must be a list of names") { validate_manifest(empty_name, index, registry) }
+end
+
+bad_context = clone(schema4)
+bad_context["sources"]["jira_context"] = "partial"
+expect_error("invalid jira_context") { validate_manifest(bad_context, index, registry) }
+
+%w[material stale].each do |flag|
+  text_flag = clone(schema4)
+  text_flag["sources"]["conflicts"].first[flag] = "yes"
+  expect_error("conflict #{flag} must be true or false") { validate_manifest(text_flag, index, registry) }
+end
+
+empty_question = clone(schema4)
+schema4_child(empty_question, "choose-transport")["classification"]["question"] = " "
+expect_error("classification question must be text") { validate_manifest(empty_question, index, registry) }
+
+empty_search = clone(schema4)
+schema4_child(empty_search, "choose-transport")["classification"]["precedent"]["searched"] = "src"
+expect_error("precedent searched must list locations") { validate_manifest(empty_search, index, registry) }
+
+unsupported_classified = clone(schema4)
+schema4_child(unsupported_classified, "build-endpoint")["type"] = "Bug"
+expect_error("unsupported child type") { validate_manifest(unsupported_classified, index, registry) }
 
 schema5 = clone(schema4_minimal)
 schema5["schema_version"] = 5
