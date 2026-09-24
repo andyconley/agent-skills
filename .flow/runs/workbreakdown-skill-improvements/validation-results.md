@@ -1,6 +1,7 @@
 # Validation results: Slice A, chunk 1
 
-- Commits: a6b9eb4 (`feat(workbreakdown): add manifest schema 4 foundation`) and 7b58289 (`fix(workbreakdown): tighten schema 4 prose and coverage from review`). Both are local only, not pushed.
+- Commits: a6b9eb4 (the feature), 7b58289 (implementation-review fixes), and 54f665a, cedeb73 and bafcc78 (acceptance-review fixes). All are local only, not pushed.
+- Updated during flow-review. The final-state results are in "Acceptance-review update" below.
 - Validated against: the change itself, in the worktree `claude/workbreakdown-slice-a`. No surrogate was used.
 
 | # | Check (validation-plan.md) | Result |
@@ -51,3 +52,37 @@ $ cat skills/workbreakdown/VERSION; git diff main --stat -- skills/workbreakdown
 $ git diff main -- . ":(exclude).flow" | grep -nE "AE-[0-9]+|ER-[0-9]+"
 (no output: clean)
 ```
+
+## Acceptance-review update (final state bafcc78)
+
+- The contract suites, `validate-skills`, `install-test` (17/17) and Vale are all green.
+- The schema-2/3 fixtures, VERSION (1.4.0) and the root CHANGELOG are unchanged.
+- The leak grep is clean.
+- The only removed lines are the same 5 validator lines as before.
+- The Ruby suite now has 41 new rejection or positive-control calls beyond main.
+
+### Correction: the mutation helper
+
+The first round's helper judged each mutant by grepping the suite output for `FAIL` or `passed`. A mutant that crashes the suite with an uncaught `NoMethodError` prints neither word, so the helper could report it wrongly. Every mutant was re-run with a check on the suite's exit code, so non-zero means caught. Results:
+
+| Mutant | Result |
+| --- | --- |
+| M1 accept schema 5 | caught |
+| M2 drop `validate_placeholder_definers` | caught |
+| M3 disable the schema-2/3 gate on `shaping`/`sources` | caught (see note) |
+| M4 drop the `jira_context` enum | caught |
+| M5 drop the `material`/`stale` boolean check | caught |
+| M6 drop the `from_epic` Jira-key pattern | caught |
+| M7 date check by format only (accepts 2026-13-45) | caught |
+| M8 allow duplicate conflict source refs | caught |
+| M9 revert the root check order (schema before unknown keys) | caught |
+| M10 prose changes an enum value | caught by the vocabulary and rule pins |
+| M11 prose deletes the `source` enum rule | caught by the rule pin |
+| M12 prose deletes the boolean rule | caught by the rule pin |
+| M13 allow default reviewers | caught |
+| M14 drop the claim type check | caught (the suite crashes with NoMethodError) |
+| M15 validator adds a verdict value without a prose update | caught by the rule pin, which is generated from the validator constants |
+
+**Note on M3.** Two paths enforce `shaping`/`sources` on schema 2 and 3: the explicit gate and the schema-2/3 root key list. With the gate disabled, the root key check still rejects the manifest, but with the generic "manifest has unknown field" message, so the fragment assertion fails. The mutant proves that the specific error is load-bearing and that the rule is enforced twice. It does not prove the gate is the only enforcement.
+
+**Prose pin limits.** The pin strips the worked example and then checks two things: each schema-4 key name and enum value appears in the rule text, and each enumerated rule sentence matches text generated from the validator constants. Free-text rules, such as "location is required when verdict is found", are pinned only by their negative tests, not by the prose.

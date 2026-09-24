@@ -1,7 +1,7 @@
 # Handoff: Slice A, chunk 1
 
 ## Status
-Chunk 1 (manifest schema 4 foundation) implemented and validated. Commits a6b9eb4 and 7b58289 on branch `claude/workbreakdown-slice-a`, local only, not pushed. VERSION remains 1.4.0 until Slice A completes.
+Chunk 1 (manifest schema 4 foundation) implemented and validated. Commits a6b9eb4 and 7b58289, plus acceptance-review fixes 54f665a, cedeb73 and bafcc78 (see `review.md`), on branch `claude/workbreakdown-slice-a`, local only, not pushed. VERSION remains 1.4.0 until Slice A completes.
 
 ## What changed
 - `manifest-contract.md`: new "Schema 4: Draft provenance and classification" section (top-level `shaping` and `sources`, per-child `classification`, abridged example, migration note), plus schema-4 bullets in Identity and Closed shapes.
@@ -18,7 +18,7 @@ Chunk 1 (manifest schema 4 foundation) implemented and validated. Commits a6b9eb
 - Shell contract test: pass, all `require_text` pins.
 - Ruby suite: both schema-4 fixtures valid; plan negative cases plus 10 coverage gaps, each with intended fragment.
 - Schema 2 and 3 fixtures unchanged.
-- Mutation checks: 5 of 5 caught (schema gating, placeholder definers, shaping/sources gates, jira_context enum, material/stale boolean).
+- Mutation checks: 15 of 15 caught by exit code after flow-review (first round: 5 of 5) (schema gating, placeholder definers, shaping/sources gates, jira_context enum, material/stale boolean).
 - No public-safety violations.
 
 ## Review dispositions

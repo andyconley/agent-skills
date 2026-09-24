@@ -30,7 +30,9 @@
         ".flow"
       ],
       "write_scopes": [
-        ".flow/runs/workbreakdown-skill-improvements"
+        ".flow/runs/workbreakdown-skill-improvements",
+        "skills/workbreakdown",
+        "tests"
       ],
       "read_only": false,
       "required_capabilities": [
@@ -244,6 +246,102 @@
         "mode": "serialized",
         "group": "coordinator"
       }
+    },
+    {
+      "id": "acceptance-quality-reviewer",
+      "lane": "review",
+      "role": "quality-reviewer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/quality-reviewer-acceptance"
+      },
+      "brief_path": ".flow/runs/workbreakdown-skill-improvements/briefs/chunk1-acceptance-review.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-skill-improvements/plan.md",
+        ".flow/runs/workbreakdown-skill-improvements/validation-plan.md",
+        ".flow/runs/workbreakdown-skill-improvements/validation-results.md",
+        ".flow/runs/workbreakdown-skill-improvements/HANDOFF.md",
+        "skills/workbreakdown/references/manifest-contract.md",
+        "tests/workbreakdown/workbreakdown-template-contract-test.rb"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs/workbreakdown-skill-improvements"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-skill-improvements/review.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "verdict and ranked findings on acceptance readiness, correctness and fit to plan"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "chunk1-acceptance"
+      }
+    },
+    {
+      "id": "acceptance-test-engineer",
+      "lane": "review",
+      "role": "test-engineer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/test-engineer-acceptance"
+      },
+      "brief_path": ".flow/runs/workbreakdown-skill-improvements/briefs/chunk1-acceptance-review.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-skill-improvements/plan.md",
+        ".flow/runs/workbreakdown-skill-improvements/validation-plan.md",
+        ".flow/runs/workbreakdown-skill-improvements/validation-results.md",
+        ".flow/runs/workbreakdown-skill-improvements/HANDOFF.md",
+        "skills/workbreakdown/references/manifest-contract.md",
+        "tests/workbreakdown/workbreakdown-template-contract-test.rb"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs/workbreakdown-skill-improvements"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-skill-improvements/review.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "verdict and ranked findings on proof: whether tests and mutation checks prove the plan rules"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "chunk1-acceptance"
+      }
     }
   ],
   "shared_state": [],
@@ -254,11 +352,12 @@
   },
   "verification": {
     "producer_assignments": [
-      "coordinator"
+      "coordinator",
+      "handback-tech-writer"
     ],
     "evidence_collector_assignment": "coordinator",
-    "verifier_assignment": "review-quality-reviewer",
+    "verifier_assignment": "acceptance-quality-reviewer",
     "independent": true,
-    "artifact_path": ".flow/runs/workbreakdown-skill-improvements/solution.md"
+    "artifact_path": ".flow/runs/workbreakdown-skill-improvements/review.md"
   }
 }
