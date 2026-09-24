@@ -1,0 +1,28 @@
+# Implementation handoff: Slice A completion
+
+- **Where:**
+  - **Public skill:** the `~/agent-skills-worktrees/workbreakdown-slice-a` worktree, branch `claude/workbreakdown-slice-a`, in the public repo `andyconley/agent-skills`.
+  - **Private script:** `~/KB/utilities/workbreakdown-release-check/` on a new `claude/*` branch in KB.
+  - **Private fixture and results:** the KB run folder `.flow/runs/workbreakdown-skill-improvements/` in the `nostalgic-kapitsa-82d9e6` worktree, or wherever the maintainer points.
+  - Leave the `~/agent-skills` main checkout alone. It holds another run's uncommitted work.
+- **Spec:** `plan.md` is complete. Build steps 0–6 in order, and don't start a step until the previous step's gate in `validation-plan.md` passes.
+- **Stop points:** stopping is safe after step 0, 1, 2 or 3, while set 3 is still the default. Never stop partway through step 4. If step 4 can't finish, revert the default flip. VERSION changes only in step 6, after the release gate is green.
+- **Constraints:**
+  - This is a public repo. No private keys, names, project terms or fixture content go into agent-skills. Public tests use synthetic keys such as `INIT-1`, `EPIC-1` and `WORK-301`.
+  - Keep every existing `require_text` pin. Don't modify the existing schema-2 and schema-3 fixtures or the set-1 to set-3 assets.
+  - Never write to Jira. The fixture refresh is GET-only, using the zsh credentials.
+  - The agent under test never receives Jira credentials, Bash, network or MCP.
+  - No estimates or points in any content.
+  - Commit locally with conventional messages ending in the attribution line. Don't push.
+  - Commit before running mutation checks, and judge each mutant by the suite's exit code.
+  - Every new utility gets a README, and the release script's README covers usage, prerequisites, the rerun tolerance and what each check proves.
+- **Orchestration:**
+  - Revision-2 mode is delegated.
+  - The quick-gate reviewers for each step are read-only.
+  - Run `flow run validate-orchestration workbreakdown-slice-a-completion --stage dispatch` before each dispatch.
+- **Done when:**
+  - Every step gate and the release gate pass.
+  - `validation-results.md` records them.
+  - `HANDOFF.md` is written.
+  - `mark-handback-ready` succeeds.
+  - Then run `flow-review`.
