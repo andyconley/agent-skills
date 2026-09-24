@@ -67,6 +67,17 @@ require_text "$SOP_FILE" "Treat five points as a review trigger."
 require_text "$SOP_FILE" "Gherkin scenarios for the main path"
 require_text "$SOP_FILE" "Mark estimates as provisional while blocking Spikes remain open."
 require_text "$SOP_FILE" "Do not require design-only fields."
+require_text "$SOP_FILE" "Read existing work first."
+require_text "$SOP_FILE" "the most recent dated decision wins. A Jira amendment counts as a decision."
+require_text "$SOP_FILE" "A conflict is material when it would change a classification, an owner, or a dependency edge."
+require_text "$SOP_FILE" "Never build on a stale claim without saying so."
+for file in "$SOP_FILE" "$MANIFEST_FILE"; do
+  require_text "$file" "No Jira context: design claims are unverified"
+  require_text "$file" "Unverified design claim:"
+done
+require_text "$MANIFEST_FILE" "A schema-4 manifest with jira_context absent is rejected."
+require_text "$MANIFEST_FILE" "Reconciliation table"
+require_text "$SKILL_FILE" "Without Jira context, emit schema 2"
 
 require_text "$JIRA_FILE" "stop before the first write"
 require_text "$JIRA_FILE" "direct user instruction to apply the exact"

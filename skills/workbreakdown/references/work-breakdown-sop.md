@@ -15,13 +15,24 @@ Create a direct Epic child when work needs an owner, estimate, status, dependenc
 
 ## Breakdown procedure
 
-1. **Define the Epic outcome.** State the capability that becomes available. Target about one month or two sprints. Treat two months as the upper limit before considering another milestone Epic.
-2. **Define verifiable Stories.** Work backward from demonstrations that prove the Epic. A Story can be a delivery checkpoint, but it must package real behavior, validation, and integration evidence.
-3. **Identify implementation Tasks.** Add the code, infrastructure, configuration, packaging, and operational work needed to make each Story pass. Give every Task a clear completion state.
-4. **Isolate uncertainty as Spikes.** Create one Spike for each unanswered decision. Keep the question narrow. Prefer several short Spikes over one open-ended research ticket.
-5. **Connect the work.** Use `Spike -> Task -> Story` as the normal flow. One Spike can block several Tasks. Several Tasks can block one Story. A Spike can block a Story directly when no implementation Task is needed.
-6. **Rank the children.** Rank items in reading and likely execution order: Spikes, Tasks, Stories. Rank communicates priority and presentation order, not dependency.
-7. **Review the graph.** Make every edge point from prerequisite to consumer and eventually reach a verifiable Story or explicit Epic exit condition.
+1. **Read existing work first.** Before proposing any child, read every existing Epic child: its description, amendments, status, links, and link history. An amendment is a dated Jira edit or comment that changes a decision. Reconcile each proposed item to an existing card, as `existing` or `update`, or mark it new. Resolve disagreements with the source-authority rules below.
+2. **Define the Epic outcome.** State the capability that becomes available. Target about one month or two sprints. Treat two months as the upper limit before considering another milestone Epic.
+3. **Define verifiable Stories.** Work backward from demonstrations that prove the Epic. A Story can be a delivery checkpoint, but it must package real behavior, validation, and integration evidence.
+4. **Identify implementation Tasks.** Add the code, infrastructure, configuration, packaging, and operational work needed to make each Story pass. Give every Task a clear completion state.
+5. **Isolate uncertainty as Spikes.** Create one Spike for each unanswered decision. Keep the question narrow. Prefer several short Spikes over one open-ended research ticket.
+6. **Connect the work.** Use `Spike -> Task -> Story` as the normal flow. One Spike can block several Tasks. Several Tasks can block one Story. A Spike can block a Story directly when no implementation Task is needed.
+7. **Rank the children.** Rank items in reading and likely execution order: Spikes, Tasks, Stories. Rank communicates priority and presentation order, not dependency.
+8. **Review the graph.** Make every edge point from prerequisite to consumer and eventually reach a verifiable Story or explicit Epic exit condition.
+
+## Source authority
+
+When sources disagree, the most recent dated decision wins. A Jira amendment counts as a decision. A lead may supply a different order of source types as the `source_order` shaping answer, which Draft records with its source.
+
+A conflict is material when it would change a classification, an owner, or a dependency edge. Record each material conflict in the manifest's `sources.conflicts` and report it with both sources and the winner.
+
+Flag a design source as stale when a later dated decision contradicts it. Never build on a stale claim without saying so.
+
+When Draft cannot read the live Epic and its children, it has no Jira context. Emit a schema-2 manifest and state `No Jira context: design claims are unverified` in the output. Record each design claim the breakdown relies on as an `unknowns` entry that begins `Unverified design claim:`.
 
 ## Dependency rules
 

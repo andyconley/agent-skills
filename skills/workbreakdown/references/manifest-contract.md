@@ -350,6 +350,7 @@ sources records what the Draft read and how it resolved disagreements between so
   - sources lists at least two entries with distinct refs, ignoring surrounding whitespace, each a ref and a valid ISO calendar date in `YYYY-MM-DD` form. Quote the date so YAML keeps it as text.
   - winner equals the ref of one listed source.
   - material and stale are true or false.
+- A schema-4 manifest with jira_context absent is rejected. Schema 4 always binds a live Epic digest, so a Draft without Jira context emits schema 2.
 
 ### classification
 
@@ -364,7 +365,7 @@ classification is an optional child key. Its keys are question, precedent, and p
 
 ### Migration
 
-Schema 2 and 3 manifests remain valid. Schema 4 adds optional blocks only. Draft emits schema 4 from the release that completes Slice A.
+Schema 2 and 3 manifests remain valid. Schema 4 adds optional blocks only. From the release that completes Slice A, a new Draft emits schema 4 when the live Epic ADF is available and schema 2 otherwise, and its output states which.
 
 ## Child invariants
 
@@ -416,12 +417,14 @@ If exact placement among all live children matters, use full-live-order and incl
 
 Return:
 
-1. Epic outcome.
-2. Proposed child table.
-3. Complete YAML manifest.
-4. Dependency edge list or graph using A -> B for A blocks B.
-5. Cycle, direction, duplicate, redundancy, missing-edge, and orphan checks.
-6. Questions that materially affect the breakdown.
+1. Jira context: `Jira context: present`, or `No Jira context: design claims are unverified`. Without Jira context, the manifest is schema 2 and each design claim it relies on is an `unknowns` entry beginning `Unverified design claim:`.
+2. Epic outcome.
+3. Reconciliation table: each proposed item, mapped to the existing Jira key it reconciles to or to `new`.
+4. Proposed child table.
+5. Complete YAML manifest.
+6. Dependency edge list or graph using A -> B for A blocks B.
+7. Cycle, direction, duplicate, redundancy, missing-edge, and orphan checks.
+8. Questions that materially affect the breakdown.
 
 Use temporary references until Jira assigns keys. Do not create placeholder Jira keys.
 

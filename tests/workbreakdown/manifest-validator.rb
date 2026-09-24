@@ -428,7 +428,11 @@ def validate_manifest(manifest, templates, registry)
   return unless schema == 4
 
   validate_shaping(manifest["shaping"]) if manifest.key?("shaping")
-  validate_sources(manifest["sources"]) if manifest.key?("sources")
+  if manifest.key?("sources")
+    validate_sources(manifest["sources"])
+    # Schema 4 always binds a live Epic digest. Without Jira context, Draft falls back to schema 2.
+    raise ArgumentError, "schema 4 requires Jira context" if manifest.dig("sources", "jira_context") == "absent"
+  end
   validate_placeholder_definers(children)
 end
 

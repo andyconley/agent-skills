@@ -281,7 +281,14 @@ expect_error("existing_children requires Jira context") { validate_manifest(chil
 absent_context = clone(schema4)
 absent_context["sources"]["jira_context"] = "absent"
 absent_context["sources"]["existing_children"] = []
-validate_manifest(absent_context, index, registry)
+expect_error("schema 4 requires Jira context") { validate_manifest(absent_context, index, registry) }
+
+# Without Jira context, Draft emits schema 2 and records each design claim it relied on as unverified.
+fallback = load_yaml(File.join(FIXTURES, "fallback-schema2-valid.yaml"))
+validate_manifest(fallback, index, registry)
+assert(fallback["schema_version"] == 2, "fallback fixture is not schema 2")
+assert(fallback["children"].all? { |child| child["disposition"] == "proposed" && !child.key?("jira_key") }, "fallback fixture claims live Jira keys")
+assert(fallback["unknowns"].any? && fallback["unknowns"].all? { |item| item.start_with?("Unverified design claim: ") }, "fallback fixture lost its unverified design claims")
 
 bad_read = clone(schema4)
 bad_read["sources"]["existing_children"].first["read"] = ["comments"]
