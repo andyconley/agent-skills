@@ -250,7 +250,7 @@ Schema 3 does not authorize Epic creation, deletion, reparenting, retyping, rank
 
 ## Schema 4: Draft provenance and classification
 
-Schema 4 records how a Draft was shaped, which sources it read, and why each child has its classification. All three blocks are optional, and a schema-4 manifest without them is valid. The example is abridged: its Epic description and child template bindings follow the schema-3 and child rules. The Epic block follows the schema-3 rules unchanged. Reject shaping, sources, or a child classification in a schema-2 or schema-3 manifest.
+Schema 4 records how a Draft was shaped, which sources it read, and why each child has its classification. All three blocks are optional, and a schema-4 manifest without them is valid. The Epic block follows the schema-3 rules unchanged. The example is abridged: its Epic description and child template bindings follow the schema-3 and child rules. Reject shaping, sources, or a child classification in a schema-2 or schema-3 manifest.
 
 ~~~yaml
 schema_version: 4
@@ -333,20 +333,21 @@ shaping records the answers that shaped the Draft. Its entries are spike_shape, 
 
 - Each entry contains value, source, and, only for a reused answer, from_epic.
 - source is asked, reused, or default.
-- from_epic is the Jira key of the sibling Epic the answer came from. It is required when source is reused and rejected otherwise.
+- from_epic is the Jira key, such as EPIC-201, of the sibling Epic the answer came from. It is required when source is reused and rejected otherwise.
 - spike_shape.value is vertical-slice or by-layer.
 - task_granularity.value is per-flow or finer.
-- reviewers.value is a list of nonempty reviewer names.
-- source_order.value is a list of nonempty source kinds, most authoritative first.
+- reviewers.value lists at least one nonempty reviewer name. When no reviewer is known, omit the entry and record the gap in unknowns.
+- source_order.value lists at least one nonempty source kind, most authoritative first.
 
 ### sources
 
 sources records what the Draft read and how it resolved disagreements between sources. Its keys are jira_context, existing_children, and conflicts, and each is optional.
 
 - jira_context is present or absent.
-- existing_children lists each existing Epic child the Draft read, as jira_key plus read. read is a nonempty subset of description, amendments, status, links, and link_history. existing_children must be empty or omitted when jira_context is absent.
+- existing_children lists each existing Epic child the Draft read, as jira_key plus read. read is a nonempty subset of description, amendments, status, links, and link_history, with no repeats. existing_children must be empty or omitted when jira_context is absent.
 - conflicts lists each disagreement between sources. A conflict contains claim, sources, winner, material, and stale.
-  - sources lists at least two entries, each a ref and an ISO date in `YYYY-MM-DD` form. Quote the date so YAML keeps it as text.
+  - claim is the nonempty statement the sources disagree on.
+  - sources lists at least two entries with distinct refs, each a ref and a valid ISO calendar date in `YYYY-MM-DD` form. Quote the date so YAML keeps it as text.
   - winner equals the ref of one listed source.
   - material and stale are true or false.
 
@@ -356,7 +357,7 @@ classification is an optional child key. Its keys are question, precedent, and p
 
 - question is the nonempty open question the child answers.
 - precedent contains searched and verdict, and may contain location.
-  - searched lists the nonempty locations the Draft looked in.
+  - searched lists at least one nonempty location the Draft looked in.
   - verdict is none, found, or unverified.
   - location is where the precedent lives. It is required when verdict is found and optional otherwise.
 - placeholder is allowed only on a Task. It contains only defined_by, which is either the ref of a Spike child in the same manifest or an existing Jira key.

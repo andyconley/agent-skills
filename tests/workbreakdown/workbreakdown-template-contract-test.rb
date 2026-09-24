@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require "date"
 require "digest"
 require "json"
 require "yaml"
@@ -241,7 +242,13 @@ def validate_epic_description(description, template)
 end
 
 def nonempty_string_list?(value)
-  value.is_a?(Array) && value.all? { |item| item.is_a?(String) && !item.strip.empty? }
+  value.is_a?(Array) && !value.empty? && value.all? { |item| item.is_a?(String) && !item.strip.empty? }
+end
+
+def iso_date?(value)
+  value.is_a?(String) && value.match?(/\A\d{4}-\d{2}-\d{2}\z/) && Date.iso8601(value)
+rescue ArgumentError
+  false
 end
 
 def validate_shaping(shaping)
@@ -252,7 +259,8 @@ def validate_shaping(shaping)
     reject_unknown_keys(answer, %w[value source from_epic], "shaping #{name}")
     raise ArgumentError, "invalid shaping source" unless %w[asked reused default].include?(answer["source"])
     if answer["source"] == "reused"
-      raise ArgumentError, "reused shaping answer requires from_epic" unless answer["from_epic"].to_s.match?(JIRA_KEY)
+      raise ArgumentError, "reused shaping answer requires from_epic" if answer["from_epic"].to_s.strip.empty?
+      raise ArgumentError, "from_epic must be a Jira key" unless answer["from_epic"].to_s.match?(JIRA_KEY)
     elsif answer.key?("from_epic")
       raise ArgumentError, "from_epic is only allowed on reused answers"
     end
@@ -279,7 +287,7 @@ def validate_sources(sources)
     reject_unknown_keys(item, %w[jira_key read], "existing_children entry")
     raise ArgumentError, "existing_children entry requires a Jira key" unless item["jira_key"].to_s.match?(JIRA_KEY)
     read = item["read"]
-    raise ArgumentError, "invalid existing_children read" unless read.is_a?(Array) && !read.empty? && (read - SOURCES_READ).empty?
+    raise ArgumentError, "invalid existing_children read" unless read.is_a?(Array) && !read.empty? && (read - SOURCES_READ).empty? && read.uniq.length == read.length
   end
 
   conflicts = sources.fetch("conflicts", [])
@@ -294,8 +302,9 @@ def validate_sources(sources)
       raise ArgumentError, "conflict source must be a map" unless source.is_a?(Hash)
       reject_unknown_keys(source, %w[ref date], "conflict source")
       raise ArgumentError, "conflict source requires a ref" if source["ref"].to_s.strip.empty?
-      raise ArgumentError, "conflict source date must be YYYY-MM-DD" unless source["date"].is_a?(String) && source["date"].match?(/\A\d{4}-\d{2}-\d{2}\z/)
+      raise ArgumentError, "conflict source date must be YYYY-MM-DD" unless iso_date?(source["date"])
     end
+    raise ArgumentError, "conflict sources must be distinct" unless listed.map { |source| source["ref"] }.uniq.length == listed.length
     raise ArgumentError, "conflict winner is not a listed source" unless listed.map { |source| source["ref"] }.include?(conflict["winner"])
     %w[material stale].each do |flag|
       raise ArgumentError, "conflict #{flag} must be true or false" unless [true, false].include?(conflict[flag])
@@ -383,12 +392,14 @@ def validate_child(child, templates, set_version, schema)
 end
 
 def validate_manifest(manifest, templates, registry)
-  schema = manifest.fetch("schema_version")
-  raise ArgumentError, "unsupported schema" unless [2, 3, 4].include?(schema)
-  if schema < 4
+  # Keep the schema-2/3 check order: unknown root fields first, then the schema version.
+  declared = manifest["schema_version"]
+  if [2, 3].include?(declared)
     SCHEMA4_ROOT_KEYS.each { |key| raise ArgumentError, "#{key} requires schema 4" if manifest.key?(key) }
   end
-  reject_unknown_keys(manifest, schema == 4 ? ROOT_KEYS + SCHEMA4_ROOT_KEYS : ROOT_KEYS, "manifest")
+  reject_unknown_keys(manifest, declared == 4 ? ROOT_KEYS + SCHEMA4_ROOT_KEYS : ROOT_KEYS, "manifest")
+  schema = manifest.fetch("schema_version")
+  raise ArgumentError, "unsupported schema" unless [2, 3, 4].include?(schema)
   reject_unknown_keys(manifest.fetch("template_set"), %w[id version], "template_set")
   raise ArgumentError, "wrong registry" unless manifest.dig("template_set", "id") == "jira-house-templates"
   set_version = manifest.dig("template_set", "version")
@@ -871,6 +882,50 @@ expect_error("precedent searched must list locations") { validate_manifest(empty
 unsupported_classified = clone(schema4)
 schema4_child(unsupported_classified, "build-endpoint")["type"] = "Bug"
 expect_error("unsupported child type") { validate_manifest(unsupported_classified, index, registry) }
+
+bad_from_epic = clone(schema4)
+bad_from_epic["shaping"]["spike_shape"]["from_epic"] = "sibling epic"
+expect_error("from_epic must be a Jira key") { validate_manifest(bad_from_epic, index, registry) }
+
+bad_child_key = clone(schema4)
+bad_child_key["sources"]["existing_children"].first["jira_key"] = "work 301"
+expect_error("existing_children entry requires a Jira key") { validate_manifest(bad_child_key, index, registry) }
+
+impossible_date = clone(schema4)
+impossible_date["sources"]["conflicts"].first["sources"].first["date"] = "2026-13-45"
+expect_error("conflict source date must be YYYY-MM-DD") { validate_manifest(impossible_date, index, registry) }
+
+same_source = clone(schema4)
+same_source["sources"]["conflicts"].first["sources"].last["ref"] = same_source["sources"]["conflicts"].first["sources"].first["ref"]
+same_source["sources"]["conflicts"].first["winner"] = same_source["sources"]["conflicts"].first["sources"].first["ref"]
+expect_error("conflict sources must be distinct") { validate_manifest(same_source, index, registry) }
+
+repeated_read = clone(schema4)
+repeated_read["sources"]["existing_children"].first["read"] = %w[status status]
+expect_error("invalid existing_children read") { validate_manifest(repeated_read, index, registry) }
+
+empty_reviewers = clone(schema4)
+empty_reviewers["shaping"]["reviewers"]["value"] = []
+expect_error("shaping reviewers value must be a list of names") { validate_manifest(empty_reviewers, index, registry) }
+
+empty_searched = clone(schema4)
+schema4_child(empty_searched, "choose-transport")["classification"]["precedent"]["searched"] = []
+expect_error("precedent searched must list locations") { validate_manifest(empty_searched, index, registry) }
+
+# Schema-2/3 error precedence is unchanged: an unknown root field is reported before the schema version.
+unknown_before_schema = clone(schema3)
+unknown_before_schema["transition"] = "Done"
+unknown_before_schema["schema_version"] = 9
+expect_error("manifest has unknown field transition") { validate_manifest(unknown_before_schema, index, registry) }
+
+# Pin the validator's schema-4 vocabulary to the prose contract, so a renamed or added key cannot drift silently.
+schema4_prose = File.read(File.join(SKILL, "references", "manifest-contract.md"))[/^## Schema 4:.*?(?=^## Child invariants)/m]
+assert(schema4_prose, "manifest contract lost its schema 4 section")
+schema4_tokens = SCHEMA4_ROOT_KEYS + SHAPING_VALUES.keys + SHAPING_VALUES.values.grep(Array).flatten + SOURCES_READ +
+  %w[jira_context existing_children conflicts claim winner material stale present absent] +
+  %w[classification question precedent searched verdict location placeholder defined_by none found unverified] +
+  %w[value source from_epic asked reused default]
+schema4_tokens.each { |token| assert(schema4_prose.match?(/\b#{Regexp.escape(token)}\b/), "schema 4 prose does not name #{token}") }
 
 schema5 = clone(schema4_minimal)
 schema5["schema_version"] = 5
