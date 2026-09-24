@@ -102,3 +102,27 @@ Each gate ran `bash tests/workbreakdown-contract-test.sh`, `bash scripts/validat
   - the schema-2 fallback had no way to record shaping
   - an Epic update could silently remove a live panel
 - **Test gate:** one Critical finding, verify-side panel shape validation, fixed with a case caught by M31. The procedure pins were strengthened.
+
+### Step 5: release check (in progress, paused 2026-09-24)
+
+- **Harness status:** the private harness and the frozen gate snapshot are committed in the KB worktree. The harness is hardened after its quality and test gates, and a checker self-test was added.
+- **Skill gaps found by the harness, all fixed and committed:**
+  - documentation location (50557a3)
+  - classification of existing Spikes (50557a3)
+  - the child table's exit-condition column (50557a3)
+  - YAML quoting (58fb44a)
+- **Isolation evidence:** a positive-control codeword test shows that `--restricted` keeps every `CLAUDE.md` out of the agent's context.
+- **Gate run:** the first full gate was stopped partway when the session paused. Its partial results are not gate evidence.
+- **Pending before the next full gate:** harness fixes from the re-check of the harness fixes:
+  - the R2.2 and S4 self-test mutants were no-ops on some runs
+  - P1 reply parsing and path boundary
+  - S1 relative and trailing globs
+  - the selftest completion marker
+  - R2.3 backend terms
+  - clearing stale attempts
+  - an offline recheck mode
+- **Remaining after a green gate:**
+  - step 6: VERSION 1.5.0 and the migration note
+  - HANDOFF.md
+  - `mark-handback-ready`
+  - `flow-review`
