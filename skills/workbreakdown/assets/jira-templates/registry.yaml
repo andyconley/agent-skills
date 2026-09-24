@@ -31,7 +31,9 @@ template_sets:
     defaults:
       Epic: jira-epic-v2
       Story: jira-story-v3
-      Task: jira-task-v2
+      Task:
+        artifact: jira-task-v2
+        placeholder: jira-task-placeholder-v3
       Spike:
         design: jira-spike-design-v3
         investigation: jira-spike-investigation-v3
@@ -180,6 +182,17 @@ templates:
     description_format: adf
     required_keys: [question, precedent, evidence_needed, done_when, downstream_updates]
     conditional_keys: [reviewers, boundaries, references]
+
+  - id: jira-task-placeholder-v3
+    set_version: 4
+    issue_type: Task
+    variant: placeholder
+    status: default
+    file: task-placeholder-v3.md
+    sha256: 7c3616d9acc68f7fa7e1b0cf05124e5abfc14cc46a04106544ec6633b7e6fd69
+    description_format: adf
+    required_keys: [purpose, defined_by]
+    conditional_keys: []
 
 rendering:
   omit_empty_conditionals: true

@@ -49,7 +49,7 @@ Ask for every child:
 
 Every Task must contribute to a Story or an explicit Epic exit condition. Every Spike must inform a Task or Story.
 
-Classify a Spike by its one open question and a Task by a verified precedent. Draft defaults to one vertical-slice Spike and one implementation Task per user-facing flow. Review and Audit never flag a team's own Spike shape or Task granularity. Review reports a Story that is not a demoable flow as a component Story.
+Classify a Spike by its one open question and a Task by a verified precedent. Draft defaults to one vertical-slice Spike and one implementation Task per user-facing flow. Review and Audit never flag a team's own Spike shape or Task granularity. Review reports a Story that is not a demoable flow as a component Story. Hold work that a Spike must define first in a placeholder Task linked to that Spike. It has no estimate, and a real Task replaces it when the Spike closes.
 
 New Drafts use the template-set-3 defaults. Keep descriptions short: fill required content, include conditional sections only when material, and omit empty sections. An explicitly older manifest stays on its approved template and still meets the current lifecycle bar.
 

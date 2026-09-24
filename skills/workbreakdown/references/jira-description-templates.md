@@ -14,7 +14,7 @@ New Drafts use template-set version 3 and the registry defaults:
 - design Spike: `jira-spike-design-v2`
 - investigation or feasibility Spike: `jira-spike-investigation-v2`
 
-Template set 4 keeps the set-3 defaults except the Spikes, which become `jira-spike-design-v3` and `jira-spike-investigation-v3`. Both add a question and a precedent section, and both treat reviewers as conditional.
+Template set 4 keeps the set-3 defaults except the Spikes, which become `jira-spike-design-v3` and `jira-spike-investigation-v3`. Both add a question and a precedent section, and both treat reviewers as conditional. Set 4 also adds a placeholder Task variant, `jira-task-placeholder-v3`, for work a Spike must define first. Its `defined_by` renders as an `inlineCard` to the defining Spike.
 
 Choose the Spike variant from its completion state. A design Spike produces a reviewed design decision and linked artifact. An investigation Spike answers a research or feasibility question. Do not force investigation work through design fields.
 

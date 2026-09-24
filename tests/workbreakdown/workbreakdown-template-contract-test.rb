@@ -50,7 +50,7 @@ expect_error("missing template asset") { validate_registry(missing_asset_registr
 
 variant_default_registry = clone(registry)
 variant_default_registry["template_sets"][2]["defaults"]["Spike"]["design"] = "jira-spike-investigation-v2"
-expect_error("default Spike variant mismatch") { validate_registry(variant_default_registry) }
+expect_error("default variant mismatch") { validate_registry(variant_default_registry) }
 
 expected_v1 = {
   "jira-epic-v1" => "e6ac1fced57839ccaca7c56fe42cd08b5907af5b15f2f050625350dfaf9c758a",
@@ -306,18 +306,6 @@ spike_placeholder = clone(schema4)
 schema4_child(spike_placeholder, "choose-transport")["classification"]["placeholder"] = {"defined_by" => "measure-staleness"}
 expect_error("placeholder is only allowed on a Task") { validate_manifest(spike_placeholder, index, registry) }
 
-missing_definer = clone(schema4)
-schema4_child(missing_definer, "build-endpoint")["classification"]["placeholder"]["defined_by"] = "no-such-spike"
-expect_error("placeholder defined_by must name a Spike") { validate_manifest(missing_definer, index, registry) }
-
-non_spike_definer = clone(schema4)
-schema4_child(non_spike_definer, "build-endpoint")["classification"]["placeholder"]["defined_by"] = "build-endpoint"
-expect_error("placeholder defined_by must name a Spike") { validate_manifest(non_spike_definer, index, registry) }
-
-jira_definer = clone(schema4)
-schema4_child(jira_definer, "build-endpoint")["classification"]["placeholder"]["defined_by"] = "WORK-302"
-validate_manifest(jira_definer, index, registry)
-
 unknown_classification = clone(schema4)
 schema4_child(unknown_classification, "choose-transport")["classification"]["owner"] = "API owner"
 expect_error("classification has unknown field") { validate_manifest(unknown_classification, index, registry) }
@@ -489,6 +477,81 @@ classified_story["children"] << {
   "classification" => {"question" => "Which consumer flow proves the Epic outcome?"}
 }
 validate_manifest(classified_story, index, registry)
+
+# A placeholder Task binds jira-task-placeholder-v3, which requires the prefix and the placeholder classification.
+placeholder_ref = "wire-transport"
+missing_definer = clone(set4)
+schema4_child(missing_definer, placeholder_ref)["classification"]["placeholder"]["defined_by"] = "no-such-spike"
+schema4_child(missing_definer, placeholder_ref)["fields"]["description"]["defined_by"] = "no-such-spike"
+expect_error("placeholder defined_by must name a Spike") { validate_manifest(missing_definer, index, registry) }
+
+non_spike_definer = clone(set4)
+schema4_child(non_spike_definer, placeholder_ref)["classification"]["placeholder"]["defined_by"] = "build-endpoint"
+schema4_child(non_spike_definer, placeholder_ref)["fields"]["description"]["defined_by"] = "build-endpoint"
+expect_error("placeholder defined_by must name a Spike") { validate_manifest(non_spike_definer, index, registry) }
+
+jira_definer = clone(set4)
+schema4_child(jira_definer, placeholder_ref)["classification"]["placeholder"]["defined_by"] = "WORK-302"
+schema4_child(jira_definer, placeholder_ref)["fields"]["description"]["defined_by"] = "WORK-302"
+validate_manifest(jira_definer, index, registry)
+
+mismatched_definer = clone(set4)
+schema4_child(mismatched_definer, placeholder_ref)["fields"]["description"]["defined_by"] = "measure-staleness"
+expect_error("placeholder description defined_by must match classification") { validate_manifest(mismatched_definer, index, registry) }
+
+unprefixed = clone(set4)
+schema4_child(unprefixed, placeholder_ref)["fields"]["summary"] = "Wire the chosen state transport"
+expect_error("placeholder Task summary requires the [PLACEHOLDER] prefix") { validate_manifest(unprefixed, index, registry) }
+
+prefix_on_task_v2 = clone(set4)
+schema4_child(prefix_on_task_v2, "build-endpoint")["fields"]["summary"] = "[PLACEHOLDER] Add the supported state endpoint"
+expect_error("placeholder prefix requires jira-task-placeholder-v3") { validate_manifest(prefix_on_task_v2, index, registry) }
+
+prefix_without_template = clone(set4)
+prefix_without_template["children"] << {
+  "ref" => "old-card", "jira_key" => "WORK-403", "type" => "Task", "disposition" => "existing",
+  "verify" => {"summary" => "[PLACEHOLDER] Old card", "done_when" => "Replaced."}
+}
+expect_error("placeholder prefix requires jira-task-placeholder-v3") { validate_manifest(prefix_without_template, index, registry) }
+
+placeholder_on_task_v2 = clone(set4)
+schema4_child(placeholder_on_task_v2, "build-endpoint")["classification"]["placeholder"] = {"defined_by" => "choose-transport"}
+expect_error("classification placeholder requires jira-task-placeholder-v3") { validate_manifest(placeholder_on_task_v2, index, registry) }
+
+unclassified_placeholder = clone(set4)
+schema4_child(unclassified_placeholder, placeholder_ref).delete("classification")
+expect_error("placeholder Task requires classification placeholder") { validate_manifest(unclassified_placeholder, index, registry) }
+
+estimated_placeholder = clone(set4)
+schema4_child(estimated_placeholder, placeholder_ref)["fields"]["estimate"] = 2
+expect_error("placeholder Task carries no estimate") { validate_manifest(estimated_placeholder, index, registry) }
+
+filler_purpose = clone(set4)
+schema4_child(filler_purpose, placeholder_ref)["fields"]["description"]["purpose"] = "N/A"
+expect_error("empty filler value") { validate_manifest(filler_purpose, index, registry) }
+
+extra_placeholder_key = clone(set4)
+schema4_child(extra_placeholder_key, placeholder_ref)["fields"]["description"]["acceptance_criteria"] = ["The transport is wired."]
+expect_error("unapproved description key") { validate_manifest(extra_placeholder_key, index, registry) }
+
+# Without classification, a schema-2 placeholder still resolves its definer from the description.
+placeholder_fallback = clone(set4)
+placeholder_fallback["schema_version"] = 2
+placeholder_fallback["epic"] = {"outcome" => "Consumers retrieve current state through the supported API."}
+%w[shaping sources].each { |key| placeholder_fallback.delete(key) }
+placeholder_fallback["children"].each { |child| child.delete("classification") }
+validate_manifest(placeholder_fallback, index, registry)
+schema4_child(placeholder_fallback, placeholder_ref)["fields"]["description"]["defined_by"] = "no-such-spike"
+expect_error("placeholder defined_by must name a Spike") { validate_manifest(placeholder_fallback, index, registry) }
+
+placeholder_in_set3 = clone(set4)
+placeholder_in_set3["template_set"]["version"] = 3
+placeholder_in_set3["children"].select! { |child| %w[build-endpoint wire-transport].include?(child["ref"]) }
+placeholder_in_set3["dependencies"] = []
+placeholder_in_set3["rank"]["order"] = %w[build-endpoint wire-transport]
+schema4_child(placeholder_in_set3, placeholder_ref)["classification"]["placeholder"]["defined_by"] = "WORK-302"
+schema4_child(placeholder_in_set3, placeholder_ref)["fields"]["description"]["defined_by"] = "WORK-302"
+expect_error("template-set mismatch") { validate_manifest(placeholder_in_set3, index, registry) }
 
 v3_in_set3 = clone(set4)
 v3_in_set3["template_set"]["version"] = 3

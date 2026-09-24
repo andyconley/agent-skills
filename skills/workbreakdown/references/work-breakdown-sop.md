@@ -116,7 +116,9 @@ Do not use `same as success criteria`. Do not copy success measures into accepta
 
 ## Task completion
 
-A Task names one concrete artifact or operational result, 2–5 binary acceptance conditions, and the validation that proves it. Reference the ticket completion profile. Add only Task-specific gates or approved exceptions.
+A Task bound to `jira-task-v2` names one concrete artifact or operational result, 2–5 binary acceptance conditions, and the validation that proves it. Reference the ticket completion profile. Add only Task-specific gates or approved exceptions.
+
+A placeholder Task, bound to `jira-task-placeholder-v3`, holds work that a Spike must define first. It is not implementation-ready, has no acceptance count, and carries no estimate. Its summary starts with `[PLACEHOLDER] ` and its description names the defining Spike.
 
 ## Spike variants
 
@@ -128,7 +130,7 @@ On template set 4, both variants also state their question and precedent. Review
 
 ## Spike completion
 
-When a Spike finishes, read its decision and evidence. Identify every downstream Task and Story it affects. Propose description, acceptance, estimate, dependency, and rank changes. Do not change Jira until that delta is reviewed.
+When a Spike finishes, read its decision and evidence. Identify every downstream Task and Story it affects. Propose description, acceptance, estimate, dependency, and rank changes. Propose replacing each placeholder Task the Spike defines with a real Task. Do not change Jira until that delta is reviewed.
 
 ## Example flow
 

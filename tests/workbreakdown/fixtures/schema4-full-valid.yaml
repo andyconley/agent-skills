@@ -78,8 +78,6 @@ children:
           - src/api/handlers
         verdict: found
         location: src/api/handlers/status.rb
-      placeholder:
-        defined_by: choose-transport
     fields:
       summary: Add the supported state endpoint
       done_when: The endpoint returns current state for every supported source.

@@ -116,12 +116,29 @@ children:
           - The endpoint returns current state for a permitted consumer.
           - An unsupported source returns the documented error.
         validation: Passing endpoint contract test in the representative system.
+  - ref: wire-transport
+    type: Task
+    template_id: jira-task-placeholder-v3
+    template_sha256: 7c3616d9acc68f7fa7e1b0cf05124e5abfc14cc46a04106544ec6633b7e6fd69
+    disposition: proposed
+    classification:
+      placeholder:
+        defined_by: choose-transport
+    fields:
+      summary: "[PLACEHOLDER] Wire the chosen state transport"
+      done_when: The transport decision is replaced by an implementation-ready Task.
+      description:
+        purpose: Connect state reads to the transport chosen by the design Spike.
+        defined_by: choose-transport
 dependencies:
   - action: ensure
     blocker: {ref: choose-transport}
     blocked: {ref: build-endpoint}
+  - action: ensure
+    blocker: {ref: choose-transport}
+    blocked: {ref: wire-transport}
 rank:
   mode: scoped-relative
-  order: [choose-transport, measure-staleness, build-endpoint]
+  order: [choose-transport, measure-staleness, build-endpoint, wire-transport]
 unknowns:
   - No reviewer is named for the staleness investigation.

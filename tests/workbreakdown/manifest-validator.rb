@@ -34,6 +34,8 @@ CLASSIFICATION_KEYS = %w[question precedent placeholder].freeze
 PRECEDENT_VERDICTS = %w[none found unverified].freeze
 JIRA_KEY = /\A[A-Z][A-Z0-9]+-\d+\z/.freeze
 CLASSIFIED_SPIKE_TEMPLATES = %w[jira-spike-design-v3 jira-spike-investigation-v3].freeze
+PLACEHOLDER_TEMPLATE = "jira-task-placeholder-v3"
+PLACEHOLDER_PREFIX = "[PLACEHOLDER] "
 # Review output categories. Review and Audit never flag a team's own Spike shape or Task granularity,
 # so no category exists for either.
 FINDING_CATEGORIES = %w[
@@ -101,7 +103,7 @@ def validate_registry(registry)
         compatible = template.fetch("compatible_set_versions", [template["set_version"]])
         raise ArgumentError, "default template-set mismatch" unless compatible.include?(version)
         raise ArgumentError, "default issue-type mismatch" unless template["issue_type"] == issue_type
-        raise ArgumentError, "default Spike variant mismatch" if variant && template["variant"] != variant
+        raise ArgumentError, "default variant mismatch" if variant && template["variant"] != variant
       end
     end
   end
@@ -365,14 +367,45 @@ def validate_classification(classification, child)
   end
 end
 
+def placeholder_definers(child)
+  definers = []
+  definers << child.dig("classification", "placeholder", "defined_by") unless child.dig("classification", "placeholder").nil?
+  if child["template_id"] == PLACEHOLDER_TEMPLATE
+    description = %w[verify changes fields].map { |key| child.dig(key, "description") }.compact.first
+    definers << description["defined_by"] if description
+  end
+  definers
+end
+
 def validate_placeholder_definers(children)
   spikes = children.select { |child| child["type"] == "Spike" }.map { |child| child["ref"] }
   children.each do |child|
-    defined_by = child.dig("classification", "placeholder", "defined_by")
-    next if child.dig("classification", "placeholder").nil?
-    next if spikes.include?(defined_by) || defined_by.to_s.match?(JIRA_KEY)
-    raise ArgumentError, "placeholder defined_by must name a Spike ref or a Jira key"
+    placeholder_definers(child).each do |defined_by|
+      next if spikes.include?(defined_by) || defined_by.to_s.match?(JIRA_KEY)
+      raise ArgumentError, "placeholder defined_by must name a Spike ref or a Jira key"
+    end
   end
+end
+
+# A placeholder Task holds undesigned work. Only jira-task-placeholder-v3 may carry the
+# prefix or classification.placeholder, and that template requires both.
+def validate_placeholder_task(child, payload, template_id, schema)
+  placeholder_template = template_id == PLACEHOLDER_TEMPLATE
+  prefixed = payload["summary"].to_s.start_with?(PLACEHOLDER_PREFIX)
+  classified = !child.dig("classification", "placeholder").nil?
+  raise ArgumentError, "placeholder prefix requires jira-task-placeholder-v3" if prefixed && !placeholder_template
+  raise ArgumentError, "classification placeholder requires jira-task-placeholder-v3" if classified && !placeholder_template
+  return unless placeholder_template
+
+  raise ArgumentError, "placeholder Task summary requires the [PLACEHOLDER] prefix" unless prefixed
+  raise ArgumentError, "placeholder Task carries no estimate" if payload.key?("estimate")
+  return unless schema == 4
+
+  raise ArgumentError, "placeholder Task requires classification placeholder" unless classified
+  description = payload["description"]
+  return unless description
+
+  raise ArgumentError, "placeholder description defined_by must match classification" unless description["defined_by"] == child.dig("classification", "placeholder", "defined_by")
 end
 
 def validate_child(child, templates, set_version, schema)
@@ -398,6 +431,7 @@ def validate_child(child, templates, set_version, schema)
   raise ArgumentError, "child requires summary and done_when" unless %w[summary done_when].all? { |key| !payload[key].to_s.empty? }
 
   template_id = child["template_id"]
+  validate_placeholder_task(child, payload, template_id, schema)
   if template_id.nil?
     raise ArgumentError, "proposed child requires template" if disposition == "proposed"
     raise ArgumentError, "description requires template" if payload.key?("description")
@@ -473,6 +507,7 @@ def validate_manifest(manifest, templates, registry)
   refs = children.map { |child| child["ref"] }
   raise ArgumentError, "child refs must be unique and nonempty" if refs.any? { |ref| ref.to_s.empty? } || refs.uniq.length != refs.length
   children.each { |child| validate_child(child, templates, set_version, schema) }
+  validate_placeholder_definers(children)
   return unless schema == 4
 
   validate_shaping(manifest["shaping"]) if manifest.key?("shaping")
@@ -481,7 +516,6 @@ def validate_manifest(manifest, templates, registry)
     # Schema 4 always binds a live Epic digest. Without Jira context, Draft falls back to schema 2.
     raise ArgumentError, "schema 4 requires Jira context" if manifest.dig("sources", "jira_context") == "absent"
   end
-  validate_placeholder_definers(children)
 end
 
 def validate_story_review(story)

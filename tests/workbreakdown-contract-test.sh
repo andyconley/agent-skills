@@ -44,7 +44,7 @@ require_text "$MANIFEST_FILE" "template_sha256:"
 for field in "schema_version: 4" "shaping:" "sources:" "classification:"; do require_text "$MANIFEST_FILE" "$field"; done
 require_text "$MANIFEST_FILE" "Schema 2 and 3 manifests remain valid."
 
-for template in epic-v1 epic-v2 story-v1 story-v2 story-v3 task-v1 task-v2 spike-v1 spike-design-v2 spike-investigation-v2 spike-design-v3 spike-investigation-v3; do
+for template in epic-v1 epic-v2 story-v1 story-v2 story-v3 task-v1 task-v2 spike-v1 spike-design-v2 spike-investigation-v2 spike-design-v3 spike-investigation-v3 task-placeholder-v3; do
   [ -f "$REPO_ROOT/skills/workbreakdown/assets/jira-templates/$template.md" ] || fail "missing bundled $template template"
 done
 require_text "$TEMPLATE_REGISTRY" "schema_version: 2"
@@ -96,6 +96,14 @@ require_text "$MANIFEST_FILE" "the description's question and precedent must equ
 require_text "$MANIFEST_FILE" "Draft never converts a Spike to a Task on verdict unverified"
 require_text "$TEMPLATE_REGISTRY" "jira-spike-design-v3"
 require_text "$TEMPLATE_REGISTRY" "jira-spike-investigation-v3"
+require_text "$TEMPLATE_REGISTRY" "jira-task-placeholder-v3"
+require_text "$MANIFEST_FILE" "Its summary starts with \`[PLACEHOLDER] \`, and no other template may use that prefix."
+require_text "$SOP_FILE" "A Task bound to \`jira-task-v2\` names one concrete artifact"
+require_text "$SOP_FILE" "It is not implementation-ready, has no acceptance count, and carries no estimate."
+require_text "$SOP_FILE" "Propose replacing each placeholder Task the Spike defines with a real Task."
+require_text "$JIRA_FILE" "Create each defining Spike before the placeholder Tasks it defines."
+require_text "$JIRA_FILE" "This is key resolution, not content added after approval."
+require_text "$SKILL_FILE" "Hold work that a Spike must define first in a placeholder Task"
 require_text "$MANIFEST_FILE" "Material conflicts: each with both sources"
 
 require_text "$JIRA_FILE" "stop before the first write"
