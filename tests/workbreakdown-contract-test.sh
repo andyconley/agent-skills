@@ -44,12 +44,12 @@ require_text "$MANIFEST_FILE" "template_sha256:"
 for field in "schema_version: 4" "shaping:" "sources:" "classification:"; do require_text "$MANIFEST_FILE" "$field"; done
 require_text "$MANIFEST_FILE" "Schema 2 and 3 manifests remain valid."
 
-for template in epic-v1 epic-v2 story-v1 story-v2 story-v3 task-v1 task-v2 spike-v1 spike-design-v2 spike-investigation-v2 spike-design-v3 spike-investigation-v3 task-placeholder-v3; do
+for template in epic-v1 epic-v2 story-v1 story-v2 story-v3 task-v1 task-v2 spike-v1 spike-design-v2 spike-investigation-v2 spike-design-v3 spike-investigation-v3 task-placeholder-v3 epic-v3; do
   [ -f "$REPO_ROOT/skills/workbreakdown/assets/jira-templates/$template.md" ] || fail "missing bundled $template template"
 done
 require_text "$TEMPLATE_REGISTRY" "schema_version: 2"
 require_text "$TEMPLATE_REGISTRY" "version: 3"
-require_text "$TEMPLATE_REGISTRY" "default_set_version: 3"
+require_text "$TEMPLATE_REGISTRY" "default_set_version: 4"
 require_text "$TEMPLATE_REGISTRY" "jira-story-v3"
 require_text "$TEMPLATE_REGISTRY" "registry_id: jira-house-templates"
 require_text "$TEMPLATE_REGISTRY" "jira-spike-design-v2"
@@ -104,6 +104,21 @@ require_text "$SOP_FILE" "Propose replacing each placeholder Task the Spike defi
 require_text "$JIRA_FILE" "Create each defining Spike before the placeholder Tasks it defines."
 require_text "$JIRA_FILE" "This is key resolution, not content added after approval."
 require_text "$SKILL_FILE" "Hold work that a Spike must define first in a placeholder Task"
+require_text "$SKILL_FILE" "New Drafts use the template-set-4 defaults."
+require_text "$SKILL_FILE" "collect the shaping answers"
+require_text "$TEMPLATE_REGISTRY" "jira-epic-v3"
+require_text "$TEMPLATE_GUIDE" "New Drafts use template-set version 4"
+require_text "$MANIFEST_FILE" "New Drafts use template-set version 4."
+require_text "$MANIFEST_FILE" "On an Epic update, it must equal the manifest's shaping block exactly."
+require_text "$MANIFEST_FILE" "Divergence list:"
+require_text "$SOP_FILE" "Never take reviewers from a default."
+require_text "$SOP_FILE" "record it as \`reused\`, with \`from_epic\` naming that Epic"
+require_text "$SOP_FILE" "In a non-interactive run, use the portable default and record it as \`default\`."
+require_text "$SOP_FILE" "Treat answers supplied in the invocation request as \`asked\`."
+require_text "$SOP_FILE" "It does not arbitrate between Epic owners or order milestones."
+require_text "$JIRA_FILE" "requires the Epic owner's agreement"
+reject_text "$SKILL_FILE" "template-set-3 defaults"
+reject_text "$MANIFEST_FILE" "template_id must be jira-epic-v2"
 require_text "$MANIFEST_FILE" "Material conflicts: each with both sources"
 
 require_text "$JIRA_FILE" "stop before the first write"

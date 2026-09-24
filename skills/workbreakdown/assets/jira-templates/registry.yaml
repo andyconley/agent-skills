@@ -1,9 +1,9 @@
 schema_version: 2
 registry_id: jira-house-templates
-version: 3
-verified_at: "2026-09-09"
+version: 4
+verified_at: "2026-09-24"
 
-default_set_version: 3
+default_set_version: 4
 template_sets:
   1:
     defaults:
@@ -29,7 +29,7 @@ template_sets:
         investigation: jira-spike-investigation-v2
   4:
     defaults:
-      Epic: jira-epic-v2
+      Epic: jira-epic-v3
       Story: jira-story-v3
       Task:
         artifact: jira-task-v2
@@ -193,6 +193,17 @@ templates:
     description_format: adf
     required_keys: [purpose, defined_by]
     conditional_keys: []
+
+  - id: jira-epic-v3
+    set_version: 4
+    issue_type: Epic
+    variant: milestone
+    status: default
+    file: epic-v3.md
+    sha256: 374650d662bb9305fdb25c27a06872e68ed80fd65293156ac24f19ec49c145a8
+    description_format: adf
+    required_keys: [milestone_outcome, problem, acceptance_criteria, success_measures]
+    conditional_keys: [delivery_approach, out_of_scope, release_quality_additions, approved_exceptions, breakdown_conventions, open_decisions]
 
 rendering:
   omit_empty_conditionals: true

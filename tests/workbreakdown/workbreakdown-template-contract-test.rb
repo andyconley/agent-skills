@@ -72,6 +72,37 @@ assert(v2_defaults.dig("Spike", "investigation") == "jira-spike-investigation-v2
 assert(v3_defaults["Story"] == "jira-story-v3", "Story v3 is not the new default")
 assert(v3_defaults["Epic"] == "jira-epic-v2", "template set 3 lost the compatible Epic")
 assert(index.dig("jira-story-v2", "sha256") == "ca7c5dcf753d6a0e2f432ef436801422ea81ca4c5c20bdabb358197c9c4fc6b4", "Story v2 identity changed")
+
+# Template set 4 is the default. Sets 2 and 3 are frozen: their template assets keep their exact hashes.
+assert(registry["default_set_version"] == 4, "template set 4 is not the default")
+v4_defaults = registry.dig("template_sets", 4, "defaults")
+assert(v4_defaults == {
+  "Epic" => "jira-epic-v3", "Story" => "jira-story-v3",
+  "Task" => {"artifact" => "jira-task-v2", "placeholder" => "jira-task-placeholder-v3"},
+  "Spike" => {"design" => "jira-spike-design-v3", "investigation" => "jira-spike-investigation-v3"}
+}, "template set 4 defaults changed")
+frozen = {
+  "jira-epic-v2" => "18fefffa6ebb6fe385616ecc0dce1756a6238ce11cd5f41d972557313d42342e",
+  "jira-story-v2" => "ca7c5dcf753d6a0e2f432ef436801422ea81ca4c5c20bdabb358197c9c4fc6b4",
+  "jira-task-v2" => "fedfeda541933a2a379bf7569703b138e078aa9ee730438a839977824bdd06b3",
+  "jira-spike-design-v2" => "5b936d0a1ad0bbf705e446fa921234ee9818f17a79df79e99c2a55e47491aff5",
+  "jira-spike-investigation-v2" => "988d1188e66b2afe7932b5dc6be0da2f29af51b62cff483df91855056fb7e960",
+  "jira-story-v3" => "c19201ccb6e6f59671c0d33b45df3524d9d0662b3563d133e1f6f02c2774fef4"
+}
+assert(templates.select { |template| [2, 3].include?(template["set_version"]) }.map { |template| template["id"] }.sort == frozen.keys.sort, "a template joined or left the frozen sets 2 and 3")
+frozen.each { |id, digest| assert(index.dig(id, "sha256") == digest, "#{id} is frozen but its identity changed") }
+%w[jira-epic-v2 jira-task-v2 jira-spike-design-v2 jira-spike-investigation-v2].each do |id|
+  assert(index.dig(id, "compatible_set_versions") == [2, 3, 4], "#{id} lost set-4 compatibility")
+end
+assert(index.dig("jira-story-v3", "compatible_set_versions") == [3, 4], "Story v3 lost set-4 compatibility")
+
+old_default = clone(registry)
+old_default["default_set_version"] = 3
+expect_error("default template set must be 4") { validate_registry(old_default) }
+
+swapped_task_variant = clone(registry)
+swapped_task_variant["template_sets"][4]["defaults"]["Task"]["placeholder"] = "jira-task-v2"
+expect_error("default variant mismatch") { validate_registry(swapped_task_variant) }
 assert(index.dig("jira-story-v3", "sha256") == "c19201ccb6e6f59671c0d33b45df3524d9d0662b3563d133e1f6f02c2774fef4", "Story v3 identity changed")
 
 legacy = load_yaml(File.join(FIXTURES, "schema2-v1-valid.yaml"))
@@ -602,6 +633,66 @@ assert(review_prose, "manifest contract lost its Review output section")
 FINDING_CATEGORIES.each { |category| assert(review_prose.include?("`#{category}`"), "Review output does not define category #{category}") }
 assert(review_prose.scan(/^- `([a-z-]+)`:/).flatten.sort == FINDING_CATEGORIES.sort, "Review output lists a category the validator does not accept")
 
+# Epic v3 adds the Breakdown conventions panel, which records the shaping answers in schema 4 only.
+panel = load_yaml(File.join(FIXTURES, "schema4-epic-panel-valid.yaml"))
+validate_manifest(panel, index, registry)
+assert(panel.dig("epic", "changes", "description", "breakdown_conventions") == panel["shaping"], "panel fixture does not write its shaping")
+
+diverged_panel = clone(panel)
+diverged_panel["epic"]["changes"]["description"]["breakdown_conventions"]["task_granularity"]["value"] = "finer"
+expect_error("breakdown_conventions must equal shaping") { validate_manifest(diverged_panel, index, registry) }
+
+panel_without_shaping = clone(panel)
+panel_without_shaping.delete("shaping")
+expect_error("breakdown_conventions must equal shaping") { validate_manifest(panel_without_shaping, index, registry) }
+
+default_reviewer_panel = clone(panel)
+default_reviewer_panel["epic"]["changes"]["description"]["breakdown_conventions"]["reviewers"]["source"] = "default"
+default_reviewer_panel["shaping"]["reviewers"]["source"] = "default"
+expect_error("reviewers cannot come from a default") { validate_manifest(default_reviewer_panel, index, registry) }
+
+schema3_panel = clone(panel)
+schema3_panel["schema_version"] = 3
+%w[shaping sources].each { |key| schema3_panel.delete(key) }
+expect_error("breakdown_conventions requires schema 4") { validate_manifest(schema3_panel, index, registry) }
+
+panel_on_epic_v2 = clone(panel)
+panel_on_epic_v2["epic"]["template_id"] = "jira-epic-v2"
+panel_on_epic_v2["epic"]["template_sha256"] = index.dig("jira-epic-v2", "sha256")
+expect_error("unapproved description key") { validate_manifest(panel_on_epic_v2, index, registry) }
+
+# A verified panel is the live Epic's record, so it may differ from this Draft's shaping.
+verified_panel = clone(panel)
+description = verified_panel["epic"]["changes"]["description"]
+verified_panel["epic"] = {
+  "disposition" => "existing",
+  "verify" => {"template_id" => "jira-epic-v3", "template_sha256" => index.dig("jira-epic-v3", "sha256"),
+               "description_adf_sha256" => "c" * 64, "description" => description}
+}
+verified_panel["shaping"]["task_granularity"]["value"] = "finer"
+validate_manifest(verified_panel, index, registry)
+
+epic_v3_in_set3 = clone(panel)
+epic_v3_in_set3["template_set"]["version"] = 3
+expect_error("invalid Epic template") { validate_manifest(epic_v3_in_set3, index, registry) }
+
+# Set 4 still verifies an Epic written with epic-v2, which has no panel.
+epic_v2_in_set4 = clone(schema4_minimal)
+epic_v2_in_set4["template_set"]["version"] = 4
+validate_manifest(epic_v2_in_set4, index, registry)
+
+[3, 4].each do |schema|
+  no_epic_template = clone(schema3)
+  no_epic_template["schema_version"] = schema
+  no_epic_template["template_set"]["version"] = 1
+  expect_error("schema #{schema} requires an Epic-compatible template set") { validate_manifest(no_epic_template, index, registry) }
+end
+
+legacy_epic_in_set4 = clone(panel)
+legacy_epic_in_set4["epic"]["template_id"] = "jira-epic-v1"
+legacy_epic_in_set4["epic"]["template_sha256"] = index.dig("jira-epic-v1", "sha256")
+expect_error("invalid Epic template") { validate_manifest(legacy_epic_in_set4, index, registry) }
+
 # Schema-2/3 error precedence is unchanged: an unknown root field is reported before the schema version.
 unknown_before_schema = clone(schema3)
 unknown_before_schema["transition"] = "Done"
@@ -923,6 +1014,11 @@ RENDER_EXCEPTIONS = {
     "release_quality_additions" => "**Additions:**",
     "approved_exceptions" => "**Approved exceptions:**"
   },
+  "jira-epic-v3" => {
+    "out_of_scope" => "**Out:**",
+    "release_quality_additions" => "**Additions:**",
+    "approved_exceptions" => "**Approved exceptions:**"
+  },
   "jira-story-v2" => {
     "scenarios" => "## Acceptance scenarios",
     "documentation" => "### Documentation",
@@ -963,7 +1059,7 @@ RENDER_EXCEPTIONS = {
 
 # The exceptions table in the template guide is the documented form of RENDER_EXCEPTIONS.
 RENDER_LABELS = {
-  "jira-epic-v2" => "Epic v2", "jira-story-v2" => "Story v2", "jira-story-v3" => "Story v3",
+  "jira-epic-v2" => "Epic v2", "jira-epic-v3" => "Epic v3", "jira-story-v2" => "Story v2", "jira-story-v3" => "Story v3",
   "jira-task-v2" => "Task v2", "jira-spike-design-v2" => "Design Spike v2", "jira-spike-design-v3" => "Design Spike v3"
 }.freeze
 guide_rows = File.read(File.join(SKILL, "references", "jira-description-templates.md")).scan(/^\| ([^|]+?) \| ([a-z_]+) \| (.+?) \|$/)

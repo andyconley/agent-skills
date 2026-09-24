@@ -68,7 +68,7 @@ end
 
 def validate_registry(registry)
   raise ArgumentError, "registry schema must be 2" unless registry["schema_version"] == 2
-  raise ArgumentError, "default template set must be 3" unless registry["default_set_version"] == 3
+  raise ArgumentError, "default template set must be 4" unless registry["default_set_version"] == 4
   sets = registry.fetch("template_sets")
   raise ArgumentError, "missing template set 1" unless sets.key?(1)
   raise ArgumentError, "missing template set 2" unless sets.key?(2)
@@ -474,8 +474,12 @@ def validate_manifest(manifest, templates, registry)
   if schema == 2
     reject_unknown_keys(epic, %w[outcome target_duration], "schema-2 Epic")
   else
-    # Schema 4 keeps the schema-3 Epic rules unchanged.
-    raise ArgumentError, "schema 3 requires an Epic-compatible template set" unless template_supports_set?(templates.fetch("jira-epic-v2"), set_version)
+    # Schema 4 keeps the schema-3 Epic rules. Either schema binds any non-legacy Epic template
+    # the selected set supports; for sets 2 and 3 that is exactly jira-epic-v2.
+    epic_templates = templates.values.select do |candidate|
+      candidate["issue_type"] == "Epic" && candidate["variant"] != "legacy" && template_supports_set?(candidate, set_version)
+    end
+    raise ArgumentError, "schema #{schema} requires an Epic-compatible template set" if epic_templates.empty?
     disposition = epic["disposition"]
     raise ArgumentError, "missing Epic disposition" unless %w[existing update].include?(disposition)
     if disposition == "existing"
@@ -483,15 +487,16 @@ def validate_manifest(manifest, templates, registry)
       verify = epic.fetch("verify")
       reject_unknown_keys(verify, %w[template_id template_sha256 description_adf_sha256 description], "Epic verify")
       template = templates[verify["template_id"]]
-      raise ArgumentError, "invalid Epic template" unless template && template["id"] == "jira-epic-v2"
+      raise ArgumentError, "invalid Epic template" unless epic_templates.include?(template)
       raise ArgumentError, "Epic template hash mismatch" unless verify["template_sha256"] == template["sha256"]
       digest = verify["description_adf_sha256"]
       raise ArgumentError, "missing current ADF digest" unless digest&.match?(/\A[0-9a-f]{64}\z/)
       validate_epic_description(verify.fetch("description"), template)
+      validate_breakdown_conventions(verify.fetch("description"), manifest, schema, false)
     else
       reject_unknown_keys(epic, %w[disposition template_id template_sha256 expected_current changes], "update Epic")
       template = templates[epic["template_id"]]
-      raise ArgumentError, "invalid Epic template" unless template && template["id"] == "jira-epic-v2"
+      raise ArgumentError, "invalid Epic template" unless epic_templates.include?(template)
       raise ArgumentError, "Epic template hash mismatch" unless epic["template_sha256"] == template["sha256"]
       expected = epic.fetch("expected_current")
       reject_unknown_keys(expected, %w[description_adf_sha256], "expected_current")
@@ -500,6 +505,7 @@ def validate_manifest(manifest, templates, registry)
       changes = epic.fetch("changes")
       raise ArgumentError, "forbidden Epic field" unless changes.keys == ["description"]
       validate_epic_description(changes.fetch("description"), template)
+      validate_breakdown_conventions(changes.fetch("description"), manifest, schema, true)
     end
   end
 
@@ -516,6 +522,17 @@ def validate_manifest(manifest, templates, registry)
     # Schema 4 always binds a live Epic digest. Without Jira context, Draft falls back to schema 2.
     raise ArgumentError, "schema 4 requires Jira context" if manifest.dig("sources", "jira_context") == "absent"
   end
+end
+
+# The Epic's Breakdown conventions panel records the shaping answers. It exists only in
+# schema 4, and an update writes exactly the manifest's shaping block.
+def validate_breakdown_conventions(description, manifest, schema, update)
+  return unless description.key?("breakdown_conventions")
+  raise ArgumentError, "breakdown_conventions requires schema 4" unless schema == 4
+  validate_shaping(description["breakdown_conventions"])
+  return unless update
+
+  raise ArgumentError, "breakdown_conventions must equal shaping" unless description["breakdown_conventions"] == manifest["shaping"]
 end
 
 def validate_story_review(story)

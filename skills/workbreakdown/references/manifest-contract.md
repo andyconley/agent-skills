@@ -17,7 +17,7 @@ The manifest is the reviewed desired-state contract between planning and Jira. E
 
 template_set names the registry and version. The selected template must declare compatibility with that set version. Every nonlegacy or schema-3 description names an exact template_id and template_sha256 and contains all reviewed values needed by that template.
 
-New Drafts use template-set version 3. A schema-2 manifest bound to version 1 may omit template_sha256; resolve its template_id through the immutable v1 registry entry and verify the packaged asset hash. Never require a rewrite, migrate an approved manifest, or add fields to it.
+New Drafts use template-set version 4. A schema-2 manifest bound to version 1 may omit template_sha256; resolve its template_id through the immutable v1 registry entry and verify the packaged asset hash. Never require a rewrite, migrate an approved manifest, or add fields to it.
 
 Grandfathering covers the template asset and its declared key set. It does not cover content. The quality rules in [ticket-quality-and-completion.md](ticket-quality-and-completion.md) apply to every description in every template set. A v1-bound description with an unresolved placeholder, an `N/A` or `None` filler value, or generic evidence is rejected, and it may still use only the keys its own registry entry declares.
 
@@ -235,8 +235,8 @@ unknowns: []
 For update:
 
 - scope.epic_key is the only Epic identity.
-- the selected template set must be compatible with `jira-epic-v2`.
-- template_id must be jira-epic-v2 and the asset hash must match the installed registry.
+- the selected template set must support a non-legacy Epic template: `jira-epic-v2` for sets 2 and 3, and `jira-epic-v2` or `jira-epic-v3` for set 4.
+- template_id must name one of those templates, and the asset hash must match the installed registry.
 - expected_current.description_adf_sha256 is required and must be exactly 64 lowercase hexadecimal characters. Any other value, including a template token, an empty string, or a description of how to obtain the digest, is a manifest rejection.
 - Compute it by removing only `localId` properties from raw live ADF, then serializing UTF-8 JSON with sorted object keys, preserved array order, and no insignificant whitespace, then calculating SHA-256.
 - Capture the digest from live Jira before approval. Apply never computes, fills, refreshes, or substitutes this value. A digest derived from the state Apply just read proves nothing and satisfies no gate.
@@ -369,6 +369,15 @@ A Task bound to jira-task-placeholder-v3 holds undesigned work. Its summary star
 
 A Task that relies on an existing pattern carries classification.precedent with verdict found and a location. Draft never converts a Spike to a Task on verdict unverified, including when it cannot read the repository.
 
+### breakdown_conventions
+
+breakdown_conventions is an optional description key of jira-epic-v3. It renders as the Epic's Breakdown conventions panel and has the same shape and rules as shaping.
+
+- It is allowed only in schema 4.
+- On an Epic update, it must equal the manifest's shaping block exactly.
+- On a verified Epic, it is the live Epic's record and may differ from this Draft's shaping.
+- It is written only through the guarded Epic description update. Schema 4 adds no other Epic write.
+
 ### Migration
 
 Schema 2 and 3 manifests remain valid. Schema 4 adds optional blocks only. From the release that completes Slice A, a new Draft emits schema 4 when it has Jira context and schema 2 otherwise. It has Jira context when it can read the live Epic ADF and the Epic's existing children. Its output states which case applies.
@@ -427,11 +436,12 @@ Return:
 2. Epic outcome.
 3. Reconciliation table: each proposed item, mapped to the existing Jira key it reconciles to or to `new`.
 4. Material conflicts: each with both sources, their dates, and the winner, matching `sources.conflicts`.
-5. Proposed child table.
-6. Complete YAML manifest.
-7. Dependency edge list or graph using A -> B for A blocks B.
-8. Cycle, direction, duplicate, redundancy, missing-edge, and orphan checks.
-9. Questions that materially affect the breakdown.
+5. Divergence list: each shaping answer that differs from a sibling Epic's panel, naming the answer, the sibling Epic, the sibling's value, and the proposed value. Write `No divergence` when there is none.
+6. Proposed child table.
+7. Complete YAML manifest.
+8. Dependency edge list or graph using A -> B for A blocks B.
+9. Cycle, direction, duplicate, redundancy, missing-edge, and orphan checks.
+10. Questions that materially affect the breakdown.
 
 Use temporary references until Jira assigns keys. Do not create placeholder Jira keys.
 
