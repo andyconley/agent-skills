@@ -86,3 +86,13 @@ The first round's helper judged each mutant by grepping the suite output for `FA
 **Note on M3.** Two paths enforce `shaping`/`sources` on schema 2 and 3: the explicit gate and the schema-2/3 root key list. With the gate disabled, the root key check still rejects the manifest, but with the generic "manifest has unknown field" message, so the fragment assertion fails. The mutant proves that the specific error is load-bearing and that the rule is enforced twice. It does not prove the gate is the only enforcement.
 
 **Prose pin limits.** The pin strips the worked example and then checks two things: each schema-4 key name and enum value appears in the rule text, and each enumerated rule sentence matches text generated from the validator constants. Free-text rules, such as "location is required when verdict is found", are pinned only by their negative tests, not by the prose.
+
+## Date-check follow-up (maintainer request, after review acceptance)
+
+The error for an impossible date now reads "conflict source date must be a valid YYYY-MM-DD date". New cases reject 2026-13-45, 2026-02-29 and 2026-04-31, and a positive control accepts the leap day 2024-02-29. Mutants were judged by exit code:
+
+| Mutant | Result |
+| --- | --- |
+| M7: format-only check | caught |
+| M16: drop the format regex | caught |
+| M17: reject a valid leap day | caught |
