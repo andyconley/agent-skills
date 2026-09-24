@@ -30,9 +30,9 @@ When sources disagree, the most recent dated decision wins. A Jira amendment cou
 
 A conflict is material when it would change a classification, an owner, or a dependency edge. Record each material conflict in the manifest's `sources.conflicts` and report it with both sources and the winner.
 
-Flag a design source as stale when a later dated decision contradicts it. Never build on a stale claim without saying so.
+Flag a design source as stale, with `stale: true` on its conflict, when a later dated decision contradicts it. Never build on a stale claim without saying so.
 
-When Draft cannot read the live Epic and its children, it has no Jira context. Emit a schema-2 manifest and state `No Jira context: design claims are unverified` in the output. Record each design claim the breakdown relies on as an `unknowns` entry that begins `Unverified design claim:`.
+Draft has Jira context only when it can read the live Epic, including its description ADF, and the Epic's existing children. Otherwise it has no Jira context. Emit a schema-2 manifest and state `No Jira context: design claims are unverified` in the output. Record each design claim the breakdown relies on as an `unknowns` entry that begins `Unverified design claim:`.
 
 ## Dependency rules
 

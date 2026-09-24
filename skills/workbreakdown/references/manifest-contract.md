@@ -365,7 +365,7 @@ classification is an optional child key. Its keys are question, precedent, and p
 
 ### Migration
 
-Schema 2 and 3 manifests remain valid. Schema 4 adds optional blocks only. From the release that completes Slice A, a new Draft emits schema 4 when the live Epic ADF is available and schema 2 otherwise, and its output states which.
+Schema 2 and 3 manifests remain valid. Schema 4 adds optional blocks only. From the release that completes Slice A, a new Draft emits schema 4 when it has Jira context and schema 2 otherwise. It has Jira context when it can read the live Epic ADF and the Epic's existing children. Its output states which case applies.
 
 ## Child invariants
 
@@ -420,11 +420,12 @@ Return:
 1. Jira context: `Jira context: present`, or `No Jira context: design claims are unverified`. Without Jira context, the manifest is schema 2 and each design claim it relies on is an `unknowns` entry beginning `Unverified design claim:`.
 2. Epic outcome.
 3. Reconciliation table: each proposed item, mapped to the existing Jira key it reconciles to or to `new`.
-4. Proposed child table.
-5. Complete YAML manifest.
-6. Dependency edge list or graph using A -> B for A blocks B.
-7. Cycle, direction, duplicate, redundancy, missing-edge, and orphan checks.
-8. Questions that materially affect the breakdown.
+4. Material conflicts: each with both sources, their dates, and the winner, matching `sources.conflicts`.
+5. Proposed child table.
+6. Complete YAML manifest.
+7. Dependency edge list or graph using A -> B for A blocks B.
+8. Cycle, direction, duplicate, redundancy, missing-edge, and orphan checks.
+9. Questions that materially affect the breakdown.
 
 Use temporary references until Jira assigns keys. Do not create placeholder Jira keys.
 

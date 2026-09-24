@@ -78,6 +78,8 @@ done
 require_text "$MANIFEST_FILE" "A schema-4 manifest with jira_context absent is rejected."
 require_text "$MANIFEST_FILE" "Reconciliation table"
 require_text "$SKILL_FILE" "Without Jira context, emit schema 2"
+require_text "$SKILL_FILE" "reconciliation table, material conflicts"
+require_text "$MANIFEST_FILE" "Material conflicts: each with both sources"
 
 require_text "$JIRA_FILE" "stop before the first write"
 require_text "$JIRA_FILE" "direct user instruction to apply the exact"
