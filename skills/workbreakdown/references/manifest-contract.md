@@ -6,6 +6,7 @@ The manifest is the reviewed desired-state contract between planning and Jira. E
 
 - Use schema version 2 for child-only reconciliation.
 - Use schema version 3 only when the manifest must verify or update the scoped Epic.
+- Schema version 4 adds optional Draft provenance and per-child classification. Its Epic rules are the schema-3 rules.
 - Give the manifest a stable manifest ID and integer revision.
 - Bind approval to the exact content. For a standalone YAML file, calculate SHA-256 over its exact UTF-8 bytes after converting line endings to LF; include the final trailing newline.
 - Approval is external to the YAML. A manifest cannot authorize itself.
@@ -27,6 +28,8 @@ Reject an unknown set version or a template that does not list template_set.vers
 Reject unknown fields instead of ignoring them.
 
 - Root: schema_version, manifest_id, revision, template_set, scope, epic, children, dependencies, rank, unknowns.
+- Schema-4 root: the root fields, plus optional shaping and sources.
+- Schema-4 child: the child fields, plus optional classification.
 - template_set: id, version.
 - scope: parent_key, epic_key.
 - Schema-2 epic: outcome, target_duration.
@@ -244,6 +247,122 @@ For update:
 - Omitted Epic fields are preserved. They never become empty write values.
 
 Schema 3 does not authorize Epic creation, deletion, reparenting, retyping, ranking, or project, status, sprint, security, reporter, or arbitrary-field changes. It also does not authorize any non-field write on the Epic, including comments, attachments, watchers, worklogs, and labels.
+
+## Schema 4: Draft provenance and classification
+
+Schema 4 records how a Draft was shaped, which sources it read, and why each child has its classification. All three blocks are optional, and a schema-4 manifest without them is valid. The Epic block follows the schema-3 rules unchanged. Reject shaping, sources, or a child classification in a schema-2 or schema-3 manifest.
+
+```yaml
+schema_version: 4
+manifest_id: state-read-breakdown
+revision: 1
+template_set:
+  id: jira-house-templates
+  version: 2
+scope:
+  parent_key: INIT-1
+  epic_key: EPIC-1
+epic:
+  disposition: existing
+  verify:
+    template_id: jira-epic-v2
+    template_sha256: 18fefffa6ebb6fe385616ecc0dce1756a6238ce11cd5f41d972557313d42342e
+    description_adf_sha256: 9f2c4b7a1e5d8036c4a91b2e7f60d3a85c19e4b70d2f6a83915ce4d70b8a2f61
+    description: {} # the reviewed Epic description, as in schema 3
+shaping:
+  spike_shape:
+    value: vertical-slice
+    source: reused
+    from_epic: EPIC-2
+  task_granularity:
+    value: per-flow
+    source: asked
+  reviewers:
+    value: [API owner]
+    source: asked
+  source_order:
+    value: [jira-amendment, design-page]
+    source: default
+sources:
+  jira_context: present
+  existing_children:
+    - jira_key: WORK-301
+      read: [description, status, links, link_history]
+  conflicts:
+    - claim: State reads use the cached projection.
+      sources:
+        - ref: docs/design/state.md
+          date: "2026-01-10"
+        - ref: WORK-301
+          date: "2026-02-03"
+      winner: WORK-301
+      material: true
+      stale: true
+children:
+  - ref: choose-transport
+    type: Spike
+    variant: design
+    disposition: proposed
+    classification:
+      question: Which transport carries state reads within the payload limit?
+      precedent:
+        searched: [src/transport, docs/design]
+        verdict: none
+    # template binding and fields as for any proposed child
+  - ref: build-endpoint
+    type: Task
+    disposition: proposed
+    classification:
+      precedent:
+        searched: [src/api/handlers]
+        verdict: found
+        location: src/api/handlers/status.rb
+      placeholder:
+        defined_by: choose-transport
+    # template binding and fields as for any proposed child
+dependencies: []
+rank:
+  mode: scoped-relative
+  order: [choose-transport, build-endpoint]
+unknowns: []
+```
+
+### shaping
+
+shaping records the answers that shaped the Draft. Its entries are spike_shape, task_granularity, reviewers, and source_order, and each is optional. Reject any other entry.
+
+- Each entry contains value, source, and, only for a reused answer, from_epic.
+- source is asked, reused, or default.
+- from_epic is the Jira key of the sibling Epic the answer came from. It is required when source is reused and rejected otherwise.
+- spike_shape.value is vertical-slice or by-layer.
+- task_granularity.value is per-flow or finer.
+- reviewers.value and source_order.value are lists of nonempty names.
+
+### sources
+
+sources records what the Draft read and how it resolved disagreements between sources. Its keys are jira_context, existing_children, and conflicts, and each is optional.
+
+- jira_context is present or absent.
+- existing_children lists each existing Epic child the Draft read, as jira_key plus read. read is a nonempty subset of description, amendments, status, links, and link_history. existing_children must be empty or omitted when jira_context is absent.
+- conflicts lists each disagreement between sources. A conflict contains claim, sources, winner, material, and stale.
+  - sources lists at least two entries, each a ref and an ISO date in `YYYY-MM-DD` form. Quote the date so YAML keeps it as text.
+  - winner equals the ref of one listed source.
+  - material and stale are true or false.
+
+### classification
+
+classification is an optional child key. Its keys are question, precedent, and placeholder. Reject any other key.
+
+- question is the nonempty open question the child answers.
+- precedent contains searched, verdict, and location.
+  - searched lists the nonempty locations the Draft looked in.
+  - verdict is none, found, or unverified.
+  - location is where the precedent lives. It is required when verdict is found and optional otherwise.
+- placeholder is allowed only on a Task. It contains only defined_by, which is either the ref of a Spike child in the same manifest or an existing Jira key.
+
+### Migration
+
+Schema 2 and 3 manifests remain valid. Schema 4 adds optional blocks only. Draft emits schema 4 from the release that completes Slice A.
 
 ## Child invariants
 

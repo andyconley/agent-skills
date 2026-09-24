@@ -16,6 +16,15 @@ FIXTURES = File.join(__dir__, "fixtures")
 ROOT_KEYS = %w[schema_version manifest_id revision template_set scope epic children dependencies rank unknowns].freeze
 CHILD_KEYS = %w[ref jira_key type variant template_id template_sha256 disposition verify changes fields].freeze
 PAYLOAD_KEYS = %w[summary done_when evidence estimate description].freeze
+SCHEMA4_ROOT_KEYS = %w[shaping sources].freeze
+SHAPING_VALUES = {
+  "spike_shape" => %w[vertical-slice by-layer],
+  "task_granularity" => %w[per-flow finer],
+  "reviewers" => :list,
+  "source_order" => :list
+}.freeze
+SOURCES_READ = %w[description amendments status links link_history].freeze
+JIRA_KEY = /\A[A-Z][A-Z0-9]+-\d+\z/.freeze
 
 def fail_test(message)
   warn "FAIL: #{message}"
@@ -231,8 +240,109 @@ def validate_epic_description(description, template)
   raise ArgumentError, "Epic acceptance duplicates success measures" unless (success & conditions).empty?
 end
 
-def validate_child(child, templates, set_version)
-  reject_unknown_keys(child, CHILD_KEYS, "child")
+def nonempty_string_list?(value)
+  value.is_a?(Array) && value.all? { |item| item.is_a?(String) && !item.strip.empty? }
+end
+
+def validate_shaping(shaping)
+  raise ArgumentError, "shaping must be a map" unless shaping.is_a?(Hash)
+  reject_unknown_keys(shaping, SHAPING_VALUES.keys, "shaping")
+  shaping.each do |name, answer|
+    raise ArgumentError, "shaping #{name} must be a map" unless answer.is_a?(Hash)
+    reject_unknown_keys(answer, %w[value source from_epic], "shaping #{name}")
+    raise ArgumentError, "invalid shaping source" unless %w[asked reused default].include?(answer["source"])
+    if answer["source"] == "reused"
+      raise ArgumentError, "reused shaping answer requires from_epic" unless answer["from_epic"].to_s.match?(JIRA_KEY)
+    elsif answer.key?("from_epic")
+      raise ArgumentError, "from_epic is only allowed on reused answers"
+    end
+    allowed = SHAPING_VALUES.fetch(name)
+    if allowed == :list
+      raise ArgumentError, "shaping #{name} value must be a list of names" unless nonempty_string_list?(answer["value"])
+    else
+      raise ArgumentError, "invalid #{name} value" unless allowed.include?(answer["value"])
+    end
+  end
+end
+
+def validate_sources(sources)
+  raise ArgumentError, "sources must be a map" unless sources.is_a?(Hash)
+  reject_unknown_keys(sources, %w[jira_context existing_children conflicts], "sources")
+  context = sources["jira_context"]
+  raise ArgumentError, "invalid jira_context" unless context.nil? || %w[present absent].include?(context)
+
+  existing = sources.fetch("existing_children", [])
+  raise ArgumentError, "existing_children must be a list" unless existing.is_a?(Array)
+  raise ArgumentError, "existing_children requires Jira context" if context == "absent" && !existing.empty?
+  existing.each do |item|
+    raise ArgumentError, "existing_children entry must be a map" unless item.is_a?(Hash)
+    reject_unknown_keys(item, %w[jira_key read], "existing_children entry")
+    raise ArgumentError, "existing_children entry requires a Jira key" unless item["jira_key"].to_s.match?(JIRA_KEY)
+    read = item["read"]
+    raise ArgumentError, "invalid existing_children read" unless read.is_a?(Array) && !read.empty? && (read - SOURCES_READ).empty?
+  end
+
+  conflicts = sources.fetch("conflicts", [])
+  raise ArgumentError, "conflicts must be a list" unless conflicts.is_a?(Array)
+  conflicts.each do |conflict|
+    raise ArgumentError, "conflict must be a map" unless conflict.is_a?(Hash)
+    reject_unknown_keys(conflict, %w[claim sources winner material stale], "conflict")
+    raise ArgumentError, "conflict requires a claim" if conflict["claim"].to_s.strip.empty?
+    listed = conflict["sources"]
+    raise ArgumentError, "conflict requires at least two sources" unless listed.is_a?(Array) && listed.length >= 2
+    listed.each do |source|
+      raise ArgumentError, "conflict source must be a map" unless source.is_a?(Hash)
+      reject_unknown_keys(source, %w[ref date], "conflict source")
+      raise ArgumentError, "conflict source requires a ref" if source["ref"].to_s.strip.empty?
+      raise ArgumentError, "conflict source date must be YYYY-MM-DD" unless source["date"].is_a?(String) && source["date"].match?(/\A\d{4}-\d{2}-\d{2}\z/)
+    end
+    raise ArgumentError, "conflict winner is not a listed source" unless listed.map { |source| source["ref"] }.include?(conflict["winner"])
+    %w[material stale].each do |flag|
+      raise ArgumentError, "conflict #{flag} must be true or false" unless [true, false].include?(conflict[flag])
+    end
+  end
+end
+
+def validate_classification(classification, child)
+  raise ArgumentError, "classification must be a map" unless classification.is_a?(Hash)
+  reject_unknown_keys(classification, %w[question precedent placeholder], "classification")
+  if classification.key?("question")
+    raise ArgumentError, "classification question must be text" unless classification["question"].is_a?(String) && !classification["question"].strip.empty?
+  end
+  if classification.key?("precedent")
+    precedent = classification["precedent"]
+    raise ArgumentError, "precedent must be a map" unless precedent.is_a?(Hash)
+    reject_unknown_keys(precedent, %w[searched verdict location], "precedent")
+    raise ArgumentError, "precedent searched must list locations" unless nonempty_string_list?(precedent["searched"])
+    raise ArgumentError, "invalid precedent verdict" unless %w[none found unverified].include?(precedent["verdict"])
+    if precedent["verdict"] == "found"
+      raise ArgumentError, "found precedent requires location" if precedent["location"].to_s.strip.empty?
+    end
+  end
+  if classification.key?("placeholder")
+    raise ArgumentError, "placeholder is only allowed on a Task" unless child["type"] == "Task"
+    placeholder = classification["placeholder"]
+    raise ArgumentError, "placeholder must be a map" unless placeholder.is_a?(Hash)
+    reject_unknown_keys(placeholder, %w[defined_by], "placeholder")
+  end
+end
+
+def validate_placeholder_definers(children)
+  spikes = children.select { |child| child["type"] == "Spike" }.map { |child| child["ref"] }
+  children.each do |child|
+    defined_by = child.dig("classification", "placeholder", "defined_by")
+    next if child.dig("classification", "placeholder").nil?
+    next if spikes.include?(defined_by) || defined_by.to_s.match?(JIRA_KEY)
+    raise ArgumentError, "placeholder defined_by must name a Spike ref or a Jira key"
+  end
+end
+
+def validate_child(child, templates, set_version, schema)
+  if child.key?("classification")
+    raise ArgumentError, "classification requires schema 4" unless schema == 4
+    validate_classification(child["classification"], child)
+  end
+  reject_unknown_keys(child, schema == 4 ? CHILD_KEYS + %w[classification] : CHILD_KEYS, "child")
   raise ArgumentError, "unsupported child type" unless %w[Spike Task Story].include?(child["type"])
   disposition = child["disposition"]
   raise ArgumentError, "invalid child disposition" unless %w[existing update proposed].include?(disposition)
@@ -272,9 +382,12 @@ def validate_child(child, templates, set_version)
 end
 
 def validate_manifest(manifest, templates, registry)
-  reject_unknown_keys(manifest, ROOT_KEYS, "manifest")
   schema = manifest.fetch("schema_version")
-  raise ArgumentError, "unsupported schema" unless [2, 3].include?(schema)
+  raise ArgumentError, "unsupported schema" unless [2, 3, 4].include?(schema)
+  if schema < 4
+    SCHEMA4_ROOT_KEYS.each { |key| raise ArgumentError, "#{key} requires schema 4" if manifest.key?(key) }
+  end
+  reject_unknown_keys(manifest, schema == 4 ? ROOT_KEYS + SCHEMA4_ROOT_KEYS : ROOT_KEYS, "manifest")
   reject_unknown_keys(manifest.fetch("template_set"), %w[id version], "template_set")
   raise ArgumentError, "wrong registry" unless manifest.dig("template_set", "id") == "jira-house-templates"
   set_version = manifest.dig("template_set", "version")
@@ -285,6 +398,7 @@ def validate_manifest(manifest, templates, registry)
   if schema == 2
     reject_unknown_keys(epic, %w[outcome target_duration], "schema-2 Epic")
   else
+    # Schema 4 keeps the schema-3 Epic rules unchanged.
     raise ArgumentError, "schema 3 requires an Epic-compatible template set" unless template_supports_set?(templates.fetch("jira-epic-v2"), set_version)
     disposition = epic["disposition"]
     raise ArgumentError, "missing Epic disposition" unless %w[existing update].include?(disposition)
@@ -316,7 +430,12 @@ def validate_manifest(manifest, templates, registry)
   children = manifest.fetch("children")
   refs = children.map { |child| child["ref"] }
   raise ArgumentError, "child refs must be unique and nonempty" if refs.any? { |ref| ref.to_s.empty? } || refs.uniq.length != refs.length
-  children.each { |child| validate_child(child, templates, set_version) }
+  children.each { |child| validate_child(child, templates, set_version, schema) }
+  return unless schema == 4
+
+  validate_shaping(manifest["shaping"]) if manifest.key?("shaping")
+  validate_sources(manifest["sources"]) if manifest.key?("sources")
+  validate_placeholder_definers(children)
 end
 
 def validate_story_review(story)
@@ -617,6 +736,115 @@ swapped_variant = clone(v2_children)
 design_child = swapped_variant["children"].find { |child| child["ref"] == "choose-transport" }
 design_child["variant"] = "investigation"
 expect_error("Spike variant mismatch") { validate_manifest(swapped_variant, index, registry) }
+
+# Schema 4 adds optional Draft provenance and per-child classification.
+schema4_minimal = load_yaml(File.join(FIXTURES, "schema4-minimal-valid.yaml"))
+validate_manifest(schema4_minimal, index, registry)
+assert(!schema4_minimal.key?("shaping") && !schema4_minimal.key?("sources"), "minimal schema-4 fixture carries optional blocks")
+
+schema4 = load_yaml(File.join(FIXTURES, "schema4-full-valid.yaml"))
+validate_manifest(schema4, index, registry)
+assert(%w[spike_shape task_granularity reviewers source_order].all? { |key| schema4["shaping"].key?(key) }, "full schema-4 fixture lost a shaping entry")
+assert(schema4["children"].all? { |child| child.key?("classification") }, "full schema-4 fixture lost a classification")
+
+def schema4_child(manifest, ref)
+  manifest["children"].find { |child| child["ref"] == ref }
+end
+
+unknown_shaping = clone(schema4)
+unknown_shaping["shaping"]["estimate_mode"] = {"value" => "points", "source" => "asked"}
+expect_error("shaping has unknown field") { validate_manifest(unknown_shaping, index, registry) }
+
+reused_without_epic = clone(schema4)
+reused_without_epic["shaping"]["spike_shape"].delete("from_epic")
+expect_error("reused shaping answer requires from_epic") { validate_manifest(reused_without_epic, index, registry) }
+
+epic_without_reuse = clone(schema4)
+epic_without_reuse["shaping"]["task_granularity"]["from_epic"] = "EPIC-2"
+expect_error("from_epic is only allowed on reused answers") { validate_manifest(epic_without_reuse, index, registry) }
+
+bad_spike_shape = clone(schema4)
+bad_spike_shape["shaping"]["spike_shape"]["value"] = "by-component"
+expect_error("invalid spike_shape value") { validate_manifest(bad_spike_shape, index, registry) }
+
+bad_answer_source = clone(schema4)
+bad_answer_source["shaping"]["reviewers"]["source"] = "invented"
+expect_error("invalid shaping source") { validate_manifest(bad_answer_source, index, registry) }
+
+one_source_conflict = clone(schema4)
+one_source_conflict["sources"]["conflicts"].first["sources"] = one_source_conflict["sources"]["conflicts"].first["sources"].first(1)
+expect_error("conflict requires at least two sources") { validate_manifest(one_source_conflict, index, registry) }
+
+unlisted_winner = clone(schema4)
+unlisted_winner["sources"]["conflicts"].first["winner"] = "WORK-999"
+expect_error("conflict winner is not a listed source") { validate_manifest(unlisted_winner, index, registry) }
+
+bad_conflict_date = clone(schema4)
+bad_conflict_date["sources"]["conflicts"].first["sources"].first["date"] = "last week"
+expect_error("conflict source date must be YYYY-MM-DD") { validate_manifest(bad_conflict_date, index, registry) }
+
+children_without_jira = clone(schema4)
+children_without_jira["sources"]["jira_context"] = "absent"
+expect_error("existing_children requires Jira context") { validate_manifest(children_without_jira, index, registry) }
+
+absent_context = clone(schema4)
+absent_context["sources"]["jira_context"] = "absent"
+absent_context["sources"]["existing_children"] = []
+validate_manifest(absent_context, index, registry)
+
+bad_read = clone(schema4)
+bad_read["sources"]["existing_children"].first["read"] = ["comments"]
+expect_error("invalid existing_children read") { validate_manifest(bad_read, index, registry) }
+
+bad_verdict = clone(schema4)
+schema4_child(bad_verdict, "choose-transport")["classification"]["precedent"]["verdict"] = "probably"
+expect_error("invalid precedent verdict") { validate_manifest(bad_verdict, index, registry) }
+
+found_without_location = clone(schema4)
+schema4_child(found_without_location, "build-endpoint")["classification"]["precedent"].delete("location")
+expect_error("found precedent requires location") { validate_manifest(found_without_location, index, registry) }
+
+spike_placeholder = clone(schema4)
+schema4_child(spike_placeholder, "choose-transport")["classification"]["placeholder"] = {"defined_by" => "measure-staleness"}
+expect_error("placeholder is only allowed on a Task") { validate_manifest(spike_placeholder, index, registry) }
+
+missing_definer = clone(schema4)
+schema4_child(missing_definer, "build-endpoint")["classification"]["placeholder"]["defined_by"] = "no-such-spike"
+expect_error("placeholder defined_by must name a Spike") { validate_manifest(missing_definer, index, registry) }
+
+non_spike_definer = clone(schema4)
+schema4_child(non_spike_definer, "build-endpoint")["classification"]["placeholder"]["defined_by"] = "build-endpoint"
+expect_error("placeholder defined_by must name a Spike") { validate_manifest(non_spike_definer, index, registry) }
+
+jira_definer = clone(schema4)
+schema4_child(jira_definer, "build-endpoint")["classification"]["placeholder"]["defined_by"] = "WORK-302"
+validate_manifest(jira_definer, index, registry)
+
+unknown_classification = clone(schema4)
+schema4_child(unknown_classification, "choose-transport")["classification"]["owner"] = "API owner"
+expect_error("classification has unknown field") { validate_manifest(unknown_classification, index, registry) }
+
+schema3_classification = clone(v2_children)
+schema3_classification["schema_version"] = 3
+schema3_classification["epic"] = clone(schema3["epic"])
+schema3_classification["children"].first["classification"] = {"question" => "Which transport?"}
+expect_error("classification requires schema 4") { validate_manifest(schema3_classification, index, registry) }
+
+schema3_shaping = clone(schema3)
+schema3_shaping["shaping"] = clone(schema4["shaping"])
+expect_error("shaping requires schema 4") { validate_manifest(schema3_shaping, index, registry) }
+
+schema3_sources = clone(schema3)
+schema3_sources["sources"] = clone(schema4["sources"])
+expect_error("sources requires schema 4") { validate_manifest(schema3_sources, index, registry) }
+
+schema5 = clone(schema4_minimal)
+schema5["schema_version"] = 5
+expect_error("unsupported schema") { validate_manifest(schema5, index, registry) }
+
+schema4_epic = clone(schema4)
+schema4_epic["epic"]["changes"]["status"] = "Done"
+expect_error("forbidden Epic field") { validate_manifest(schema4_epic, index, registry) }
 
 story = load_yaml(File.join(FIXTURES, "story-lifecycle.yaml"))
 validate_story_description(story.fetch("description"))

@@ -70,7 +70,9 @@ Automatic skill selection does not authorize Jira changes. Apply requires:
 
 If any condition is missing, stop before the first write and return the proposed delta or capability gap. An API success response is not proof. Apply finishes only after final readback matches the approved manifest.
 
-Manifest schema 2 remains child-only. Only schema 3 can verify or update the scoped Epic, and only an explicit `epic.disposition: update` with exact template binding, expected-current ADF digest, and approved description content authorizes that update. Epic creation, deletion, reparenting, retyping, ranking, and status or other omitted-field changes remain forbidden.
+Manifest schema 2 remains child-only. Only schema 3 or 4 can verify or update the scoped Epic, and only an explicit `epic.disposition: update` with exact template binding, expected-current ADF digest, and approved description content authorizes that update. Epic creation, deletion, reparenting, retyping, ranking, and status or other omitted-field changes remain forbidden.
+
+Schema 4 adds optional Draft provenance (`shaping`, `sources`) and per-child `classification`; it keeps the schema-3 Epic rules.
 
 Do not invent Jira keys, live state, estimates, evidence, permissions, acceptance criteria, or dependencies. State assumptions as assumptions. Ask only questions that materially change classification, scope, acceptance, or dependency direction.
 

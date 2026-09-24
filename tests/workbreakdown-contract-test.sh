@@ -40,6 +40,8 @@ require_text "$MANIFEST_FILE" "changes may contain only description"
 require_text "$MANIFEST_FILE" "Absence from dependencies means preserve the live link."
 require_text "$MANIFEST_FILE" "Never change a link between two external issues."
 require_text "$MANIFEST_FILE" "template_sha256:"
+for field in "schema_version: 4" "shaping:" "sources:" "classification:"; do require_text "$MANIFEST_FILE" "$field"; done
+require_text "$MANIFEST_FILE" "Schema 2 and 3 manifests remain valid."
 
 for template in epic-v1 epic-v2 story-v1 story-v2 story-v3 task-v1 task-v2 spike-v1 spike-design-v2 spike-investigation-v2; do
   [ -f "$REPO_ROOT/skills/workbreakdown/assets/jira-templates/$template.md" ] || fail "missing bundled $template template"
