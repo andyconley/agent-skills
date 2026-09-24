@@ -25,7 +25,10 @@
         ".flow/runs/workbreakdown-skill-improvements/review.md",
         ".flow/runs/workbreakdown-slice-a-completion/reviews/plan-business-analyst.md",
         ".flow/runs/workbreakdown-slice-a-completion/reviews/plan-product-manager.md",
-        ".flow/runs/workbreakdown-slice-a-completion/reviews/plan-architect.md"
+        ".flow/runs/workbreakdown-slice-a-completion/reviews/plan-architect.md",
+        ".flow/runs/workbreakdown-slice-a-completion/plan.md",
+        ".flow/runs/workbreakdown-slice-a-completion/validation-plan.md",
+        ".flow/runs/workbreakdown-slice-a-completion/implementation-handoff.md"
       ],
       "read_scopes": [
         "skills/workbreakdown",
@@ -33,7 +36,9 @@
         ".flow"
       ],
       "write_scopes": [
-        ".flow/runs/workbreakdown-slice-a-completion"
+        ".flow/runs/workbreakdown-slice-a-completion",
+        "skills/workbreakdown",
+        "tests"
       ],
       "read_only": false,
       "required_capabilities": [
@@ -200,6 +205,138 @@
         "mode": "concurrent",
         "group": "plan-shaping"
       }
+    },
+    {
+      "id": "step-gate-quality-reviewer",
+      "lane": "implement",
+      "role": "quality-reviewer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/quality-reviewer"
+      },
+      "brief_path": ".flow/runs/workbreakdown-slice-a-completion/plan.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-slice-a-completion/plan.md",
+        ".flow/runs/workbreakdown-slice-a-completion/validation-plan.md"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-slice-a-completion/reviews/step-gates-quality.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "per-step findings with severity and file:line"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "step-gate"
+      }
+    },
+    {
+      "id": "step-gate-test-engineer",
+      "lane": "implement",
+      "role": "test-engineer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/test-engineer"
+      },
+      "brief_path": ".flow/runs/workbreakdown-slice-a-completion/plan.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-slice-a-completion/plan.md",
+        ".flow/runs/workbreakdown-slice-a-completion/validation-plan.md"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-slice-a-completion/reviews/step-gates-test.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "per-step test coverage findings with file:line"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "step-gate"
+      }
+    },
+    {
+      "id": "handback-tech-writer",
+      "lane": "implement",
+      "role": "tech-writer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/tech-writer"
+      },
+      "brief_path": ".flow/runs/workbreakdown-slice-a-completion/validation-results.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-slice-a-completion/plan.md",
+        ".flow/runs/workbreakdown-slice-a-completion/validation-results.md"
+      ],
+      "read_scopes": [
+        ".flow/runs/workbreakdown-slice-a-completion"
+      ],
+      "write_scopes": [
+        ".flow/runs/workbreakdown-slice-a-completion/HANDOFF.md"
+      ],
+      "read_only": false,
+      "required_capabilities": [
+        {
+          "name": "filesystem-write",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-slice-a-completion/HANDOFF.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "handback states what changed, proof, risks, next actions without chat context"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "serialized",
+        "group": "coordinator"
+      }
     }
   ],
   "shared_state": [],
@@ -210,7 +347,8 @@
   },
   "verification": {
     "producer_assignments": [
-      "coordinator"
+      "coordinator",
+      "handback-tech-writer"
     ],
     "evidence_collector_assignment": "coordinator",
     "verifier_assignment": "coordinator",
