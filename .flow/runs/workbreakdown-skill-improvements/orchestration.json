@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "work_id": "workbreakdown-skill-improvements",
-  "mode": "single",
+  "mode": "delegated",
   "risk": {
     "hard_triggers": [],
     "aggravating_factors": [],
@@ -56,11 +56,199 @@
         "mode": "serialized",
         "group": "coordinator"
       }
+    },
+    {
+      "id": "review-lead-developer",
+      "lane": "implement",
+      "role": "lead-developer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/lead-developer"
+      },
+      "brief_path": ".flow/runs/workbreakdown-skill-improvements/briefs/chunk1-review.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-skill-improvements/plan.md",
+        ".flow/runs/workbreakdown-skill-improvements/validation-plan.md",
+        "skills/workbreakdown/references/manifest-contract.md",
+        "tests/workbreakdown/workbreakdown-template-contract-test.rb",
+        "tests/workbreakdown/fixtures/schema4-full-valid.yaml"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs/workbreakdown-skill-improvements"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-skill-improvements/reviews/chunk1-lead-developer.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "findings on code structure and fit with the existing validator, each with file:line and a failure scenario"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "chunk1-review"
+      }
+    },
+    {
+      "id": "review-test-engineer",
+      "lane": "implement",
+      "role": "test-engineer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/test-engineer"
+      },
+      "brief_path": ".flow/runs/workbreakdown-skill-improvements/briefs/chunk1-review.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-skill-improvements/plan.md",
+        ".flow/runs/workbreakdown-skill-improvements/validation-plan.md",
+        "skills/workbreakdown/references/manifest-contract.md",
+        "tests/workbreakdown/workbreakdown-template-contract-test.rb",
+        "tests/workbreakdown/fixtures/schema4-full-valid.yaml"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs/workbreakdown-skill-improvements"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-skill-improvements/reviews/chunk1-test-engineer.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "findings on negative-case coverage and whether each test bites, each with file:line and a failure scenario"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "chunk1-review"
+      }
+    },
+    {
+      "id": "review-quality-reviewer",
+      "lane": "implement",
+      "role": "quality-reviewer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/quality-reviewer"
+      },
+      "brief_path": ".flow/runs/workbreakdown-skill-improvements/briefs/chunk1-review.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-skill-improvements/plan.md",
+        ".flow/runs/workbreakdown-skill-improvements/validation-plan.md",
+        "skills/workbreakdown/references/manifest-contract.md",
+        "tests/workbreakdown/workbreakdown-template-contract-test.rb",
+        "tests/workbreakdown/fixtures/schema4-full-valid.yaml"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs/workbreakdown-skill-improvements"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-skill-improvements/reviews/chunk1-quality-reviewer.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "findings on acceptance readiness against plan.md, each with file:line and a failure scenario"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "chunk1-review"
+      }
+    },
+    {
+      "id": "handback-tech-writer",
+      "lane": "implement",
+      "role": "tech-writer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/tech-writer"
+      },
+      "brief_path": ".flow/runs/workbreakdown-skill-improvements/validation-results.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-skill-improvements/plan.md",
+        ".flow/runs/workbreakdown-skill-improvements/validation-results.md",
+        ".flow/runs/workbreakdown-skill-improvements/reviews/chunk1-quality-reviewer.md",
+        ".flow/runs/workbreakdown-skill-improvements/reviews/chunk1-test-engineer.md",
+        ".flow/runs/workbreakdown-skill-improvements/reviews/chunk1-lead-developer.md"
+      ],
+      "read_scopes": [
+        ".flow/runs/workbreakdown-skill-improvements"
+      ],
+      "write_scopes": [
+        ".flow/runs/workbreakdown-skill-improvements/HANDOFF.md"
+      ],
+      "read_only": false,
+      "required_capabilities": [
+        {
+          "name": "filesystem-write",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-skill-improvements/HANDOFF.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "handback states what changed, proof, risks, next actions without chat context"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "serialized",
+        "group": "coordinator"
+      }
     }
   ],
   "shared_state": [],
   "reconciliation": {
-    "artifact_path": ".flow/runs/workbreakdown-skill-improvements/solution.md",
+    "artifact_path": ".flow/runs/workbreakdown-skill-improvements/reviews/chunk1-quality-reviewer.md",
     "status": "resolved",
     "claims": []
   },
@@ -69,8 +257,8 @@
       "coordinator"
     ],
     "evidence_collector_assignment": "coordinator",
-    "verifier_assignment": "coordinator",
-    "independent": false,
+    "verifier_assignment": "review-quality-reviewer",
+    "independent": true,
     "artifact_path": ".flow/runs/workbreakdown-skill-improvements/solution.md"
   }
 }
