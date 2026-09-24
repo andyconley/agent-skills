@@ -87,14 +87,14 @@ The `review_evidence.approved_exceptions` list renders under the `**Approved exc
 
 ## Authorization boundary
 
-The template controls structure. It does not authorize content. Apply renders only values in the approved manifest. Adding scenarios, assumptions, criteria, exceptions, references, or technical detail requires a new manifest revision, Review, digest, and approval.
+The template controls structure. It does not authorize content. Apply renders only values in the approved manifest. Adding scenarios, assumptions, criteria, exceptions, references, or technical detail requires a new manifest revision, Review, digest, and approval. Rendering a placeholder Task's approved `defined_by` ref as the Jira key Apply created for that Spike is key resolution, not added content.
 
 ## Review checks
 
 Flag only material defects:
 
 - missing required content
-- unresolved placeholders or empty sections
+- unresolved template tokens or empty sections
 - vague or generic evidence
 - repeated facts or criteria
 - Epic acceptance criteria copied from success measures

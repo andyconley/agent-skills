@@ -57,7 +57,7 @@ Before writing:
 1. Compute or obtain the approved manifest identity and confirm it matches the user's authorization.
 2. Validate every manifest invariant.
 3. Read live parent, raw Epic ADF, all relevant Epic fields, all direct children, ranks, and links.
-4. Map each manifest reference to an existing key or planned creation.
+4. Map each manifest reference to an existing key or planned creation. Confirm that each Jira key named as a placeholder Task's `defined_by` is a Spike.
 5. Confirm the target hierarchy and required issue and link types exist.
 6. Build the intended edge list as `A -> B`.
 7. Check missing, duplicate, reversed, redundant, cyclic, and cross-Epic edges.
@@ -110,7 +110,7 @@ After mutation:
 1. Read raw Epic ADF, relevant Epic fields, children, ranks, and links again.
 2. For a schema-3 Epic update, compare the normalized ADF with the approved rendered description. Remove regenerated `localId` properties only. Serialize UTF-8 JSON with sorted object keys, preserved array order, and no insignificant whitespace before hashing. Preserve text, headings, panels, tables, lists, marks, code-block language, and link targets.
 3. Compare the post-write preservation projection with preflight. Prove every unapproved observable business field remained unchanged, and prove the projected field count matches the count recorded at preflight. A projection that shrank between preflight and readback is an unresolved mismatch, not a pass. Do not compare server-managed timestamps, history, audit records, or computed fields.
-4. Compare the remaining live state with the complete approved manifest.
+4. Compare the remaining live state with the complete approved manifest. Compare a placeholder Task's `defined_by` after mapping its ref to the created key.
 5. Check missing and duplicate items, field mismatches, reversed links, cycles, unauthorized deletions, rank differences, and unrelated-order preservation.
 6. Return the complete reference-to-key mapping and Epic journal entry.
 7. Report Epic and child counts for `created`, `updated`, `unchanged`, `failed`, `restored`, `untouched`, and `verified`.

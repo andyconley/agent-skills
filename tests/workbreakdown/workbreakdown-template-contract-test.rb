@@ -124,7 +124,7 @@ validate_manifest(legacy_with_description, index, registry)
 
 legacy_placeholder = clone(legacy_with_description)
 legacy_placeholder["children"].first["verify"]["description"]["context"] = "<fill in the context>"
-expect_error("unresolved placeholder") { validate_manifest(legacy_placeholder, index, registry) }
+expect_error("unresolved template token") { validate_manifest(legacy_placeholder, index, registry) }
 
 legacy_filler = clone(legacy_with_description)
 legacy_filler["children"].first["verify"]["description"]["technical_considerations"] = "N/A"
@@ -575,6 +575,35 @@ validate_manifest(placeholder_fallback, index, registry)
 schema4_child(placeholder_fallback, placeholder_ref)["fields"]["description"]["defined_by"] = "no-such-spike"
 expect_error("placeholder defined_by must name a Spike") { validate_manifest(placeholder_fallback, index, registry) }
 
+# The placeholder rules hold for every disposition payload, not only proposed fields.
+{"update" => "changes", "existing" => "verify"}.each do |disposition, payload_key|
+  keyed = clone(set4)
+  child = schema4_child(keyed, placeholder_ref)
+  child["disposition"] = disposition
+  child["jira_key"] = "WORK-404"
+  child[payload_key] = child.delete("fields")
+  validate_manifest(keyed, index, registry)
+
+  estimated = clone(keyed)
+  schema4_child(estimated, placeholder_ref)[payload_key]["estimate"] = 1
+  expect_error("placeholder Task carries no estimate") { validate_manifest(estimated, index, registry) }
+
+  unprefixed_keyed = clone(keyed)
+  schema4_child(unprefixed_keyed, placeholder_ref)[payload_key]["summary"] = "Wire the chosen state transport"
+  expect_error("placeholder Task summary requires the [PLACEHOLDER] prefix") { validate_manifest(unprefixed_keyed, index, registry) }
+
+  unclassified_keyed = clone(keyed)
+  schema4_child(unclassified_keyed, placeholder_ref).delete("classification")
+  expect_error("placeholder Task requires classification placeholder") { validate_manifest(unclassified_keyed, index, registry) }
+end
+
+# The prefix is exact: uppercase, bracketed, and followed by one space.
+["[Placeholder] Wire the chosen state transport", "[PLACEHOLDER]Wire the chosen state transport", "PLACEHOLDER: Wire the chosen state transport"].each do |near_miss|
+  near = clone(set4)
+  schema4_child(near, placeholder_ref)["fields"]["summary"] = near_miss
+  expect_error("placeholder Task summary requires the [PLACEHOLDER] prefix") { validate_manifest(near, index, registry) }
+end
+
 placeholder_in_set3 = clone(set4)
 placeholder_in_set3["template_set"]["version"] = 3
 placeholder_in_set3["children"].select! { |child| %w[build-endpoint wire-transport].include?(child["ref"]) }
@@ -999,7 +1028,7 @@ validate_legacy_story_review(legacy_story, legacy_instrumentation_exception)
 
 placeholder = clone(schema3)
 placeholder["epic"]["changes"]["description"]["problem"] = "<problem>"
-expect_error("unresolved placeholder") { validate_manifest(placeholder, index, registry) }
+expect_error("unresolved template token") { validate_manifest(placeholder, index, registry) }
 
 generic = clone(story["description"])
 generic["automated_tests"].first["expected_evidence"] = "tests added"

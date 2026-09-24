@@ -12,7 +12,7 @@ Required core fields must contain specific, actionable content. Conditional fiel
 
 Reject:
 
-- unresolved placeholders or empty headings
+- unresolved template tokens or empty headings
 - repeated facts or acceptance conditions
 - generic claims such as `tests added`, `metrics added`, `dashboard updated`, or `docs reviewed`
 - generic Definition-of-Done text copied into every ticket

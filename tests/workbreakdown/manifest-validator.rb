@@ -188,7 +188,7 @@ def validate_quality(value)
     value.each { |child| validate_quality(child) }
   when String
     normalized = value.strip.downcase
-    raise ArgumentError, "unresolved placeholder" if value.match?(/<[^>]+>/)
+    raise ArgumentError, "unresolved template token" if value.match?(/<[^>]+>/)
     raise ArgumentError, "empty filler value" if %w[n/a none].include?(normalized)
     raise ArgumentError, "generic evidence" if ["tests added", "documentation updated", "docs reviewed", "metrics added", "dashboard updated", "add logging"].include?(normalized)
   end

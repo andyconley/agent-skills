@@ -19,7 +19,7 @@ template_set names the registry and version. The selected template must declare 
 
 New Drafts use template-set version 4. A schema-2 manifest bound to version 1 may omit template_sha256; resolve its template_id through the immutable v1 registry entry and verify the packaged asset hash. Never require a rewrite, migrate an approved manifest, or add fields to it.
 
-Grandfathering covers the template asset and its declared key set. It does not cover content. The quality rules in [ticket-quality-and-completion.md](ticket-quality-and-completion.md) apply to every description in every template set. A v1-bound description with an unresolved placeholder, an `N/A` or `None` filler value, or generic evidence is rejected, and it may still use only the keys its own registry entry declares.
+Grandfathering covers the template asset and its declared key set. It does not cover content. The quality rules in [ticket-quality-and-completion.md](ticket-quality-and-completion.md) apply to every description in every template set. A v1-bound description with an unresolved template token, an `N/A` or `None` filler value, or generic evidence is rejected, and it may still use only the keys its own registry entry declares.
 
 Reject an unknown set version or a template that does not list template_set.version in `compatible_set_versions`. When that metadata is absent, only the template's own `set_version` is compatible.
 
@@ -361,7 +361,7 @@ classification is an optional child key. Its keys are question, precedent, and p
   - searched lists at least one nonempty location the Draft looked in.
   - verdict is none, found, or unverified.
   - location is where the precedent lives. It is required when verdict is found and optional otherwise.
-- placeholder is allowed only on a Task bound to jira-task-placeholder-v3, and that template requires it. It contains only defined_by, which is either the ref of a Spike child in the same manifest or an existing Jira key.
+- placeholder is allowed only on a Task bound to jira-task-placeholder-v3, and in schema 4 that template requires it. It contains only defined_by, which is either the ref of a Spike child in the same manifest or an existing Jira key.
 
 A child bound to jira-spike-design-v3 or jira-spike-investigation-v3 states its question and precedent in its description in every schema. In schema 4 it also requires classification.question and classification.precedent, and the description's question and precedent must equal them. A verdict of none is a finding, not filler, so the description quality rules do not reject it. Its reviewers name people from a source or a shaping answer. When nobody is known, omit reviewers and record the gap in unknowns.
 
