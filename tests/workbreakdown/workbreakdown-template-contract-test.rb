@@ -308,7 +308,7 @@ def validate_sources(sources)
       raise ArgumentError, "conflict source must be a map" unless source.is_a?(Hash)
       reject_unknown_keys(source, %w[ref date], "conflict source")
       raise ArgumentError, "conflict source requires a ref" if source["ref"].to_s.strip.empty?
-      raise ArgumentError, "conflict source date must be YYYY-MM-DD" unless iso_date?(source["date"])
+      raise ArgumentError, "conflict source date must be a valid YYYY-MM-DD date" unless iso_date?(source["date"])
     end
     raise ArgumentError, "conflict sources must be distinct" unless listed.map { |source| source["ref"].to_s.strip }.uniq.length == listed.length
     raise ArgumentError, "conflict winner is not a listed source" unless listed.map { |source| source["ref"] }.include?(conflict["winner"])
@@ -800,7 +800,7 @@ expect_error("conflict winner is not a listed source") { validate_manifest(unlis
 
 bad_conflict_date = clone(schema4)
 bad_conflict_date["sources"]["conflicts"].first["sources"].first["date"] = "last week"
-expect_error("conflict source date must be YYYY-MM-DD") { validate_manifest(bad_conflict_date, index, registry) }
+expect_error("conflict source date must be a valid YYYY-MM-DD date") { validate_manifest(bad_conflict_date, index, registry) }
 
 children_without_jira = clone(schema4)
 children_without_jira["sources"]["jira_context"] = "absent"
@@ -897,9 +897,15 @@ bad_child_key = clone(schema4)
 bad_child_key["sources"]["existing_children"].first["jira_key"] = "work 301"
 expect_error("existing_children entry requires a Jira key") { validate_manifest(bad_child_key, index, registry) }
 
-impossible_date = clone(schema4)
-impossible_date["sources"]["conflicts"].first["sources"].first["date"] = "2026-13-45"
-expect_error("conflict source date must be YYYY-MM-DD") { validate_manifest(impossible_date, index, registry) }
+%w[2026-13-45 2026-02-29 2026-04-31].each do |impossible|
+  impossible_date = clone(schema4)
+  impossible_date["sources"]["conflicts"].first["sources"].first["date"] = impossible
+  expect_error("conflict source date must be a valid YYYY-MM-DD date") { validate_manifest(impossible_date, index, registry) }
+end
+
+leap_day = clone(schema4)
+leap_day["sources"]["conflicts"].first["sources"].first["date"] = "2024-02-29"
+validate_manifest(leap_day, index, registry)
 
 same_source = clone(schema4)
 same_source["sources"]["conflicts"].first["sources"].last["ref"] = same_source["sources"]["conflicts"].first["sources"].first["ref"]
