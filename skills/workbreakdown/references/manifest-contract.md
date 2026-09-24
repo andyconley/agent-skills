@@ -2,6 +2,8 @@
 
 The manifest is the reviewed desired-state contract between planning and Jira. Every Draft includes a complete manifest, even when no Jira change is expected.
 
+The manifest must parse as YAML. Quote a string value in double quotes when it contains `: ` or ` #`, starts with a quote, bracket, brace, `*`, `&`, `!`, `%`, `@`, or a backtick, or would otherwise read as a number, date, or boolean. Escape any double quote inside it.
+
 ## Identity and approval
 
 - Use schema version 2 for child-only reconciliation.

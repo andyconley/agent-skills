@@ -123,6 +123,7 @@ require_text "$SOP_FILE" "In a schema-4 Draft, classify every Spike, existing or
 require_text "$SOP_FILE" "its intended location, which is always named"
 require_text "$MANIFEST_FILE" "Every documentation artifact names its artifact, audience, and intended location; only its owner is optional."
 require_text "$MANIFEST_FILE" "and the Epic exit condition or Story it serves"
+require_text "$MANIFEST_FILE" "The manifest must parse as YAML."
 require_text "$SOP_FILE" "When nobody is named, omit the \`reviewers\` entry and record the gap in \`unknowns\`."
 require_text "$SOP_FILE" "When siblings disagree, ask. When no sibling has an answer, ask."
 require_text "$SOP_FILE" "A run is non-interactive when the request says so or when no reply is possible"
