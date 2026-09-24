@@ -903,6 +903,13 @@ expect_error("existing_children entry requires a Jira key") { validate_manifest(
   expect_error("conflict source date must be a valid YYYY-MM-DD date") { validate_manifest(impossible_date, index, registry) }
 end
 
+# Other ISO 8601 forms parse as dates but are not the contract's YYYY-MM-DD form.
+%w[20260203 2026-W06-2 2026-034].each do |other_form|
+  other_date = clone(schema4)
+  other_date["sources"]["conflicts"].first["sources"].first["date"] = other_form
+  expect_error("conflict source date must be a valid YYYY-MM-DD date") { validate_manifest(other_date, index, registry) }
+end
+
 leap_day = clone(schema4)
 leap_day["sources"]["conflicts"].first["sources"].first["date"] = "2024-02-29"
 validate_manifest(leap_day, index, registry)
