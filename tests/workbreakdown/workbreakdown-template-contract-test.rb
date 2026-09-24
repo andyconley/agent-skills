@@ -258,6 +258,7 @@ def validate_shaping(shaping)
     raise ArgumentError, "shaping #{name} must be a map" unless answer.is_a?(Hash)
     reject_unknown_keys(answer, %w[value source from_epic], "shaping #{name}")
     raise ArgumentError, "invalid shaping source" unless %w[asked reused default].include?(answer["source"])
+    raise ArgumentError, "reviewers cannot come from a default" if name == "reviewers" && answer["source"] == "default"
     if answer["source"] == "reused"
       raise ArgumentError, "reused shaping answer requires from_epic" if answer["from_epic"].to_s.strip.empty?
       raise ArgumentError, "from_epic must be a Jira key" unless answer["from_epic"].to_s.match?(JIRA_KEY)
@@ -295,7 +296,7 @@ def validate_sources(sources)
   conflicts.each do |conflict|
     raise ArgumentError, "conflict must be a map" unless conflict.is_a?(Hash)
     reject_unknown_keys(conflict, %w[claim sources winner material stale], "conflict")
-    raise ArgumentError, "conflict requires a claim" if conflict["claim"].to_s.strip.empty?
+    raise ArgumentError, "conflict requires a claim" unless conflict["claim"].is_a?(String) && !conflict["claim"].strip.empty?
     listed = conflict["sources"]
     raise ArgumentError, "conflict requires at least two sources" unless listed.is_a?(Array) && listed.length >= 2
     listed.each do |source|
@@ -304,7 +305,7 @@ def validate_sources(sources)
       raise ArgumentError, "conflict source requires a ref" if source["ref"].to_s.strip.empty?
       raise ArgumentError, "conflict source date must be YYYY-MM-DD" unless iso_date?(source["date"])
     end
-    raise ArgumentError, "conflict sources must be distinct" unless listed.map { |source| source["ref"] }.uniq.length == listed.length
+    raise ArgumentError, "conflict sources must be distinct" unless listed.map { |source| source["ref"].to_s.strip }.uniq.length == listed.length
     raise ArgumentError, "conflict winner is not a listed source" unless listed.map { |source| source["ref"] }.include?(conflict["winner"])
     %w[material stale].each do |flag|
       raise ArgumentError, "conflict #{flag} must be true or false" unless [true, false].include?(conflict[flag])
@@ -904,6 +905,20 @@ repeated_read = clone(schema4)
 repeated_read["sources"]["existing_children"].first["read"] = %w[status status]
 expect_error("invalid existing_children read") { validate_manifest(repeated_read, index, registry) }
 
+default_reviewers = clone(schema4)
+default_reviewers["shaping"]["reviewers"]["source"] = "default"
+expect_error("reviewers cannot come from a default") { validate_manifest(default_reviewers, index, registry) }
+
+[[], " ", 123].each do |bad|
+  bad_claim = clone(schema4)
+  bad_claim["sources"]["conflicts"].first["claim"] = bad
+  expect_error("conflict requires a claim") { validate_manifest(bad_claim, index, registry) }
+end
+
+padded_source = clone(schema4)
+padded_source["sources"]["conflicts"].first["sources"].last["ref"] = padded_source["sources"]["conflicts"].first["sources"].first["ref"] + " "
+expect_error("conflict sources must be distinct") { validate_manifest(padded_source, index, registry) }
+
 empty_reviewers = clone(schema4)
 empty_reviewers["shaping"]["reviewers"]["value"] = []
 expect_error("shaping reviewers value must be a list of names") { validate_manifest(empty_reviewers, index, registry) }
@@ -921,6 +936,9 @@ expect_error("manifest has unknown field transition") { validate_manifest(unknow
 # Pin the validator's schema-4 vocabulary to the prose contract, so a renamed or added key cannot drift silently.
 schema4_prose = File.read(File.join(SKILL, "references", "manifest-contract.md"))[/^## Schema 4:.*?(?=^## Child invariants)/m]
 assert(schema4_prose, "manifest contract lost its schema 4 section")
+# Scan the rule text only. The worked example repeats most tokens and would mask a deleted rule.
+schema4_prose = schema4_prose.gsub(/^~~~.*?^~~~$/m, "")
+assert(!schema4_prose.include?("schema_version: 4"), "schema 4 pin still scans the worked example")
 schema4_tokens = SCHEMA4_ROOT_KEYS + SHAPING_VALUES.keys + SHAPING_VALUES.values.grep(Array).flatten + SOURCES_READ +
   %w[jira_context existing_children conflicts claim winner material stale present absent] +
   %w[classification question precedent searched verdict location placeholder defined_by none found unverified] +

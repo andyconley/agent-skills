@@ -336,7 +336,7 @@ shaping records the answers that shaped the Draft. Its entries are spike_shape, 
 - from_epic is the Jira key, such as EPIC-201, of the sibling Epic the answer came from. It is required when source is reused and rejected otherwise.
 - spike_shape.value is vertical-slice or by-layer.
 - task_granularity.value is per-flow or finer.
-- reviewers.value lists at least one nonempty reviewer name. When no reviewer is known, omit the entry and record the gap in unknowns.
+- reviewers.value lists at least one nonempty reviewer name, and its source is asked or reused, never default. When no reviewer is known, omit the entry and record the gap in unknowns.
 - source_order.value lists at least one nonempty source kind, most authoritative first.
 
 ### sources
@@ -347,7 +347,7 @@ sources records what the Draft read and how it resolved disagreements between so
 - existing_children lists each existing Epic child the Draft read, as jira_key plus read. read is a nonempty subset of description, amendments, status, links, and link_history, with no repeats. existing_children must be empty or omitted when jira_context is absent.
 - conflicts lists each disagreement between sources. A conflict contains claim, sources, winner, material, and stale.
   - claim is the nonempty statement the sources disagree on.
-  - sources lists at least two entries with distinct refs, each a ref and a valid ISO calendar date in `YYYY-MM-DD` form. Quote the date so YAML keeps it as text.
+  - sources lists at least two entries with distinct refs, ignoring surrounding whitespace, each a ref and a valid ISO calendar date in `YYYY-MM-DD` form. Quote the date so YAML keeps it as text.
   - winner equals the ref of one listed source.
   - material and stale are true or false.
 
