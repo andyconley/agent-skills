@@ -447,7 +447,7 @@ findings:
 Each finding contains category, ref, and correction. ref is the child ref or Jira key the finding concerns. category is one of:
 
 - `wrong-type`: wrong issue type or Spike variant.
-- `misclassified-spike`: a Task whose precedent verdict is unverified or none. It stays a Spike until a precedent is found.
+- `misclassified-spike`: a Task that relies on an existing pattern whose precedent verdict is unverified or none. It stays a Spike until a precedent is found.
 - `component-story`: a Story that is not a demoable user, partner, or system flow, such as a Story for one component or layer.
 - `unverifiable-completion`: no independently verifiable completion.
 - `missing-implementation`: missing implementation work.

@@ -24,7 +24,7 @@
 - **Reviewers:** <named people from a source or a shaping answer>
 - **Checklist coverage:** <applicable design concerns and explicit exclusions>
 
-Do not copy the design into Jira.
+Omit the Reviewers bullet when nobody is known, and record the gap in `unknowns`. Do not copy the design into Jira.
 
 ## Done when
 

@@ -466,6 +466,30 @@ spike["classification"]["precedent"]["searched"] = ["None"]
 spike["fields"]["description"]["precedent"]["searched"] = ["None"]
 expect_error("empty filler value") { validate_manifest(filler_search, index, registry) }
 
+blank_question = clone(set4)
+schema4_child(blank_question, "measure-staleness")["fields"]["description"]["question"] = " "
+schema4_child(blank_question, "measure-staleness")["classification"]["question"] = " "
+expect_error("classification question must be text") { validate_manifest(blank_question, index, registry) }
+
+investigation_reviewers = clone(set4)
+schema4_child(investigation_reviewers, "measure-staleness")["fields"]["description"]["reviewers"] = ["  "]
+expect_error("Spike reviewers must name people") { validate_manifest(investigation_reviewers, index, registry) }
+named_investigation = clone(set4)
+schema4_child(named_investigation, "measure-staleness")["fields"]["description"]["reviewers"] = ["Alex Reviewer"]
+validate_manifest(named_investigation, index, registry)
+
+# classification applies to Tasks and Stories too; its question is checked on every type.
+blank_task_question = clone(set4)
+schema4_child(blank_task_question, "build-endpoint")["classification"]["question"] = " "
+expect_error("classification question must be text") { validate_manifest(blank_task_question, index, registry) }
+classified_story = clone(set4)
+classified_story["children"] << {
+  "ref" => "prove-read", "jira_key" => "WORK-402", "type" => "Story", "disposition" => "existing",
+  "verify" => {"summary" => "Prove current state reads", "done_when" => "Consumer scenarios pass."},
+  "classification" => {"question" => "Which consumer flow proves the Epic outcome?"}
+}
+validate_manifest(classified_story, index, registry)
+
 v3_in_set3 = clone(set4)
 v3_in_set3["template_set"]["version"] = 3
 expect_error("template-set mismatch") { validate_manifest(v3_in_set3, index, registry) }
@@ -477,6 +501,9 @@ set4_fallback["epic"] = {"outcome" => "Consumers retrieve current state through 
 %w[shaping sources].each { |key| set4_fallback.delete(key) }
 set4_fallback["children"].each { |child| child.delete("classification") }
 validate_manifest(set4_fallback, index, registry)
+empty_fallback_question = clone(set4_fallback)
+schema4_child(empty_fallback_question, "choose-transport")["fields"]["description"]["question"] = "  "
+expect_error("Spike question must be text") { validate_manifest(empty_fallback_question, index, registry) }
 bad_description_precedent = clone(set4_fallback)
 schema4_child(bad_description_precedent, "choose-transport")["fields"]["description"]["precedent"]["verdict"] = "likely"
 expect_error("invalid precedent verdict") { validate_manifest(bad_description_precedent, index, registry) }

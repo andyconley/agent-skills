@@ -19,7 +19,7 @@ Create a direct Epic child when work needs an owner, estimate, status, dependenc
 2. **Define the Epic outcome.** State the capability that becomes available. Target about one month or two sprints. Treat two months as the upper limit before considering another milestone Epic.
 3. **Define verifiable Stories.** Work backward from demonstrations that prove the Epic. A Story can be a delivery checkpoint, but it must package real behavior, validation, and integration evidence.
 4. **Identify implementation Tasks.** Add the code, infrastructure, configuration, packaging, and operational work needed to make each Story pass. Give every Task a clear completion state.
-5. **Isolate uncertainty as Spikes.** Create one Spike for each unanswered decision. Keep each Spike's question narrow, and split a Spike only when it holds independent questions.
+5. **Isolate uncertainty as Spikes.** Start from one vertical-slice Spike per user-facing flow, as described under Classification and precedent. Keep each Spike's question narrow, and split a Spike only when it holds independent questions.
 6. **Connect the work.** Use `Spike -> Task -> Story` as the normal flow. One Spike can block several Tasks. Several Tasks can block one Story. A Spike can block a Story directly when no implementation Task is needed.
 7. **Rank the children.** Rank items in reading and likely execution order: Spikes, Tasks, Stories. Rank communicates priority and presentation order, not dependency.
 8. **Review the graph.** Make every edge point from prerequisite to consumer and eventually reach a verifiable Story or explicit Epic exit condition.
@@ -123,6 +123,8 @@ A Task names one concrete artifact or operational result, 2–5 binary acceptanc
 Use a design Spike when the result is a reviewed design decision. Name the decision, material questions and constraints, linked design artifact, reviewers, applicable checklist coverage, closure evidence, and downstream updates. Keep the design in its design artifact; do not copy it into Jira.
 
 Use an investigation Spike for research or feasibility. Name one question, required evidence, closure condition, and downstream effect. Do not require design-only fields.
+
+On template set 4, both variants also state their question and precedent. Reviewers are named people from a source or a shaping answer. When nobody is known, omit reviewers and record the gap in `unknowns`.
 
 ## Spike completion
 

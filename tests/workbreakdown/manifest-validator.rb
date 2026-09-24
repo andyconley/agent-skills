@@ -323,6 +323,7 @@ end
 def validate_classified_spike(child, payload, schema)
   description = payload["description"]
   if description
+    raise ArgumentError, "Spike question must be text" unless description["question"].is_a?(String) && !description["question"].strip.empty?
     validate_precedent(description["precedent"])
     if description.key?("reviewers")
       raise ArgumentError, "Spike reviewers must name people" unless nonempty_string_list?(description["reviewers"])

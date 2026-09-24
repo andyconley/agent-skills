@@ -165,7 +165,7 @@ templates:
     variant: design
     status: default
     file: spike-design-v3.md
-    sha256: 3a6dd44e12de32d98ed83cfbc163f1adfa6051f9778213c4a55670f41139ed8f
+    sha256: 61c54db1a8daefa7dcd4c2c5d7c6a41475fe1af3bb87a7b122bb3251fe5c79e9
     description_format: adf
     required_keys: [question, precedent, decision, questions_and_constraints, design_artifact, checklist_coverage, done_when, downstream_updates]
     conditional_keys: [reviewers, references]
