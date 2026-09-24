@@ -281,7 +281,7 @@ shaping:
     value: [API owner]
     source: asked
   source_order:
-    value: [jira-amendment, design-page]
+    value: [jira-amendment, jira-description, design-page]
     source: default
 sources:
   jira_context: present
@@ -377,8 +377,8 @@ breakdown_conventions is an optional description key of jira-epic-v3. It renders
 - On an Epic update, it must equal the manifest's shaping block exactly.
 - On a verified Epic, it is the live Epic's record and may differ from this Draft's shaping.
 - It is written only through the guarded Epic description update. Schema 4 adds no other Epic write.
-- An update replaces the whole description. When the live Epic has a panel, the update carries breakdown_conventions. Draft states any panel removal in its output, and Review reports an unstated removal as `invalid-manifest`.
-- A verified panel that is malformed makes the manifest invalid. Draft reports it instead of verifying it.
+- An update replaces the whole description, so an update of an Epic whose live description has a panel must carry breakdown_conventions. A schema-3 update cannot carry it, so updating such an Epic requires schema 4. Review reports a missing panel as `invalid-manifest`.
+- A malformed live panel cannot be verified. Draft reports it and proposes an Epic update whose breakdown_conventions equals shaping, which needs the Epic owner's agreement like any Epic update.
 
 ### Migration
 
