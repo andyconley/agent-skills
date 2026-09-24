@@ -33,6 +33,14 @@ SOURCES_KEYS = %w[jira_context existing_children conflicts].freeze
 CLASSIFICATION_KEYS = %w[question precedent placeholder].freeze
 PRECEDENT_VERDICTS = %w[none found unverified].freeze
 JIRA_KEY = /\A[A-Z][A-Z0-9]+-\d+\z/.freeze
+CLASSIFIED_SPIKE_TEMPLATES = %w[jira-spike-design-v3 jira-spike-investigation-v3].freeze
+# Review output categories. Review and Audit never flag a team's own Spike shape or Task granularity,
+# so no category exists for either.
+FINDING_CATEGORIES = %w[
+  wrong-type misclassified-spike component-story unverifiable-completion missing-implementation
+  missing-story-evidence missing-review-evidence content-quality too-broad unsupported-assumption
+  stale-source invalid-manifest dependency
+].freeze
 
 def reject_unknown_keys(value, allowed, context)
   unknown = value.keys - allowed
@@ -63,6 +71,7 @@ def validate_registry(registry)
   raise ArgumentError, "missing template set 1" unless sets.key?(1)
   raise ArgumentError, "missing template set 2" unless sets.key?(2)
   raise ArgumentError, "missing template set 3" unless sets.key?(3)
+  raise ArgumentError, "missing template set 4" unless sets.key?(4)
 
   templates = registry.fetch("templates")
   ids = templates.map { |template| template.fetch("id") }
@@ -207,6 +216,11 @@ def validate_description(description, template)
       validate_story_description(description, instrumentation_required: true)
     end
   end
+  # A precedent verdict is an enumerated value checked by validate_precedent. Its `none`
+  # is a finding, not filler, so only that one field skips the free-text quality check.
+  if description["precedent"].is_a?(Hash)
+    description = description.merge("precedent" => description["precedent"].reject { |key, _| key == "verdict" })
+  end
   validate_quality(description)
 end
 
@@ -294,22 +308,54 @@ def validate_sources(sources)
   end
 end
 
+def validate_precedent(precedent)
+  raise ArgumentError, "precedent must be a map" unless precedent.is_a?(Hash)
+  reject_unknown_keys(precedent, %w[searched verdict location], "precedent")
+  raise ArgumentError, "precedent searched must list locations" unless nonempty_string_list?(precedent["searched"])
+  raise ArgumentError, "invalid precedent verdict" unless PRECEDENT_VERDICTS.include?(precedent["verdict"])
+  if precedent["verdict"] == "found"
+    raise ArgumentError, "found precedent requires location" if precedent["location"].to_s.strip.empty?
+  end
+end
+
+# A v3 Spike states its question and precedent in the description in every schema.
+# Schema 4 also records them as classification, and the two must agree.
+def validate_classified_spike(child, payload, schema)
+  description = payload["description"]
+  if description
+    validate_precedent(description["precedent"])
+    if description.key?("reviewers")
+      raise ArgumentError, "Spike reviewers must name people" unless nonempty_string_list?(description["reviewers"])
+    end
+  end
+  return unless schema == 4
+
+  classification = child["classification"] || {}
+  raise ArgumentError, "v3 Spike requires classification question and precedent" unless classification.key?("question") && classification.key?("precedent")
+  return unless description
+
+  raise ArgumentError, "Spike description question must match classification" unless description["question"] == classification["question"]
+  raise ArgumentError, "Spike description precedent must match classification" unless description["precedent"] == classification["precedent"]
+end
+
+def validate_review_findings(findings)
+  raise ArgumentError, "findings must be a list" unless findings.is_a?(Array)
+  findings.each do |finding|
+    raise ArgumentError, "finding must be a map" unless finding.is_a?(Hash)
+    reject_unknown_keys(finding, %w[category ref correction], "finding")
+    raise ArgumentError, "invalid finding category" unless FINDING_CATEGORIES.include?(finding["category"])
+    raise ArgumentError, "finding requires a ref" unless finding["ref"].is_a?(String) && !finding["ref"].strip.empty?
+    raise ArgumentError, "finding requires a correction" unless finding["correction"].is_a?(String) && !finding["correction"].strip.empty?
+  end
+end
+
 def validate_classification(classification, child)
   raise ArgumentError, "classification must be a map" unless classification.is_a?(Hash)
   reject_unknown_keys(classification, CLASSIFICATION_KEYS, "classification")
   if classification.key?("question")
     raise ArgumentError, "classification question must be text" unless classification["question"].is_a?(String) && !classification["question"].strip.empty?
   end
-  if classification.key?("precedent")
-    precedent = classification["precedent"]
-    raise ArgumentError, "precedent must be a map" unless precedent.is_a?(Hash)
-    reject_unknown_keys(precedent, %w[searched verdict location], "precedent")
-    raise ArgumentError, "precedent searched must list locations" unless nonempty_string_list?(precedent["searched"])
-    raise ArgumentError, "invalid precedent verdict" unless PRECEDENT_VERDICTS.include?(precedent["verdict"])
-    if precedent["verdict"] == "found"
-      raise ArgumentError, "found precedent requires location" if precedent["location"].to_s.strip.empty?
-    end
-  end
+  validate_precedent(classification["precedent"]) if classification.key?("precedent")
   if classification.key?("placeholder")
     raise ArgumentError, "placeholder is only allowed on a Task" unless child["type"] == "Task"
     placeholder = classification["placeholder"]
@@ -371,6 +417,7 @@ def validate_child(child, templates, set_version, schema)
   end
   raise ArgumentError, "proposed child requires description" if disposition == "proposed" && !payload["description"].is_a?(Hash)
   validate_description(payload["description"], template) if payload["description"]
+  validate_classified_spike(child, payload, schema) if CLASSIFIED_SPIKE_TEMPLATES.include?(template_id)
 end
 
 def validate_manifest(manifest, templates, registry)

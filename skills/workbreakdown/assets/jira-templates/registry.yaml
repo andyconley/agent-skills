@@ -27,6 +27,14 @@ template_sets:
       Spike:
         design: jira-spike-design-v2
         investigation: jira-spike-investigation-v2
+  4:
+    defaults:
+      Epic: jira-epic-v2
+      Story: jira-story-v3
+      Task: jira-task-v2
+      Spike:
+        design: jira-spike-design-v3
+        investigation: jira-spike-investigation-v3
 
 templates:
   - id: jira-epic-v1
@@ -75,7 +83,7 @@ templates:
 
   - id: jira-epic-v2
     set_version: 2
-    compatible_set_versions: [2, 3]
+    compatible_set_versions: [2, 3, 4]
     issue_type: Epic
     variant: milestone
     status: default
@@ -101,7 +109,7 @@ templates:
 
   - id: jira-task-v2
     set_version: 2
-    compatible_set_versions: [2, 3]
+    compatible_set_versions: [2, 3, 4]
     issue_type: Task
     variant: artifact
     status: default
@@ -113,7 +121,7 @@ templates:
 
   - id: jira-spike-design-v2
     set_version: 2
-    compatible_set_versions: [2, 3]
+    compatible_set_versions: [2, 3, 4]
     issue_type: Spike
     variant: design
     status: default
@@ -125,7 +133,7 @@ templates:
 
   - id: jira-spike-investigation-v2
     set_version: 2
-    compatible_set_versions: [2, 3]
+    compatible_set_versions: [2, 3, 4]
     issue_type: Spike
     variant: investigation
     status: default
@@ -137,6 +145,7 @@ templates:
 
   - id: jira-story-v3
     set_version: 3
+    compatible_set_versions: [3, 4]
     issue_type: Story
     variant: behavior-evidence
     status: default
@@ -149,6 +158,28 @@ templates:
       - [automated_tests, automated_tests_exception]
       - [instrumentation, instrumentation_exception]
     conditional_keys: [documentation, automated_tests, instrumentation, documentation_exception, automated_tests_exception, instrumentation_exception, context_and_constraints, nonfunctional_requirements, review_evidence, supplemental_demonstration]
+
+  - id: jira-spike-design-v3
+    set_version: 4
+    issue_type: Spike
+    variant: design
+    status: default
+    file: spike-design-v3.md
+    sha256: 3a6dd44e12de32d98ed83cfbc163f1adfa6051f9778213c4a55670f41139ed8f
+    description_format: adf
+    required_keys: [question, precedent, decision, questions_and_constraints, design_artifact, checklist_coverage, done_when, downstream_updates]
+    conditional_keys: [reviewers, references]
+
+  - id: jira-spike-investigation-v3
+    set_version: 4
+    issue_type: Spike
+    variant: investigation
+    status: default
+    file: spike-investigation-v3.md
+    sha256: 555f754bd4f7633a3aca70b8256fbbfcbb7ada3df29b6c45e0ede8ae58bf0786
+    description_format: adf
+    required_keys: [question, precedent, evidence_needed, done_when, downstream_updates]
+    conditional_keys: [reviewers, boundaries, references]
 
 rendering:
   omit_empty_conditionals: true

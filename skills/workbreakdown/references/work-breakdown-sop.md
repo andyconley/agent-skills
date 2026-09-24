@@ -19,7 +19,7 @@ Create a direct Epic child when work needs an owner, estimate, status, dependenc
 2. **Define the Epic outcome.** State the capability that becomes available. Target about one month or two sprints. Treat two months as the upper limit before considering another milestone Epic.
 3. **Define verifiable Stories.** Work backward from demonstrations that prove the Epic. A Story can be a delivery checkpoint, but it must package real behavior, validation, and integration evidence.
 4. **Identify implementation Tasks.** Add the code, infrastructure, configuration, packaging, and operational work needed to make each Story pass. Give every Task a clear completion state.
-5. **Isolate uncertainty as Spikes.** Create one Spike for each unanswered decision. Keep the question narrow. Prefer several short Spikes over one open-ended research ticket.
+5. **Isolate uncertainty as Spikes.** Create one Spike for each unanswered decision. Keep each Spike's question narrow, and split a Spike only when it holds independent questions.
 6. **Connect the work.** Use `Spike -> Task -> Story` as the normal flow. One Spike can block several Tasks. Several Tasks can block one Story. A Spike can block a Story directly when no implementation Task is needed.
 7. **Rank the children.** Rank items in reading and likely execution order: Spikes, Tasks, Stories. Rank communicates priority and presentation order, not dependency.
 8. **Review the graph.** Make every edge point from prerequisite to consumer and eventually reach a verifiable Story or explicit Epic exit condition.
@@ -33,6 +33,17 @@ A conflict is material when it would change a classification, an owner, or a dep
 Flag a design source as stale, with `stale: true` on its conflict, when a later dated decision contradicts it. Never build on a stale claim without saying so.
 
 Draft has Jira context only when it can read the live Epic, including its description ADF, and the Epic's existing children. Otherwise it has no Jira context. Emit a schema-2 manifest and state `No Jira context: design claims are unverified` in the output. Record each design claim the breakdown relies on as an `unknowns` entry that begins `Unverified design claim:`.
+
+## Classification and precedent
+
+Before making a child a Task because an existing pattern covers it, search for that pattern. Record the search as `classification.precedent`: where you searched, the verdict, and the location when found. A Task that relies on a pattern needs verdict `found` and a location. Never convert a Spike to a Task on an unverified precedent, including when repository access is unavailable.
+
+Draft defaults to this shape and declares it through `shaping.spike_shape` and `shaping.task_granularity`, each with its source:
+
+- One vertical-slice Spike per user-facing flow, across all layers. Give a single layer its own Spike only when that layer is the open question.
+- One implementation Task per flow.
+
+These defaults shape Draft only. Review and Audit never flag a team's own Spike shape or Task granularity.
 
 ## Dependency rules
 
@@ -59,7 +70,7 @@ Every graph must satisfy these checks:
 ## Sizing and refinement
 
 - Create known work early so the milestone can be forecast. Mark estimates as provisional while blocking Spikes remain open.
-- Aim for one to two days of focused work per Spike or Task when practical.
+- Size each Spike or Task so its completion can be forecast and it finishes with verifiable evidence. Split an item when its completion cannot be observed.
 - Treat five points as a review trigger. Check whether the item contains multiple outcomes or decisions.
 - Do not split work only to reduce an estimate. Each resulting item needs its own completion state.
 - Estimate enough work to forecast the milestone.

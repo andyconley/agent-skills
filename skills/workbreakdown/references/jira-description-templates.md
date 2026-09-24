@@ -14,6 +14,8 @@ New Drafts use template-set version 3 and the registry defaults:
 - design Spike: `jira-spike-design-v2`
 - investigation or feasibility Spike: `jira-spike-investigation-v2`
 
+Template set 4 keeps the set-3 defaults except the Spikes, which become `jira-spike-design-v3` and `jira-spike-investigation-v3`. Both add a question and a precedent section, and both treat reviewers as conditional.
+
 Choose the Spike variant from its completion state. A design Spike produces a reviewed design decision and linked artifact. An investigation Spike answers a research or feasibility question. Do not force investigation work through design fields.
 
 An approved manifest explicitly bound to an older template set stays on its selected asset. Never migrate or reformat it silently. A project-supplied template wins only when its identity, version, and content are available for review.
@@ -68,6 +70,11 @@ These keys do not follow that rule. Render them exactly here:
 | Design Spike v2 | design_artifact | `**Artifact:**` bullet under `## Design artifact` |
 | Design Spike v2 | reviewers | `**Reviewers:**` bullet under `## Design artifact` |
 | Design Spike v2 | checklist_coverage | `**Checklist coverage:**` bullet under `## Design artifact` |
+| Design Spike v3 | precedent | `## Precedent`, with `searched`, `verdict`, and `location` as the matching bullets |
+| Design Spike v3 | design_artifact | `**Artifact:**` bullet under `## Design artifact` |
+| Design Spike v3 | reviewers | `**Reviewers:**` bullet under `## Design artifact` |
+| Design Spike v3 | checklist_coverage | `**Checklist coverage:**` bullet under `## Design artifact` |
+| Investigation Spike v3 | precedent | `## Precedent`, with `searched`, `verdict`, and `location` as the matching bullets |
 
 The `**Profile:**` line under `## Release quality` and `## Ticket quality` names the completion profile from [ticket-quality-and-completion.md](ticket-quality-and-completion.md). It is fixed template text with no manifest key. Keep it. It is a reference, not the copied checklist the anti-bloat rule forbids.
 

@@ -363,6 +363,10 @@ classification is an optional child key. Its keys are question, precedent, and p
   - location is where the precedent lives. It is required when verdict is found and optional otherwise.
 - placeholder is allowed only on a Task. It contains only defined_by, which is either the ref of a Spike child in the same manifest or an existing Jira key.
 
+A child bound to jira-spike-design-v3 or jira-spike-investigation-v3 states its question and precedent in its description in every schema. In schema 4 it also requires classification.question and classification.precedent, and the description's question and precedent must equal them. A verdict of none is a finding, not filler, so the description quality rules do not reject it. Its reviewers name people from a source or a shaping answer. When nobody is known, omit reviewers and record the gap in unknowns.
+
+A Task that relies on an existing pattern carries classification.precedent with verdict found and a location. Draft never converts a Spike to a Task on verdict unverified, including when it cannot read the repository.
+
 ### Migration
 
 Schema 2 and 3 manifests remain valid. Schema 4 adds optional blocks only. From the release that completes Slice A, a new Draft emits schema 4 when it has Jira context and schema 2 otherwise. It has Jira context when it can read the live Epic ADF and the Epic's existing children. Its output states which case applies.
@@ -431,17 +435,31 @@ Use temporary references until Jira assigns keys. Do not create placeholder Jira
 
 ## Review output
 
-Report only material defects and the smallest corrections:
+Report only material defects and the smallest corrections, as a findings block. The block is Review output, not manifest content.
 
-- wrong issue type or Spike variant
-- no independently verifiable completion
-- missing implementation work
-- missing Story scenarios, contextual documentation, mapped automated tests, or instrumentation that proves the Story outcome or an operational decision
-- review-entry evidence missing for a Story entering IN REVIEW
-- vague, trivial, repeated, or unsupported content
-- work too broad to execute safely
-- assumptions presented as facts
-- invalid manifest or template binding
-- reversed, redundant, duplicate, missing, or cyclic dependencies
+~~~yaml
+findings:
+  - category: component-story
+    ref: WORK-501
+    correction: Merge the interface and API Stories into one demoable flow.
+~~~
+
+Each finding contains category, ref, and correction. ref is the child ref or Jira key the finding concerns. category is one of:
+
+- `wrong-type`: wrong issue type or Spike variant.
+- `misclassified-spike`: a Task whose precedent verdict is unverified or none. It stays a Spike until a precedent is found.
+- `component-story`: a Story that is not a demoable user, partner, or system flow, such as a Story for one component or layer.
+- `unverifiable-completion`: no independently verifiable completion.
+- `missing-implementation`: missing implementation work.
+- `missing-story-evidence`: missing Story scenarios, contextual documentation, mapped automated tests, or instrumentation that proves the Story outcome or an operational decision.
+- `missing-review-evidence`: review-entry evidence missing for a Story entering IN REVIEW.
+- `content-quality`: vague, trivial, repeated, or unsupported content.
+- `too-broad`: work too broad to execute safely.
+- `unsupported-assumption`: an assumption presented as fact.
+- `stale-source`: a claim built on a design source that a later dated decision contradicts.
+- `invalid-manifest`: invalid manifest or template binding.
+- `dependency`: reversed, redundant, duplicate, missing, or cyclic dependencies.
+
+Review and Audit never flag a team's own Spike shape or Task granularity. Those are Draft defaults, not defects.
 
 Return a corrected edge list only when an edge changes. Do not replace valid work.

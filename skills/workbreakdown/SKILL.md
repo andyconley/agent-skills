@@ -49,6 +49,8 @@ Ask for every child:
 
 Every Task must contribute to a Story or an explicit Epic exit condition. Every Spike must inform a Task or Story.
 
+Classify a Spike by its one open question and a Task by a verified precedent. Draft defaults to one vertical-slice Spike and one implementation Task per user-facing flow. Review and Audit never flag a team's own choice of either. Review reports a Story that is not a demoable flow as a component Story.
+
 New Drafts use the template-set-3 defaults. Keep descriptions short: fill required content, include conditional sections only when material, and omit empty sections. An explicitly older manifest stays on its approved template and still meets the current lifecycle bar.
 
 For every Story, plan contextual documentation, automated integration or functional tests that prove its scenarios, and the smallest set of operational signals and business metrics that proves the Story outcome or an operational decision. This plan is enough for `IMPLEMENTATION READY`. Before the Story enters `IN REVIEW`, require appropriate documentation evidence, passing mapped tests, implemented instrumentation, observed output from a named representative environment, and reviewable evidence. A unit test or manual demonstration cannot satisfy the automated-test obligation. Each evidence class may instead use one complete approved exception.

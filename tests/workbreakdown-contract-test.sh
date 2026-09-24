@@ -12,6 +12,7 @@ QUALITY_FILE="$REPO_ROOT/skills/workbreakdown/references/ticket-quality-and-comp
 
 fail() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
 require_text() { grep -Fq -- "$2" "$1" || fail "$(basename "$1") is missing: $2"; }
+reject_text() { ! grep -Fq -- "$2" "$1" || fail "$(basename "$1") still contains: $2"; }
 
 for required_file in "$SKILL_FILE" "$SOP_FILE" "$MANIFEST_FILE" "$JIRA_FILE" "$TEMPLATE_GUIDE" "$TEMPLATE_REGISTRY" "$QUALITY_FILE"; do
   [ -f "$required_file" ] || fail "missing $required_file"
@@ -43,7 +44,7 @@ require_text "$MANIFEST_FILE" "template_sha256:"
 for field in "schema_version: 4" "shaping:" "sources:" "classification:"; do require_text "$MANIFEST_FILE" "$field"; done
 require_text "$MANIFEST_FILE" "Schema 2 and 3 manifests remain valid."
 
-for template in epic-v1 epic-v2 story-v1 story-v2 story-v3 task-v1 task-v2 spike-v1 spike-design-v2 spike-investigation-v2; do
+for template in epic-v1 epic-v2 story-v1 story-v2 story-v3 task-v1 task-v2 spike-v1 spike-design-v2 spike-investigation-v2 spike-design-v3 spike-investigation-v3; do
   [ -f "$REPO_ROOT/skills/workbreakdown/assets/jira-templates/$template.md" ] || fail "missing bundled $template template"
 done
 require_text "$TEMPLATE_REGISTRY" "schema_version: 2"
@@ -79,6 +80,19 @@ require_text "$MANIFEST_FILE" "A schema-4 manifest with jira_context absent is r
 require_text "$MANIFEST_FILE" "Reconciliation table"
 require_text "$SKILL_FILE" "Without Jira context, emit schema 2"
 require_text "$SKILL_FILE" "reconciliation table, material conflicts"
+require_text "$SKILL_FILE" "Classify a Spike by its one open question and a Task by a verified precedent."
+require_text "$SOP_FILE" "Keep each Spike's question narrow, and split a Spike only when it holds independent questions."
+require_text "$SOP_FILE" "Size each Spike or Task so its completion can be forecast and it finishes with verifiable evidence."
+require_text "$SOP_FILE" "Never convert a Spike to a Task on an unverified precedent"
+require_text "$SOP_FILE" "One vertical-slice Spike per user-facing flow, across all layers."
+require_text "$SOP_FILE" "Review and Audit never flag a team's own Spike shape or Task granularity."
+reject_text "$SOP_FILE" "Prefer several short Spikes over one open-ended research ticket"
+reject_text "$SOP_FILE" "one to two days of focused work"
+require_text "$MANIFEST_FILE" "findings:"
+require_text "$MANIFEST_FILE" "the description's question and precedent must equal them"
+require_text "$MANIFEST_FILE" "Draft never converts a Spike to a Task on verdict unverified"
+require_text "$TEMPLATE_REGISTRY" "jira-spike-design-v3"
+require_text "$TEMPLATE_REGISTRY" "jira-spike-investigation-v3"
 require_text "$MANIFEST_FILE" "Material conflicts: each with both sources"
 
 require_text "$JIRA_FILE" "stop before the first write"

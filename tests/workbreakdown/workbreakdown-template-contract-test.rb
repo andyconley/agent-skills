@@ -424,6 +424,94 @@ empty_searched = clone(schema4)
 schema4_child(empty_searched, "choose-transport")["classification"]["precedent"]["searched"] = []
 expect_error("precedent searched must list locations") { validate_manifest(empty_searched, index, registry) }
 
+# Template set 4 binds v3 Spikes, which carry their question and precedent.
+set4 = load_yaml(File.join(FIXTURES, "schema4-set4-valid.yaml"))
+validate_manifest(set4, index, registry)
+assert(set4["children"].map { |child| child["template_id"] }.count { |id| CLASSIFIED_SPIKE_TEMPLATES.include?(id) } == 2, "set-4 fixture lost a v3 Spike")
+
+no_set4 = clone(registry)
+no_set4["template_sets"].delete(4)
+expect_error("missing template set 4") { validate_registry(no_set4) }
+
+%w[question precedent].each do |key|
+  unclassified = clone(set4)
+  schema4_child(unclassified, "choose-transport")["classification"].delete(key)
+  expect_error("v3 Spike requires classification question and precedent") { validate_manifest(unclassified, index, registry) }
+end
+
+no_classification = clone(set4)
+schema4_child(no_classification, "measure-staleness").delete("classification")
+expect_error("v3 Spike requires classification question and precedent") { validate_manifest(no_classification, index, registry) }
+
+different_question = clone(set4)
+schema4_child(different_question, "measure-staleness")["fields"]["description"]["question"] = "How fresh is the cache?"
+expect_error("Spike description question must match classification") { validate_manifest(different_question, index, registry) }
+
+different_precedent = clone(set4)
+schema4_child(different_precedent, "choose-transport")["fields"]["description"]["precedent"]["verdict"] = "unverified"
+expect_error("Spike description precedent must match classification") { validate_manifest(different_precedent, index, registry) }
+
+no_reviewer_names = clone(set4)
+schema4_child(no_reviewer_names, "choose-transport")["fields"]["description"]["reviewers"] = []
+expect_error("Spike reviewers must name people") { validate_manifest(no_reviewer_names, index, registry) }
+
+missing_precedent_key = clone(set4)
+schema4_child(missing_precedent_key, "measure-staleness")["fields"]["description"].delete("precedent")
+expect_error("missing description key") { validate_manifest(missing_precedent_key, index, registry) }
+
+# Only the enumerated verdict is exempt from the filler check; the rest of the precedent is free text.
+filler_search = clone(set4)
+spike = schema4_child(filler_search, "choose-transport")
+spike["classification"]["precedent"]["searched"] = ["None"]
+spike["fields"]["description"]["precedent"]["searched"] = ["None"]
+expect_error("empty filler value") { validate_manifest(filler_search, index, registry) }
+
+v3_in_set3 = clone(set4)
+v3_in_set3["template_set"]["version"] = 3
+expect_error("template-set mismatch") { validate_manifest(v3_in_set3, index, registry) }
+
+# The schema-2 fallback on set 4 has no classification, so the description alone carries question and precedent.
+set4_fallback = clone(set4)
+set4_fallback["schema_version"] = 2
+set4_fallback["epic"] = {"outcome" => "Consumers retrieve current state through the supported API."}
+%w[shaping sources].each { |key| set4_fallback.delete(key) }
+set4_fallback["children"].each { |child| child.delete("classification") }
+validate_manifest(set4_fallback, index, registry)
+bad_description_precedent = clone(set4_fallback)
+schema4_child(bad_description_precedent, "choose-transport")["fields"]["description"]["precedent"]["verdict"] = "likely"
+expect_error("invalid precedent verdict") { validate_manifest(bad_description_precedent, index, registry) }
+
+# Set 4 still accepts the v2 Spikes, so older children verify without a rewrite.
+v2_spike_in_set4 = clone(v2_children)
+v2_spike_in_set4["template_set"]["version"] = 4
+validate_manifest(v2_spike_in_set4, index, registry)
+
+# Review findings carry a category. No category covers a team's own Spike shape or Task granularity.
+findings = [
+  {"category" => "component-story", "ref" => "WORK-501", "correction" => "Merge the UI and API Stories into one demoable flow."},
+  {"category" => "misclassified-spike", "ref" => "build-endpoint", "correction" => "Keep it a Spike until a precedent is found."}
+]
+validate_review_findings(findings)
+%w[layer-split granularity spike-shape].each do |category|
+  bad_finding = clone(findings)
+  bad_finding.first["category"] = category
+  expect_error("invalid finding category") { validate_review_findings(bad_finding) }
+end
+%w[ref correction].each do |key|
+  incomplete = clone(findings)
+  incomplete.first[key] = " "
+  expect_error("finding requires a #{key}") { validate_review_findings(incomplete) }
+end
+extra_field = clone(findings)
+extra_field.first["severity"] = "high"
+expect_error("finding has unknown field severity") { validate_review_findings(extra_field) }
+expect_error("findings must be a list") { validate_review_findings("component-story") }
+
+review_prose = File.read(File.join(SKILL, "references", "manifest-contract.md"))[/^## Review output.*\z/m]
+assert(review_prose, "manifest contract lost its Review output section")
+FINDING_CATEGORIES.each { |category| assert(review_prose.include?("`#{category}`"), "Review output does not define category #{category}") }
+assert(review_prose.scan(/^- `([a-z-]+)`:/).flatten.sort == FINDING_CATEGORIES.sort, "Review output lists a category the validator does not accept")
+
 # Schema-2/3 error precedence is unchanged: an unknown root field is reported before the schema version.
 unknown_before_schema = clone(schema3)
 unknown_before_schema["transition"] = "Done"
@@ -775,8 +863,26 @@ RENDER_EXCEPTIONS = {
     "design_artifact" => "**Artifact:**",
     "reviewers" => "**Reviewers:**",
     "checklist_coverage" => "**Checklist coverage:**"
+  },
+  "jira-spike-design-v3" => {
+    "design_artifact" => "**Artifact:**",
+    "reviewers" => "**Reviewers:**",
+    "checklist_coverage" => "**Checklist coverage:**"
   }
 }.freeze
+
+# The exceptions table in the template guide is the documented form of RENDER_EXCEPTIONS.
+RENDER_LABELS = {
+  "jira-epic-v2" => "Epic v2", "jira-story-v2" => "Story v2", "jira-story-v3" => "Story v3",
+  "jira-task-v2" => "Task v2", "jira-spike-design-v2" => "Design Spike v2", "jira-spike-design-v3" => "Design Spike v3"
+}.freeze
+guide_rows = File.read(File.join(SKILL, "references", "jira-description-templates.md")).scan(/^\| ([^|]+?) \| ([a-z_]+) \| (.+?) \|$/)
+RENDER_EXCEPTIONS.each do |id, keys|
+  keys.each do |key, target|
+    row = guide_rows.find { |label, row_key, _| label == RENDER_LABELS.fetch(id) && row_key == key }
+    assert(row && row[2].include?(target), "template guide does not document #{id} #{key} as #{target}")
+  end
+end
 
 def render_target(template_id, key)
   RENDER_EXCEPTIONS.dig(template_id, key) || "## #{key.tr("_", " ").capitalize}"
