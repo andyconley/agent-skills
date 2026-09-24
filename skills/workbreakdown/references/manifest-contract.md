@@ -354,7 +354,7 @@ sources records what the Draft read and how it resolved disagreements between so
 
 ### classification
 
-classification is an optional child key. Its keys are question, precedent, and placeholder. Reject any other key.
+classification is an optional child key. Its keys are question, precedent, and placeholder. Reject any other key. A schema-4 Draft classifies every Spike, existing or proposed, with a question and a precedent.
 
 - question is the nonempty open question the child answers.
 - precedent contains searched and verdict, and may contain location.
@@ -400,7 +400,7 @@ Every child defines or verifies summary and done_when. Include evidence and esti
 
 changes and fields may contain only summary, done_when, evidence, estimate, and description. A nonlegacy description requires an exact template ID and hash. A schema-2, template-set-1 manifest may omit the hash; the immutable registry entry supplies it. Description keys match the registered required and conditional keys. Apply cannot add template content after approval. Omission of a description preserves the live description.
 
-For a Story, give each scenario, documentation artifact, and instrumentation signal a stable ID. Planned fields cover observable scenarios, contextual documentation, automated integration or functional tests mapped by scenario ID, and the smallest signal set that proves the Story outcome or an operational decision. Each signal names its class, precise signal, purpose, implementation target, and expected observation. The intended suite, location, and environment are optional at plan time; supply them when known and record material gaps in `unknowns`.
+For a Story, give each scenario, documentation artifact, and instrumentation signal a stable ID. Planned fields cover observable scenarios, contextual documentation, automated integration or functional tests mapped by scenario ID, and the smallest signal set that proves the Story outcome or an operational decision. Each signal names its class, precise signal, purpose, implementation target, and expected observation. The intended test suite or location and the verification environment are optional at plan time; supply them when known and record material gaps in `unknowns`. Every documentation artifact names its artifact, audience, and intended location; only its owner is optional.
 
 For each documentation, automated-test, and instrumentation obligation, supply either a nonempty plan or one complete approved exception—not both. An exception names the obligation, reason, approver, and approval evidence.
 
@@ -440,7 +440,7 @@ Return:
 4. Material conflicts: each with both sources, their dates, and the winner, matching `sources.conflicts`.
 5. Shaping: whether the run was interactive or non-interactive, each answer with its source, which answers used a default, and any reviewer gap.
 6. Divergence list: each shaping answer that differs from a sibling Epic's panel, naming the answer, the sibling Epic, the sibling's value, and the proposed value. Write `No divergence` when sibling panels were read and none differs, and `No sibling panels read` when there were none to read.
-7. Proposed child table.
+7. Proposed child table: each child's ref, key or `new`, type, summary, observable completion, and the Epic exit condition or Story it serves. Name an exit condition the way the Epic names it, such as its slice ID.
 8. Complete YAML manifest.
 9. Dependency edge list or graph using A -> B for A blocks B.
 10. Cycle, direction, duplicate, redundancy, missing-edge, and orphan checks.

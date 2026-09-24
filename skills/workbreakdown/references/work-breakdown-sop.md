@@ -55,6 +55,8 @@ Draft has Jira context only when it can read the live Epic, including its descri
 
 ## Classification and precedent
 
+In a schema-4 Draft, classify every Spike, existing or proposed: record its one open question as `classification.question` and its precedent search as `classification.precedent`.
+
 Before making a child a Task because an existing pattern covers it, search for that pattern. Record the search as `classification.precedent`: where you searched, the verdict, and the location when found. A Task that relies on a pattern needs verdict `found` and a location. Never convert a Spike to a Task on an unverified precedent, including when repository access is unavailable.
 
 Draft defaults to this shape and declares it through `shaping.spike_shape` and `shaping.task_granularity`, each with its source:
@@ -111,7 +113,7 @@ Each Story must include:
 - version or compatibility behavior where applicable
 - the automated integration or functional test that proves each scenario
 - the expected evidence, plus the intended test suite or location and the verification environment when they are known
-- contextual documentation: the applicable user, operator, support, API, or other artifact; its audience; intended location; and owner when known
+- contextual documentation: the applicable user, operator, support, API, or other artifact; its audience; its intended location, which is always named; and its owner when known
 - the smallest set of operational signals and business metrics that proves the Story outcome or an operational decision, including where each signal will be implemented
 - packaging or deployment evidence
 
