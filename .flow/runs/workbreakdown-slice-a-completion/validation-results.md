@@ -132,3 +132,39 @@ Each gate ran `bash tests/workbreakdown-contract-test.sh`, `bash scripts/validat
 - **Option A, template-less Epics:** schema 4 gains `epic.disposition: unbound`. It binds only the observed ADF digest of a live Epic whose description fits no template, and it never authorizes a write (38aa866). Draft also self-checks every description against its template's required keys and the manifest invariants before returning.
 - **R2.5:** relaxed. Review must flag at least one rev1 Story as `component-story` and never the demoable flow Story. Review consistently flagged a different pair of rev1 Stories from the tabletop's pair.
 - **R2.2:** FX-PATTERN is narrowed to the list-read card. The delete, reverse-lookup and save-and-apply cards now hold genuinely open questions in live Jira, which supersedes the tabletop expectation. FX-BOUNDS and the negative control are unchanged.
+
+### Step 5: release gate result (final)
+
+- **Final gate.** It ran on skill commit 0d85152 against the frozen private snapshot. The harness and results are private, in the KB worktree.
+  - It made 12 isolated headless Opus runs with reruns.
+  - Six were Drafts of the six fixture Epics.
+  - The rest were a defaults control, a no-Jira control, a no-sibling-panel control, a no-repository control, and two Reviews.
+- **Structural checks, S1–S4:** pass on every run and every rerun. S1 checks paths, S2 the version, S3 isolation, and S4 manifest validity.
+- **Negative controls:** R0.2-control, R0.3, R1.4, R2.2-control and R2.5-control all pass.
+- **Criteria that pass:**
+  - R0.1 and R0.2, including sibling reuse
+  - R1.1, and R1.2 across two runs
+  - R1.3 FX-STALE-3
+  - R2.1–R2.5 and R2.7
+  - R5
+  - R2.8 and the unchanged public tests
+- **R2.6** is carried by S4.
+- **Checker self-test:** doctored copies of every run's first attempt, 77 mutants in all. Every targeted check flips to fail: 0 missed.
+- **Accepted residual weakness:** R1.3 FX-STALE-2 failed, failed, then passed, so it fails the 2-of-3 rule. Across the three full gates, detecting that design-page deferral contradicts the Epic's scope landed about half the time. The maintainer accepted this on 2026-09-24 as a documented weakness instead of another skill cycle. It carries forward as a follow-up.
+- **Skill gaps the gate found, all fixed before the final gate:**
+  - documentation location, existing-Spike classification and the child table's exit-condition column (50557a3)
+  - YAML quoting (58fb44a)
+  - the precedent definition and live prefixed summaries (4512a28)
+  - the `unbound` Epic for a template-less Epic, and the Draft self-check (38aa866)
+  - angle-bracket tokens and single precedent paths (0d85152)
+- **Isolation evidence:** a positive-control codeword test showed that no `CLAUDE.md` reaches the agent under `--restricted`.
+
+### Step 6: release (28bd8cb)
+
+- VERSION is 1.5.0, and both version lines in `SKILL.md` match. The version pin catches a mismatch: mutant exit 1.
+- The migration note is in the contract's Migration section. There is no hand-written skill CHANGELOG, and the root CHANGELOG is untouched.
+- The per-step gate passes:
+  - the contract suite, `validate-skills` and `install-test`
+  - Vale at 0/0/0
+  - an empty diff for the `schema2-*` and `schema3-*` fixtures and the set-1 to set-3 assets
+  - an empty public-safety grep
