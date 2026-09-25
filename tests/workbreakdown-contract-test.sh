@@ -130,7 +130,7 @@ require_text "$SOP_FILE" "Report a proposed exception under the material questio
 require_text "$SOP_FILE" "omit it from \`consolidation.exceptions\` and report its edge with the unordered edges"
 require_text "$SOP_FILE" "When a declared order omits this Epic, record the order as \`unknown\` and ask where the Epic belongs."
 require_text "$SKILL_FILE" "and later-to-earlier edges between milestone Epics"
-require_text "$SKILL_FILE" "check edges between milestone Epics against its order and exceptions"
+require_text "$SKILL_FILE" "Check edges between milestone Epics against milestone order, taken as the SOP's cross-Epic consolidation takes it"
 require_text "$MANIFEST_FILE" "Consolidation: \`run\` for \`status: run\`"
 require_text "$SKILL_FILE" "Run the SOP's cross-Epic consolidation check unless the request opts out."
 require_text "$SKILL_FILE" "divergence list, consolidation result, child table"
