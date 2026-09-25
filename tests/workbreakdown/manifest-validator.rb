@@ -393,7 +393,9 @@ def validate_placeholder_task(child, payload, template_id, schema)
   placeholder_template = template_id == PLACEHOLDER_TEMPLATE
   prefixed = payload["summary"].to_s.start_with?(PLACEHOLDER_PREFIX)
   classified = !child.dig("classification", "placeholder").nil?
-  raise ArgumentError, "placeholder prefix requires jira-task-placeholder-v3" if prefixed && !placeholder_template
+  # A verified card keeps its live summary, which may already carry the prefix.
+  sets_summary = %w[update proposed].include?(child["disposition"])
+  raise ArgumentError, "placeholder prefix requires jira-task-placeholder-v3" if prefixed && !placeholder_template && sets_summary
   raise ArgumentError, "classification placeholder requires jira-task-placeholder-v3" if classified && !placeholder_template
   return unless placeholder_template
 

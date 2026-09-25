@@ -540,10 +540,18 @@ expect_error("placeholder prefix requires jira-task-placeholder-v3") { validate_
 
 prefix_without_template = clone(set4)
 prefix_without_template["children"] << {
-  "ref" => "old-card", "jira_key" => "WORK-403", "type" => "Task", "disposition" => "existing",
-  "verify" => {"summary" => "[PLACEHOLDER] Old card", "done_when" => "Replaced."}
+  "ref" => "old-card", "jira_key" => "WORK-403", "type" => "Task", "disposition" => "update",
+  "changes" => {"summary" => "[PLACEHOLDER] Old card", "done_when" => "Replaced."}
 }
 expect_error("placeholder prefix requires jira-task-placeholder-v3") { validate_manifest(prefix_without_template, index, registry) }
+
+# A verified card keeps its live summary, even when the team already used the prefix by hand.
+live_prefixed = clone(set4)
+live_prefixed["children"] << {
+  "ref" => "live-card", "jira_key" => "WORK-405", "type" => "Task", "disposition" => "existing",
+  "verify" => {"summary" => "[PLACEHOLDER] Hand-marked card", "done_when" => "Replaced."}
+}
+validate_manifest(live_prefixed, index, registry)
 
 placeholder_on_task_v2 = clone(set4)
 schema4_child(placeholder_on_task_v2, "build-endpoint")["classification"]["placeholder"] = {"defined_by" => "choose-transport"}

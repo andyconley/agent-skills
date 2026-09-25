@@ -57,6 +57,8 @@ Draft has Jira context only when it can read the live Epic, including its descri
 
 In a schema-4 Draft, classify every Spike, existing or proposed: record its one open question as `classification.question` and its precedent search as `classification.precedent`.
 
+A precedent is an existing implementation of the same kind of operation that the work can follow: the same kind of endpoint, handler, command, or flow, built for any entity. It does not need to involve the same entity. A utility that resembles only part of the work, or that the work cannot follow as its pattern, is not a precedent. Record it as `none`, and name what it covers.
+
 Before making a child a Task because an existing pattern covers it, search for that pattern. Record the search as `classification.precedent`: where you searched, the verdict, and the location when found. A Task that relies on a pattern needs verdict `found` and a location. Never convert a Spike to a Task on an unverified precedent, including when repository access is unavailable.
 
 Draft defaults to this shape and declares it through `shaping.spike_shape` and `shaping.task_granularity`, each with its source:

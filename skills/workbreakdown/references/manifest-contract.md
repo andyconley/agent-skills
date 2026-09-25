@@ -367,7 +367,7 @@ classification is an optional child key. Its keys are question, precedent, and p
 
 A child bound to jira-spike-design-v3 or jira-spike-investigation-v3 states its question and precedent in its description in every schema. In schema 4 it also requires classification.question and classification.precedent, and the description's question and precedent must equal them. A verdict of none is a finding, not filler, so the description quality rules do not reject it. Its reviewers name people from a source or a shaping answer. When nobody is known, omit reviewers and record the gap in unknowns.
 
-A Task bound to jira-task-placeholder-v3 holds undesigned work. Its summary starts with `[PLACEHOLDER] `, and no other template may use that prefix. It carries no estimate. Its description's defined_by names a Spike ref in the manifest or an existing Jira key, and in schema 4 it equals classification.placeholder.defined_by. The description quality rules apply to it in full.
+A Task bound to jira-task-placeholder-v3 holds undesigned work. Its summary starts with `[PLACEHOLDER] `, and no other template may use that prefix in a summary the manifest sets. An existing card whose live summary already carries the prefix is verified as it is. It carries no estimate. Its description's defined_by names a Spike ref in the manifest or an existing Jira key, and in schema 4 it equals classification.placeholder.defined_by. The description quality rules apply to it in full.
 
 A Task that relies on an existing pattern carries classification.precedent with verdict found and a location. Draft never converts a Spike to a Task on verdict unverified, including when it cannot read the repository.
 
