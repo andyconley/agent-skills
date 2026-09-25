@@ -375,7 +375,7 @@ classification is an optional child key. Its keys are question, precedent, and p
 - precedent contains searched and verdict, and may contain location.
   - searched lists at least one nonempty location the Draft looked in.
   - verdict is none, found, or unverified.
-  - location is where the precedent lives. It is required when verdict is found and optional otherwise.
+  - location is the one path where the precedent lives. It is required when verdict is found and optional otherwise.
 - placeholder is allowed only on a Task bound to jira-task-placeholder-v3, and in schema 4 that template requires it. It contains only defined_by, which is either the ref of a Spike child in the same manifest or an existing Jira key.
 
 A child bound to jira-spike-design-v3 or jira-spike-investigation-v3 states its question and precedent in its description in every schema. In schema 4 it also requires classification.question and classification.precedent, and the description's question and precedent must equal them. A verdict of none is a finding, not filler, so the description quality rules do not reject it. Its reviewers name people from a source or a shaping answer. When nobody is known, omit reviewers and record the gap in unknowns.
@@ -448,7 +448,7 @@ If exact placement among all live children matters, use full-live-order and incl
 
 ## Draft output
 
-Before returning a Draft, check every description against its template's required keys and every manifest invariant in this contract, and fix any gap. Do not return a manifest you have not checked.
+Before returning a Draft, check every description against its template's required keys and every manifest invariant in this contract, and fix any gap. Check that no value contains an angle-bracket token such as `<resource>`: name the actual value, or record the gap in `unknowns`. Do not return a manifest you have not checked.
 
 Return:
 

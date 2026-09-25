@@ -127,6 +127,8 @@ require_text "$MANIFEST_FILE" "Every documentation artifact names its artifact, 
 require_text "$MANIFEST_FILE" "and the Epic exit condition or Story it serves"
 require_text "$MANIFEST_FILE" "The manifest must parse as YAML."
 require_text "$MANIFEST_FILE" "disposition: unbound"
+require_text "$MANIFEST_FILE" "Check that no value contains an angle-bracket token"
+require_text "$MANIFEST_FILE" "location is the one path where the precedent lives."
 require_text "$MANIFEST_FILE" "It never authorizes an Epic write, and schema 3 rejects it."
 require_text "$MANIFEST_FILE" "Before returning a Draft, check every description against its template's required keys"
 require_text "$SKILL_FILE" "Check every description against its template's required keys before returning the manifest."
