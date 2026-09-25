@@ -8,3 +8,4 @@
 {"artifacts": {"handback": ".flow/runs/workbreakdown-slice-a-completion/HANDOFF.md", "implementation_evidence": ".flow/runs/workbreakdown-slice-a-completion/validation-results.md"}, "at": "2026-09-25T02:25:16Z", "dispositions": {}, "event": "mark-handback-ready", "from": "implementing", "to": "handback_ready"}
 {"artifacts": {}, "at": "2026-09-25T02:26:41Z", "dispositions": {}, "event": "start-review", "from": "handback_ready", "to": "reviewing"}
 {"artifacts": {"review": ".flow/runs/workbreakdown-slice-a-completion/review.md"}, "at": "2026-09-25T02:35:02Z", "dispositions": {}, "event": "accept-review", "from": "reviewing", "to": "review_accepted"}
+{"artifacts": {"archive": ".flow/runs/workbreakdown-slice-a-completion/archive.md"}, "at": "2026-09-25T02:50:00Z", "dispositions": {"archive_enrichment": "1", "capability_gaps": "recorded", "memory": "updated"}, "event": "archive", "from": "review_accepted", "to": "archived"}
