@@ -18,7 +18,7 @@ The repo separates the writing problem into layers.
 
 `doc-flow-review` handles document shape. It asks whether the reader gets the right context in the right order, whether claims are earned, and whether deep detail appears where it helps.
 
-`humanizer` handles prose after the structure is sound. It removes agent-shaped sentence architecture, corporate filler, stance sentences, author-state narration, and decorative rhythm while preserving facts, caveats, commands, identifiers, and protected requirements.
+`humanizer` handles prose after the structure is sound. Engineering is the default; explicit personal mode preserves effective source voice with minimum edits. Audit reports findings without rewriting. Engineering edits remove agent-shaped sentence architecture, corporate filler, stance sentences, author-state narration, and decorative rhythm while preserving facts, caveats, commands, identifiers, and protected requirements.
 
 The shared files make both skills behave like parts of one system:
 
@@ -45,7 +45,7 @@ The STE-inspired rules apply pressure in the same direction. They favor short se
 
 ## Skill Docs
 
-- [`humanizer`](../skills/humanizer/SKILL.md): rewrites prose into a direct engineering-leader voice while preserving facts, caveats, and protected technical material.
+- [`humanizer`](../skills/humanizer/SKILL.md): offers engineering rewrites, explicit personal edits, and audits while preserving facts, caveats, and protected material.
 - [`doc-flow-review`](../skills/doc-flow-review/SKILL.md): reviews document structure, information order, progressive disclosure, argument support, and depth.
 - [`workbreakdown`](../skills/workbreakdown/SKILL.md): drafts, reviews, audits, and explicitly applies Jira milestone breakdowns through versioned templates and reviewed schema-2 or schema-3 manifests. New Story drafts require plans for mapped integration or functional tests, appropriate documentation, and instrumentation that proves the Story outcome or an operational decision; evidence gates `IN REVIEW`.
 

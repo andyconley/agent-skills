@@ -2,6 +2,30 @@
 
 All notable changes to agent-skills are generated from Conventional Commits. Longer design context belongs in the documentation changed by the release.
 
+## [1.6.2](https://github.com/andyconley/agent-skills/compare/v1.6.1...v1.6.2) (2026-09-14)
+
+### Documentation
+
+* **flow:** record humanizer release handback ([74b5451](https://github.com/andyconley/agent-skills/commit/74b54519d5d536479cf0895e996f72744b207ae8))
+
+## [1.6.1](https://github.com/andyconley/agent-skills/compare/v1.6.0...v1.6.1) (2026-09-14)
+
+### Bug Fixes
+
+* **humanizer:** package shared references for installed skills ([5221c96](https://github.com/andyconley/agent-skills/commit/5221c96d32bec0b3267665942c08f5f777f2c184))
+
+## [1.6.0](https://github.com/andyconley/agent-skills/compare/v1.5.1...v1.6.0) (2026-09-14)
+
+### Features
+
+* **humanizer:** add engineering and personal modes ([111f8c9](https://github.com/andyconley/agent-skills/commit/111f8c9fd50306226591bdd382e384948a6b412d))
+
+## [1.5.1](https://github.com/andyconley/agent-skills/compare/v1.5.0...v1.5.1) (2026-09-10)
+
+### Documentation
+
+* **flow:** accept Story evidence review ([85bd4bd](https://github.com/andyconley/agent-skills/commit/85bd4bdde5490e012ef009f260cbd374381b1352))
+
 ## [1.5.0](https://github.com/andyconley/agent-skills/compare/v1.4.1...v1.5.0) (2026-09-09)
 
 ### Features

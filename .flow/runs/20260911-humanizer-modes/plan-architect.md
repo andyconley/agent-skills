@@ -1,0 +1,4 @@
+# Architect review — coordinator summary
+Plan fits approved solution. One resolver/workflow in SKILL.md; references/policy.md owns mode/purpose/protection matrix, diagnostic dispositions and examples. Protection -> purpose -> mode -> operation -> intensity -> semantics -> optional mechanics. Operational purpose retains engineering; incidental syntax does not.
+One lint wrapper repository/engineering/personal; repository fixed governing-doc allowlist; engineering and personal explicit targets; narrow advisory personal profile without inherited engineering prohibitions. Tool/config failures remain nonzero; personal findings nonblocking. CI pins Vale and invokes wrapper.
+Keep fixture instructions linted; isolate only intentional source/output via dedicated data paths or verified fenced blocks. Add target-list assertion plus real Vale coverage probes. Atomic complete delivery with path loading and fresh dual-runtime evidence. No ADR needed.

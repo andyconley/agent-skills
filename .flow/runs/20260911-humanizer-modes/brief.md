@@ -1,0 +1,14 @@
+# Humanizer mode definition brief
+User confirmed: strengthen engineering focus AND add personal writing mode. Engineering remains default. Personal mode requires explicit request and preserves draft voice with minimum effective edits. Requirements are not approved. Define only; no implementation.
+
+## Evidence inventory
+Read in full: skills/humanizer/SKILL.md (4.7.0): engineering voice, full rewrite, document-type branches, technical preservation, texture examples, voice preservation, modes. No dedicated detect mode in its Modes section.
+Read shared/agent-output-discipline.md, shared/pattern-classes.md, shared/final-gates.md: mandatory construction sweeps, STE before voice, technical exceptions, shared rules also used by doc-flow-review.
+Prior requirements manually inspected: .flow/runs/2026-08-15-humanizer-ste-discipline/requirements.md and .flow/runs/2026-08-11-simplified-technical-english/requirements.md. Broad STE/mixed-document strictest-wins precedent. Engineering must retain safeguards; personal requires explicit bounded exception/supersession at approval. No generic AI detector remains applicable; pattern audit would not infer authorship.
+External primary comparison already read: https://github.com/petergyang/no-ai-slop/blob/main/skills/no-ai-slop/SKILL.md and eval.md. Offers minimum-effective editing, detect-only quoted findings, portability test, colon reveals, trailing -ing superficial analysis and formatting checks. No output benchmark was performed. Treat these as candidate features, not proven quality improvements.
+Search method: full reads of skill and shared files, enumerated .flow/runs and read two prior requirements. Archive retrieval unavailable: missing project/ancestor identity.json; selection 8933967ee514ad5aeb48ab0568087a69e70acf580ad85a92ce2f34a2475e2a6e. Manual evidence is outside selection.
+
+## Assignment
+Participate in discovery and targeted evidence assessment from your role. Then adversarially challenge the candidate scope. Return proposed requirements, acceptance scenarios, non-goals, open questions and approval-readiness findings with observed/inferred/recommended/unverified claims. Product manager: value, scope, success; business analyst: modes/workflows/edge cases; solution architect: shared-contract boundaries/precedent/feasibility, no implementation design.
+Candidates: fix conflicting examples and repeated workflow; add audit operation independent of writing mode; add portability and targeted construction examples; personal minimum edit with truth protection; preserve engineering default and doc-flow-review behavior.
+You are not alone in this repository. Do not revert others. Read only; return report in your response for coordinator to save under this run. Do not edit product files. Do not spawn agents. Success: evidence-backed bounded scope, concrete adversarial findings and measurable acceptance cases; no unsupported absence claims.

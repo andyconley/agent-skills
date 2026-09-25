@@ -23,16 +23,24 @@ go install github.com/vale-cli/vale/v3/cmd/vale@latest
 From the repo root:
 
 ```bash
-./scripts/lint-prose.sh
+./scripts/lint-prose.sh --profile repository
 ```
 
-To lint specific files or directories:
+To lint explicit engineering or personal-writing targets:
 
 ```bash
-./scripts/lint-prose.sh path/to/draft.md
-./scripts/lint-prose.sh path/to/pasted-text.txt
-./scripts/lint-prose.sh examples/regression/
+./scripts/lint-prose.sh --profile engineering -- path/to/draft.md
+./scripts/lint-prose.sh --profile personal -- path/to/pasted-text.txt
 ```
+
+A bare target uses the engineering profile to support existing strict skill
+callers. New callers should select a profile explicitly.
+
+The repository and engineering profiles use the full technical-writing
+tripwires. The personal profile selects `CorporateFiller` as an advisory
+signal only. A personal finding is a prompt for editorial judgment, not a
+requirement to remove source voice. Vale never selects an editing mode or
+determines whether a draft is operational; humanizer does that work.
 
 ## Rule Levels
 

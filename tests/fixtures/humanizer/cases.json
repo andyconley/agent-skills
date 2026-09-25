@@ -1,0 +1,572 @@
+[
+  {
+    "id": "engineering",
+    "group": "A",
+    "instruction": "Use humanizer to rewrite this draft.",
+    "source": "The retry job writes errors to `retry.log`. What I concluded: the trace answers. Nothing answers it today. The timeout is 15 seconds, but we have not measured recovery under load.",
+    "checks": [
+      "Preserve retry.log, 15 seconds, and unmeasured recovery caveat.",
+      "Remove author-state and decorative echo."
+    ],
+    "expected_policy": "engineering",
+    "operation": "edit",
+    "protected_spans": [
+      "`retry.log`"
+    ],
+    "retained_traits": [],
+    "seeded_defects": [
+      "What I concluded:",
+      "the trace answers. Nothing answers it today."
+    ],
+    "reader_task": "evaluate supplied prose",
+    "clean_under_policy": false
+  },
+  {
+    "id": "natural-default",
+    "group": "A",
+    "instruction": "Use humanizer to make this draft more natural.",
+    "source": "What I concluded is that we must turn off the scheduler before maintenance. Set up the replacement job, then carry out one dry run. The timeout stays 15 seconds.",
+    "checks": [
+      "Generic naturalness does not select personal.",
+      "Use plain verbs across procedural content; preserve timeout."
+    ],
+    "expected_policy": "engineering",
+    "operation": "edit",
+    "protected_spans": [],
+    "retained_traits": [],
+    "seeded_defects": [
+      "What I concluded is",
+      "turn off",
+      "Set up",
+      "carry out"
+    ],
+    "reader_task": "evaluate supplied prose",
+    "clean_under_policy": false
+  },
+  {
+    "id": "personal",
+    "group": "B",
+    "instruction": "Use humanizer personal mode. Make minimum effective edits. One sentence was accidentally pasted twice.",
+    "source": "I spent Saturday arguing with a flat-pack bookcase. The bookcase won. I called my brother, who laughed for a full minute before telling me the back panel was upside down. I had put it in upside down. I had put it in upside down. By dinner it stood straight. Mostly.",
+    "checks": [
+      "Retain bookcase humor, brother digression and Mostly cadence.",
+      "Remove one exact repeated responsibility sentence; preserve the fact that the narrator installed the panel."
+    ],
+    "expected_policy": "personal",
+    "operation": "edit",
+    "protected_spans": [],
+    "retained_traits": [
+      "source first-person perspective and cadence"
+    ],
+    "seeded_defects": [
+      "I had put it in upside down. I had put it in upside down."
+    ],
+    "reader_task": "evaluate supplied prose",
+    "clean_under_policy": false
+  },
+  {
+    "id": "equivalent",
+    "group": "B",
+    "instruction": "Use humanizer for this personal note; keep my voice and make minimal edits. One sentence was accidentally pasted twice.",
+    "source": "My first read of the recipe was wrong. I set up every bowl we own, then discovered I needed one. Mum would have laughed. Mum would have laughed.",
+    "checks": [
+      "Retain first-person admission and colloquial set up.",
+      "Remove duplicated final sentence."
+    ],
+    "expected_policy": "personal",
+    "operation": "edit",
+    "protected_spans": [],
+    "retained_traits": [
+      "source first-person perspective and cadence"
+    ],
+    "seeded_defects": [
+      "Mum would have laughed. Mum would have laughed."
+    ],
+    "reader_task": "evaluate supplied prose",
+    "clean_under_policy": false
+  },
+  {
+    "id": "personal-clean",
+    "group": "B",
+    "instruction": "Use humanizer personal mode on this draft.",
+    "source": "My first read was wrong. I thought the trail ended at the creek. It kept going, and so did I.",
+    "checks": [
+      "Leave effective source sentences unchanged.",
+      "Do not request a voice sample."
+    ],
+    "expected_policy": "personal",
+    "operation": "edit",
+    "protected_spans": [],
+    "retained_traits": [
+      "source first-person perspective and cadence"
+    ],
+    "seeded_defects": [],
+    "reader_task": "evaluate supplied prose",
+    "clean_under_policy": true
+  },
+  {
+    "id": "personal-technical",
+    "group": "D",
+    "instruction": "Use humanizer personal mode.",
+    "source": "I finally learned why my little server kept falling over. I typed `systemctl stop demo`, made tea, and read the message \"port already in use\" three times. Patience is apparently a skill I am still installing. I have not measured whether the restart fixed it.",
+    "checks": [
+      "Incidental command does not force whole narrative engineering.",
+      "Preserve command, exact error quote and uncertainty.",
+      "Retain source humor."
+    ],
+    "expected_policy": "personal",
+    "operation": "edit",
+    "protected_spans": [
+      "`systemctl stop demo`",
+      "\"port already in use\""
+    ],
+    "retained_traits": [
+      "source first-person perspective and cadence"
+    ],
+    "seeded_defects": [],
+    "reader_task": "evaluate supplied prose",
+    "clean_under_policy": true
+  },
+  {
+    "id": "personal-runbook",
+    "group": "D",
+    "instruction": "Use humanizer personal mode on this runbook.",
+    "source": "I like a quiet maintenance window.\n\n## Restart procedure\nTurn off the scheduler. Set up the replacement job. Carry out a dry run. Do not delete `retry.log`. The timeout is 15 seconds.",
+    "checks": [
+      "Operational purpose retains whole-document engineering discipline.",
+      "Preserve negative obligation, command-like identifier and timeout."
+    ],
+    "expected_policy": "engineering",
+    "operation": "edit",
+    "protected_spans": [
+      "`retry.log`"
+    ],
+    "retained_traits": [],
+    "seeded_defects": [
+      "Turn off",
+      "Set up",
+      "Carry out"
+    ],
+    "reader_task": "execute service restart instructions",
+    "clean_under_policy": false
+  },
+  {
+    "id": "audit-engineering",
+    "group": "E",
+    "instruction": "Use humanizer to audit this draft. Do not rewrite it.",
+    "source": "What I concluded: the worker now retries failed uploads. This is a pivotal moment, highlighting our commitment to reliability.",
+    "checks": [
+      "Locate author-state and inflated trailing interpretation.",
+      "Give reader consequence and repair direction, no replacement draft or authorship claim."
+    ],
+    "expected_policy": "engineering",
+    "operation": "audit",
+    "protected_spans": [],
+    "retained_traits": [],
+    "seeded_defects": [
+      "What I concluded:",
+      "This is a pivotal moment, highlighting our commitment to reliability."
+    ],
+    "reader_task": "evaluate supplied prose",
+    "clean_under_policy": false
+  },
+  {
+    "id": "audit-personal",
+    "group": "C",
+    "instruction": "Use humanizer personal mode to audit this draft. Do not rewrite it.",
+    "source": "My first read was wrong. I thought the trail ended at the creek. It kept going, and so did I.",
+    "checks": [
+      "No actionable findings solely for voice-bearing constructions.",
+      "No replacement draft, score or AI inference."
+    ],
+    "expected_policy": "personal",
+    "operation": "audit",
+    "protected_spans": [],
+    "retained_traits": [
+      "source first-person perspective and cadence"
+    ],
+    "seeded_defects": [],
+    "reader_task": "evaluate supplied prose",
+    "clean_under_policy": true
+  },
+  {
+    "id": "audit-clean",
+    "group": "E",
+    "instruction": "Use humanizer to audit this draft.",
+    "source": "The worker retries failed uploads twice. Each attempt has a 15-second timeout.",
+    "checks": [
+      "Report no actionable findings.",
+      "No invented deficiency or replacement draft."
+    ],
+    "expected_policy": "engineering",
+    "operation": "audit",
+    "protected_spans": [],
+    "retained_traits": [],
+    "seeded_defects": [],
+    "reader_task": "evaluate supplied prose",
+    "clean_under_policy": true
+  },
+  {
+    "id": "strict-personal",
+    "group": "F",
+    "instruction": "Use humanizer personal mode with strict validation. One sentence was accidentally pasted twice.",
+    "source": "My first read was wrong. I set up three chairs for four guests. The count was 3; it needed to be 4. The count was 3; it needed to be 4.",
+    "checks": [
+      "Retain meaningful admission and phrasal verb.",
+      "Remove repeated facts while preserving the numerical meaning of three chairs and four guests.",
+      "Accurately distinguish available checks from unavailable or inapplicable checks."
+    ],
+    "expected_policy": "personal",
+    "operation": "edit",
+    "protected_spans": [],
+    "retained_traits": [
+      "source first-person perspective and cadence"
+    ],
+    "seeded_defects": [
+      "The count was 3; it needed to be 4. The count was 3; it needed to be 4."
+    ],
+    "reader_task": "evaluate supplied prose",
+    "clean_under_policy": false
+  },
+  {
+    "id": "portability",
+    "group": "F",
+    "instruction": "Use humanizer to audit this draft.",
+    "source": "The rollout creates a better experience.\n\nThe worker retries each failed upload twice without user action. This removes two manual steps.\n\nThe best part: it works. Logs contain three fields: `job_id`, `attempt`, and `status`. The parser walks the input, stopping at the first invalid byte.",
+    "checks": [
+      "Flag unsupported generic experience/colon drama in context.",
+      "Keep supported conclusion, legitimate list colon and meaningful trailing clause.",
+      "Do not invent missing metrics."
+    ],
+    "expected_policy": "engineering",
+    "operation": "audit",
+    "protected_spans": [
+      "`job_id`",
+      "`attempt`",
+      "`status`"
+    ],
+    "retained_traits": [],
+    "seeded_defects": [
+      "The rollout creates a better experience.",
+      "The best part: it works."
+    ],
+    "reader_task": "evaluate supplied prose",
+    "clean_under_policy": false
+  },
+  {
+    "id": "ambiguous",
+    "group": "D",
+    "instruction": "Use humanizer personal mode. I have not decided whether the draft below is a memoir passage or operator instructions; please resolve any purpose question before editing.",
+    "source": "Turn off the old service. Set up the new one.",
+    "checks": [
+      "Ask one focused purpose question rather than silently apply a materially uncertain policy."
+    ],
+    "expected_policy": "clarify",
+    "operation": "edit",
+    "protected_spans": [],
+    "retained_traits": [],
+    "seeded_defects": [
+      "Intended document purpose has not been chosen."
+    ],
+    "reader_task": "resolve whether the draft is operational or narrative",
+    "clean_under_policy": false
+  },
+  {
+    "id": "doc-flow",
+    "group": "compatibility",
+    "instruction": "Use doc-flow-review to review the structure only. Do not rewrite.",
+    "source": "## Recommendation\nReplace the scheduler.\n\n## Evidence\nThree runs failed this month because the scheduler has no retry support.\n\n## Constraint\nThe replacement must run offline.\n\n## Options\nThe hosted option requires internet access. The local option supports retries and runs offline.",
+    "checks": [
+      "Review structural reader costs only; no prose rewrite.",
+      "Keep concrete recommendation/evidence and offline constraint intact in feedback."
+    ],
+    "expected_policy": "doc-flow-review",
+    "operation": "review",
+    "protected_spans": [],
+    "retained_traits": [],
+    "seeded_defects": [
+      "Recommendation does not name the replacement choice."
+    ],
+    "reader_task": "evaluate supplied prose",
+    "clean_under_policy": false
+  },
+  {
+    "id": "paired-engineering",
+    "instruction": "Use humanizer to rewrite this draft.",
+    "source": "My first read was wrong. I thought the trail ended at the creek. It kept going, and so did I.",
+    "checks": [
+      "Engineering treatment removes author-state framing and decorative mirroring without inventing a route or cause.",
+      "Preserve mistaken trail expectation and continued walk."
+    ],
+    "group": "C",
+    "expected_policy": "engineering",
+    "operation": "edit",
+    "protected_spans": [],
+    "retained_traits": [],
+    "seeded_defects": [
+      "My first read was wrong.",
+      "It kept going, and so did I."
+    ],
+    "reader_task": "evaluate supplied prose",
+    "clean_under_policy": false
+  },
+  {
+    "id": "journal-default",
+    "instruction": "Use humanizer to audit this journal entry without rewriting it.",
+    "source": "My first read was wrong. I thought the trail ended at the creek. It kept going, and so did I.",
+    "checks": [
+      "Genre alone does not select personal; engineering audit identifies the unprotected mirrored closing. Concrete error ownership may remain.",
+      "No replacement draft."
+    ],
+    "group": "C",
+    "expected_policy": "engineering",
+    "operation": "audit",
+    "protected_spans": [],
+    "retained_traits": [],
+    "seeded_defects": [
+      "It kept going, and so did I."
+    ],
+    "reader_task": "evaluate supplied prose",
+    "clean_under_policy": false
+  },
+  {
+    "id": "audit-omission",
+    "instruction": "Use humanizer to audit this operator instruction for gaps without rewriting it.",
+    "source": "Before deploying, obtain approval. Then deploy.",
+    "checks": [
+      "Locate approval instruction and identify missing approver or approval criteria.",
+      "Give repair direction without inventing an approver or quote for omitted text."
+    ],
+    "group": "E",
+    "expected_policy": "engineering",
+    "operation": "audit",
+    "protected_spans": [],
+    "retained_traits": [],
+    "seeded_defects": [
+      "Approval authority is unspecified."
+    ],
+    "reader_task": "evaluate supplied prose",
+    "clean_under_policy": false
+  },
+  {
+    "id": "strict-file",
+    "instruction": "Use humanizer personal mode with strict validation on the draft file. One sentence was accidentally pasted twice.",
+    "source": "My first read was wrong. I set up three chairs for four guests. This was a strategic effort. This was a strategic effort.",
+    "checks": [
+      "Preserve admission and colloquial verb, remove duplicate.",
+      "Read actual target and invoke personal profile; advisory finding is not a required rewrite."
+    ],
+    "file_target": true,
+    "tools": "shell",
+    "group": "F",
+    "expected_policy": "personal",
+    "operation": "edit",
+    "protected_spans": [],
+    "retained_traits": [
+      "source first-person perspective and cadence"
+    ],
+    "seeded_defects": [
+      "This was a strategic effort. This was a strategic effort."
+    ],
+    "reader_task": "evaluate supplied prose",
+    "clean_under_policy": false
+  },
+  {
+    "id": "strict-restricted",
+    "instruction": "Use humanizer personal mode with strict validation on the draft file. You may read files, including using read-only shell commands if needed. Do not execute lint or validation programs in this run; complete the editorial checks and report that mechanical validation was not run under this restriction. One sentence was accidentally pasted twice.",
+    "source": "My first read was wrong. I set up three chairs for four guests. I set up three chairs for four guests.",
+    "checks": [
+      "Preserve admission, remove duplicate, do not normalize personal phrasal verb.",
+      "Report mechanical validation not run under the execution restriction; do not claim it passed."
+    ],
+    "file_target": true,
+    "tools": "read",
+    "group": "F",
+    "expected_policy": "personal",
+    "operation": "edit",
+    "protected_spans": [],
+    "retained_traits": [
+      "source first-person perspective and cadence"
+    ],
+    "seeded_defects": [
+      "I set up three chairs for four guests. I set up three chairs for four guests."
+    ],
+    "reader_task": "evaluate supplied prose",
+    "clean_under_policy": false
+  },
+  {
+    "id": "protection-engineering",
+    "group": "A",
+    "instruction": "Use humanizer to edit this draft.",
+    "source": "I wrote `systemctl stop demo` in `notes/restart.md` beside the message \"port already in use\" and the citation \"Smith (2020, p. 4)\". The setting is `retry_limit=2`. I wanted **one** quiet evening.",
+    "checks": [
+      "Preserve exact command, path, quoted message, citation, setting and numerical meaning.",
+      "Apply engineering policy to unprotected prose without changing protected spans; do not invent a source or technical behavior."
+    ],
+    "expected_policy": "engineering",
+    "operation": "edit",
+    "protected_spans": [
+      "`systemctl stop demo`",
+      "`notes/restart.md`",
+      "\"port already in use\"",
+      "\"Smith (2020, p. 4)\"",
+      "`retry_limit=2`"
+    ],
+    "retained_traits": [],
+    "seeded_defects": [
+      "I wanted **one** quiet evening."
+    ],
+    "reader_task": "read a personal account containing technical examples",
+    "clean_under_policy": false
+  },
+  {
+    "id": "protection-personal",
+    "group": "B",
+    "instruction": "Use humanizer personal mode to edit this draft.",
+    "source": "I wrote `systemctl stop demo` in `notes/restart.md` beside the message \"port already in use\" and the citation \"Smith (2020, p. 4)\". The setting is `retry_limit=2`. I wanted **one** quiet evening.",
+    "checks": [
+      "Preserve exact command, path, quoted message, citation, setting and numerical meaning.",
+      "Retain purposeful emphasis in personal mode; do not invent a source or technical behavior."
+    ],
+    "expected_policy": "personal",
+    "operation": "edit",
+    "protected_spans": [
+      "`systemctl stop demo`",
+      "`notes/restart.md`",
+      "\"port already in use\"",
+      "\"Smith (2020, p. 4)\"",
+      "`retry_limit=2`"
+    ],
+    "retained_traits": [
+      "first-person perspective and purposeful emphasis"
+    ],
+    "seeded_defects": [],
+    "reader_task": "read a personal account containing technical examples",
+    "clean_under_policy": true
+  },
+  {
+    "id": "audit-formatting",
+    "group": "F",
+    "instruction": "Use humanizer personal mode to audit this draft without rewriting.",
+    "source": "**The worker** **retries** **failed uploads**. I wanted **one** quiet evening, not another night of pager noise.",
+    "checks": [
+      "Identify excessive markup on every part of the first sentence.",
+      "Keep purposeful one emphasis and personal cadence without treating all bold as defective.",
+      "No replacement draft."
+    ],
+    "expected_policy": "personal",
+    "operation": "audit",
+    "protected_spans": [],
+    "retained_traits": [
+      "purposeful emphasis on one quiet evening"
+    ],
+    "seeded_defects": [
+      "**The worker** **retries** **failed uploads**"
+    ],
+    "reader_task": "read a personal account",
+    "clean_under_policy": false
+  },
+  {
+    "id": "regression-protected",
+    "group": "A",
+    "instruction": "Use humanizer on this draft.",
+    "source": "DO NOT store bearer tokens in `chrome.storage.local`. Store bearer tokens in `chrome.storage.session`.\n\nDO store observability session IDs in `chrome.storage.local`. They need to survive a browser restart for trace correlation.\n\nDriven with a payload carrying no id and a foreign name, the worker relabelled the part. Driven with a token missing `exp`, the expiry guard never fired.",
+    "checks": [
+      "Preserve storage terms and opposite DO NOT / DO obligations.",
+      "Retain explicit executed evidence and missing exp outcome; no invented causal detail."
+    ],
+    "expected_policy": "engineering",
+    "operation": "edit",
+    "protected_spans": [
+      "`chrome.storage.local`",
+      "`chrome.storage.session`",
+      "`exp`"
+    ],
+    "retained_traits": [],
+    "seeded_defects": [],
+    "reader_task": "compare storage requirements and observed guard behavior",
+    "clean_under_policy": true
+  },
+  {
+    "id": "regression-word-choice",
+    "group": "A",
+    "instruction": "Use humanizer on this runbook section.",
+    "source": "Before you deploy, turn off the scheduler and set up the replacement config. Carry out a dry run. If the counts look off, find out which shard drifted and get rid of the stale cache. Each job writes to a folder under the run root; when a task fails, the retry handler reads the same directory. Older than six months? It's expired. Grab a fresh one. The rollback is pretty fast.",
+    "checks": [
+      "Use plain verbs throughout the procedure; retain the six-month threshold without guessing its subject.",
+      "Do not merge job and task without evidence that they are the same concept. Keep folder and directory tied to the same path.",
+      "Do not strengthen `pretty fast` into a guarantee; state that the draft gives no rollback duration."
+    ],
+    "expected_policy": "engineering",
+    "operation": "edit",
+    "protected_spans": [],
+    "retained_traits": [],
+    "seeded_defects": [
+      "turn off",
+      "set up",
+      "carry out",
+      "pretty fast"
+    ],
+    "reader_task": "execute deployment and troubleshoot stale cache",
+    "clean_under_policy": false
+  },
+  {
+    "id": "regression-mixed",
+    "group": "D",
+    "instruction": "Use humanizer on this document.",
+    "source": "We should move the scheduler off cron. Cron gives us no retry semantics and no visibility, and we have lost three overnight runs this quarter to silent failures.\n\n## Rollback steps\n\nTurn off the new scheduler. Set up the cron entry again. Carry out a dry run.",
+    "checks": [
+      "Use plain verbs in argument and rollback procedure.",
+      "Preserve lack of retries/visibility and three failed overnight runs; do not reduce argument to a bare requirement."
+    ],
+    "expected_policy": "engineering",
+    "operation": "edit",
+    "protected_spans": [],
+    "retained_traits": [],
+    "seeded_defects": [
+      "Turn off",
+      "Set up",
+      "Carry out"
+    ],
+    "reader_task": "assess replacement and perform rollback",
+    "clean_under_policy": false
+  },
+  {
+    "id": "doc-flow-strict",
+    "group": "compatibility",
+    "instruction": "Use doc-flow-review strict mode on this draft.",
+    "source": "# Proposal\n\nWe should create a shared service for notifications.\n\n## Implementation\n\nThe service will expose an API for email, Slack, and in-app messages. Teams will migrate over two quarters.\n\n## Context\n\nToday each team owns its own notification code. Incidents are hard to trace because delivery behavior differs by product area.\n\n## Risks\n\nSome teams need custom retry behavior.",
+    "checks": [
+      "Report structural reader problems and concrete repair direction; no replacement draft.",
+      "Preserve source facts and review-only scope; no generic praise or passed-gates checklist."
+    ],
+    "expected_policy": "doc-flow-review",
+    "operation": "review",
+    "protected_spans": [],
+    "retained_traits": [],
+    "seeded_defects": [
+      "Implementation precedes the context needed to assess it."
+    ],
+    "reader_task": "assess notification service proposal structure",
+    "clean_under_policy": false
+  },
+  {
+    "id": "doc-flow-normal",
+    "group": "compatibility",
+    "instruction": "Use doc-flow-review on this draft.",
+    "source": "# Proposal\n\nWe should create a shared service for notifications.\n\n## Implementation\n\nThe service will expose an API for email, Slack, and in-app messages. Teams will migrate over two quarters.\n\n## Context\n\nToday each team owns its own notification code. Incidents are hard to trace because delivery behavior differs by product area.",
+    "checks": [
+      "Report structural reader problems and concrete repair direction; no replacement draft.",
+      "Preserve source facts and review-only scope; no generic praise or passed-gates checklist."
+    ],
+    "expected_policy": "doc-flow-review",
+    "operation": "review",
+    "protected_spans": [],
+    "retained_traits": [],
+    "seeded_defects": [
+      "Implementation precedes the context needed to assess it."
+    ],
+    "reader_task": "assess notification service proposal structure",
+    "clean_under_policy": false
+  }
+]

@@ -1,0 +1,500 @@
+{
+  "schema_version": 1,
+  "work_id": "20260911-humanizer-modes",
+  "mode": "delegated",
+  "risk": {
+    "hard_triggers": [
+      "production_or_shared_external_mutation"
+    ],
+    "aggravating_factors": [
+      "concurrency_or_cross_system_coordination"
+    ],
+    "classification": "high",
+    "rationale": "Approved GitHub PR/merge/release and canonical install change shared state; coordinator serializes mutations, independent reviewer verifies readback."
+  },
+  "assignments": [
+    {
+      "id": "coordinator",
+      "lane": "implement",
+      "role": "coordinator",
+      "provider": {
+        "kind": "agent",
+        "id": "/root"
+      },
+      "brief_path": ".flow/runs/20260911-humanizer-modes/implementation-brief.md",
+      "input_evidence": [
+        ".flow/runs/20260911-humanizer-modes/requirements.md",
+        ".flow/runs/20260911-humanizer-modes/plan.md",
+        ".flow/runs/20260911-humanizer-modes/validation-plan.md",
+        ".flow/runs/20260911-humanizer-modes/solution.md"
+      ],
+      "read_scopes": [
+        "."
+      ],
+      "write_scopes": [
+        "README.md",
+        "skills/manifest.tsv",
+        "tests/fixtures/humanizer",
+        "tests/manual",
+        "examples/regression",
+        "scripts/validate-skills.sh",
+        "tests/install-test.sh",
+        ".flow/runs/20260911-humanizer-modes",
+        "docs/README.md",
+        "tests/humanizer-fixture-test.py"
+      ],
+      "read_only": false,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        },
+        {
+          "name": "filesystem-write",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/20260911-humanizer-modes/coordinator.md",
+        "format": "markdown or code"
+      },
+      "success_criteria": [
+        "Approved behavior implemented or reviewed within assigned scope; truthful checks"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "serialized",
+        "group": "implementation"
+      }
+    },
+    {
+      "id": "impl-lead",
+      "lane": "implement",
+      "role": "lead-developer",
+      "provider": {
+        "kind": "agent",
+        "id": "/root/impl_lead"
+      },
+      "brief_path": ".flow/runs/20260911-humanizer-modes/implementation-brief.md",
+      "input_evidence": [
+        ".flow/runs/20260911-humanizer-modes/requirements.md",
+        ".flow/runs/20260911-humanizer-modes/plan.md",
+        ".flow/runs/20260911-humanizer-modes/validation-plan.md",
+        ".flow/runs/20260911-humanizer-modes/solution.md"
+      ],
+      "read_scopes": [
+        "."
+      ],
+      "write_scopes": [
+        "skills/humanizer"
+      ],
+      "read_only": false,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        },
+        {
+          "name": "filesystem-write",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": "skills/humanizer/SKILL.md",
+        "format": "markdown or code"
+      },
+      "success_criteria": [
+        "Approved behavior implemented or reviewed within assigned scope; truthful checks"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "implementation"
+      }
+    },
+    {
+      "id": "impl-test",
+      "lane": "implement",
+      "role": "test-engineer",
+      "provider": {
+        "kind": "agent",
+        "id": "/root/impl_test"
+      },
+      "brief_path": ".flow/runs/20260911-humanizer-modes/implementation-brief.md",
+      "input_evidence": [
+        ".flow/runs/20260911-humanizer-modes/requirements.md",
+        ".flow/runs/20260911-humanizer-modes/plan.md",
+        ".flow/runs/20260911-humanizer-modes/validation-plan.md",
+        ".flow/runs/20260911-humanizer-modes/solution.md"
+      ],
+      "read_scopes": [
+        "."
+      ],
+      "write_scopes": [
+        "scripts/lint-prose.sh",
+        "tools/vale",
+        "tests/lint-prose-test.sh",
+        ".github/workflows/ci.yml"
+      ],
+      "read_only": false,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        },
+        {
+          "name": "filesystem-write",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": "tests/lint-prose-test.sh",
+        "format": "markdown or code"
+      },
+      "success_criteria": [
+        "Approved behavior implemented or reviewed within assigned scope; truthful checks"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "implementation"
+      }
+    },
+    {
+      "id": "quality-review",
+      "lane": "implement",
+      "role": "quality-reviewer",
+      "provider": {
+        "kind": "agent",
+        "id": "/root/impl_quality"
+      },
+      "brief_path": ".flow/runs/20260911-humanizer-modes/implementation-brief.md",
+      "input_evidence": [
+        ".flow/runs/20260911-humanizer-modes/requirements.md",
+        ".flow/runs/20260911-humanizer-modes/plan.md",
+        ".flow/runs/20260911-humanizer-modes/validation-plan.md",
+        ".flow/runs/20260911-humanizer-modes/solution.md"
+      ],
+      "read_scopes": [
+        "."
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/20260911-humanizer-modes/quality-review.md",
+        "format": "markdown or code"
+      },
+      "success_criteria": [
+        "Approved behavior implemented or reviewed within assigned scope; truthful checks"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "implementation"
+      }
+    },
+    {
+      "id": "handback-writer",
+      "lane": "implement",
+      "role": "tech-writer",
+      "provider": {
+        "kind": "agent",
+        "id": "/root/impl_writer"
+      },
+      "brief_path": ".flow/runs/20260911-humanizer-modes/implementation-brief.md",
+      "input_evidence": [
+        ".flow/runs/20260911-humanizer-modes/requirements.md",
+        ".flow/runs/20260911-humanizer-modes/plan.md",
+        ".flow/runs/20260911-humanizer-modes/validation-plan.md",
+        ".flow/runs/20260911-humanizer-modes/solution.md"
+      ],
+      "read_scopes": [
+        "."
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/20260911-humanizer-modes/handback-writer.md",
+        "format": "markdown or code"
+      },
+      "success_criteria": [
+        "Approved behavior implemented or reviewed within assigned scope; truthful checks"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "implementation"
+      }
+    },
+    {
+      "id": "live-codex",
+      "lane": "implement",
+      "role": "runtime-validation",
+      "provider": {
+        "kind": "external_provider",
+        "id": "codex-local-cli"
+      },
+      "brief_path": ".flow/runs/20260911-humanizer-modes/validation-plan.md",
+      "input_evidence": [
+        "tests/fixtures/humanizer/cases.json"
+      ],
+      "read_scopes": [
+        "skills",
+        "tests/fixtures/humanizer"
+      ],
+      "read_only": true,
+      "write_scopes": [],
+      "required_capabilities": [
+        {
+          "name": "local-cli-process",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/20260911-humanizer-modes/validation/codex/results.md",
+        "format": "JSONL and markdown"
+      },
+      "success_criteria": [
+        "Fresh process reads actual skill and records output without changing product files"
+      ],
+      "claim_statuses": [
+        "observed",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "live-validation"
+      }
+    },
+    {
+      "id": "live-claude",
+      "lane": "implement",
+      "role": "runtime-validation",
+      "provider": {
+        "kind": "external_provider",
+        "id": "claude-local-cli"
+      },
+      "brief_path": ".flow/runs/20260911-humanizer-modes/validation-plan.md",
+      "input_evidence": [
+        "tests/fixtures/humanizer/cases.json"
+      ],
+      "read_scopes": [
+        "skills",
+        "tests/fixtures/humanizer"
+      ],
+      "read_only": true,
+      "write_scopes": [],
+      "required_capabilities": [
+        {
+          "name": "local-cli-process",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/20260911-humanizer-modes/validation/claude/results.md",
+        "format": "JSONL and markdown"
+      },
+      "success_criteria": [
+        "Fresh process reads actual skill and records output without changing product files"
+      ],
+      "claim_statuses": [
+        "observed",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "live-validation"
+      }
+    },
+    {
+      "id": "implementation-architecture",
+      "lane": "implement",
+      "role": "solution-architect",
+      "provider": {
+        "kind": "agent",
+        "id": "/root/solution_architect"
+      },
+      "brief_path": ".flow/runs/20260911-humanizer-modes/implementation-brief.md",
+      "input_evidence": [
+        ".flow/runs/20260911-humanizer-modes/requirements.md",
+        ".flow/runs/20260911-humanizer-modes/plan.md",
+        ".flow/runs/20260911-humanizer-modes/validation-plan.md",
+        ".flow/runs/20260911-humanizer-modes/solution.md"
+      ],
+      "read_scopes": [
+        "."
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/20260911-humanizer-modes/implementation-architecture.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "Approved behavior implemented or reviewed within assigned scope; truthful checks"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "implementation"
+      }
+    }
+  ],
+  "shared_state": [
+    {
+      "id": "github",
+      "kind": "git-host",
+      "identity": "https://github.com/andyconley/agent-skills",
+      "mutation_type": "structural",
+      "owner_assignment": "coordinator",
+      "write_region": "feat/humanizer-modes branch, implementation PR, main merge and semantic-release tag/changelog",
+      "coordination": {
+        "mode": "serialized",
+        "group": "delivery"
+      },
+      "baseline_artifact": ".flow/runs/20260911-humanizer-modes/delivery-baseline.md",
+      "baseline_captured_at": "2026-09-12T05:25:46.668976+00:00",
+      "baseline_source_identity": "https://github.com/andyconley/agent-skills",
+      "expected_delta": "Publish approved implementation branch and PR; merge passing exact head; allow configured semantic-release to emit release.",
+      "execution_result_artifact": ".flow/runs/20260911-humanizer-modes/delivery-results.md",
+      "readback_artifact": ".flow/runs/20260911-humanizer-modes/delivery-results.md",
+      "comparison_artifact": ".flow/runs/20260911-humanizer-modes/delivery-results.md",
+      "recovery_state": "available_unexercised",
+      "unexpected_delta_status": "resolved",
+      "unexpected_delta_disposition": "A second release was needed to repair the installed-path defect; PR #16 and v1.6.1 delivered and verified it."
+    },
+    {
+      "id": "canonical",
+      "kind": "git-checkout",
+      "identity": "/Users/andyconley/Documents/agent-skills",
+      "mutation_type": "structural",
+      "owner_assignment": "coordinator",
+      "write_region": "main checkout and .flow/runs/20260911-humanizer-modes",
+      "coordination": {
+        "mode": "serialized",
+        "group": "delivery"
+      },
+      "baseline_artifact": ".flow/runs/20260911-humanizer-modes/delivery-baseline.md",
+      "baseline_captured_at": "2026-09-12T05:25:46.668976+00:00",
+      "baseline_source_identity": "/Users/andyconley/Documents/agent-skills",
+      "expected_delta": "Preserve untracked run in backup; fast-forward canonical main to verified remote including existing workbreakdown changes.",
+      "execution_result_artifact": ".flow/runs/20260911-humanizer-modes/delivery-results.md",
+      "readback_artifact": ".flow/runs/20260911-humanizer-modes/delivery-results.md",
+      "comparison_artifact": ".flow/runs/20260911-humanizer-modes/delivery-results.md",
+      "recovery_state": "available_unexercised",
+      "unexpected_delta_status": "none"
+    },
+    {
+      "id": "installed",
+      "kind": "skill-install",
+      "identity": "/Users/andyconley/.agents/skills and /Users/andyconley/.claude/skills",
+      "mutation_type": "structural",
+      "owner_assignment": "coordinator",
+      "write_region": "humanizer, doc-flow-review and workbreakdown managed symlinks only",
+      "coordination": {
+        "mode": "serialized",
+        "group": "delivery"
+      },
+      "baseline_artifact": ".flow/runs/20260911-humanizer-modes/delivery-baseline.md",
+      "baseline_captured_at": "2026-09-12T05:25:46.668976+00:00",
+      "baseline_source_identity": "/Users/andyconley/.agents/skills and /Users/andyconley/.claude/skills",
+      "expected_delta": "Existing humanizer/doc-flow links remain canonical; --all creates missing workbreakdown links for both runtimes; policy resolves to humanizer 4.8.0.",
+      "execution_result_artifact": ".flow/runs/20260911-humanizer-modes/delivery-results.md",
+      "readback_artifact": ".flow/runs/20260911-humanizer-modes/delivery-results.md",
+      "comparison_artifact": ".flow/runs/20260911-humanizer-modes/delivery-results.md",
+      "recovery_state": "available_unexercised",
+      "unexpected_delta_status": "resolved",
+      "unexpected_delta_disposition": "Initial 4.8.0 install exposed missing shared paths; 4.8.1 reinstallation and fresh Claude readback resolved the defect."
+    }
+  ],
+  "reconciliation": {
+    "artifact_path": ".flow/runs/20260911-humanizer-modes/implementation-reconciliation.md",
+    "status": "resolved",
+    "claims": [
+      {
+        "id": "delivered-release",
+        "status": "observed",
+        "evidence": [
+          ".flow/runs/20260911-humanizer-modes/delivery-results.md"
+        ],
+        "disposition": "accepted"
+      },
+      {
+        "id": "packaging-fixed",
+        "status": "observed",
+        "evidence": [
+          ".flow/runs/20260911-humanizer-modes/validation/installed-4.8.1.md"
+        ],
+        "disposition": "accepted"
+      },
+      {
+        "id": "behavioral-failures",
+        "status": "observed",
+        "evidence": [
+          ".flow/runs/20260911-humanizer-modes/acceptance-deviation.md",
+          ".flow/runs/20260911-humanizer-modes/validation/installed-4.8.1.md"
+        ],
+        "disposition": "accepted"
+      }
+    ]
+  },
+  "verification": {
+    "producer_assignments": [
+      "coordinator",
+      "impl-lead",
+      "impl-test"
+    ],
+    "evidence_collector_assignment": "coordinator",
+    "verifier_assignment": "quality-review",
+    "independent": true,
+    "artifact_path": ".flow/runs/20260911-humanizer-modes/quality-review.md"
+  }
+}

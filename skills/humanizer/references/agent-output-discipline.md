@@ -1,0 +1,1 @@
+../../../shared/agent-output-discipline.md

@@ -1,0 +1,324 @@
+{
+  "schema_version": 1,
+  "work_id": "20260911-humanizer-modes",
+  "mode": "delegated",
+  "risk": {
+    "hard_triggers": [],
+    "aggravating_factors": [
+      "concurrency_or_cross_system_coordination"
+    ],
+    "classification": "standard",
+    "rationale": "Read-only role reviews; coordinator authors definition artifacts; no product mutation."
+  },
+  "assignments": [
+    {
+      "id": "coordinator",
+      "lane": "plan",
+      "role": "coordinator",
+      "provider": {
+        "kind": "agent",
+        "id": "/root"
+      },
+      "brief_path": ".flow/runs/20260911-humanizer-modes/plan-brief.md",
+      "input_evidence": [
+        ".flow/runs/20260911-humanizer-modes/requirements.md",
+        ".flow/runs/20260911-humanizer-modes/acceptance-criteria.md",
+        ".flow/runs/20260911-humanizer-modes/solution.md"
+      ],
+      "read_scopes": [
+        "skills",
+        "shared",
+        "examples",
+        "tools",
+        "scripts",
+        ".flow/runs"
+      ],
+      "read_only": true,
+      "write_scopes": [],
+      "required_capabilities": [
+        {
+          "name": "repository_read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/20260911-humanizer-modes/plan-shaping.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "Buildable plan shaping grounded in approved solution; no product changes"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "definition-review"
+      }
+    },
+    {
+      "id": "product-manager",
+      "lane": "plan",
+      "role": "product-manager",
+      "provider": {
+        "kind": "agent",
+        "id": "/root/product_manager"
+      },
+      "brief_path": ".flow/runs/20260911-humanizer-modes/plan-brief.md",
+      "input_evidence": [
+        ".flow/runs/20260911-humanizer-modes/requirements.md",
+        ".flow/runs/20260911-humanizer-modes/acceptance-criteria.md",
+        ".flow/runs/20260911-humanizer-modes/solution.md"
+      ],
+      "read_scopes": [
+        "skills",
+        "shared",
+        "examples",
+        "tools",
+        "scripts",
+        ".flow/runs"
+      ],
+      "read_only": true,
+      "write_scopes": [],
+      "required_capabilities": [
+        {
+          "name": "repository_read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/20260911-humanizer-modes/plan-product-manager.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "Buildable plan shaping grounded in approved solution; no product changes"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "definition-review"
+      }
+    },
+    {
+      "id": "business-analyst",
+      "lane": "plan",
+      "role": "business-analyst",
+      "provider": {
+        "kind": "agent",
+        "id": "/root/business_analyst"
+      },
+      "brief_path": ".flow/runs/20260911-humanizer-modes/plan-brief.md",
+      "input_evidence": [
+        ".flow/runs/20260911-humanizer-modes/requirements.md",
+        ".flow/runs/20260911-humanizer-modes/acceptance-criteria.md",
+        ".flow/runs/20260911-humanizer-modes/solution.md"
+      ],
+      "read_scopes": [
+        "skills",
+        "shared",
+        "examples",
+        "tools",
+        "scripts",
+        ".flow/runs"
+      ],
+      "read_only": true,
+      "write_scopes": [],
+      "required_capabilities": [
+        {
+          "name": "repository_read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/20260911-humanizer-modes/plan-business-analyst.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "Buildable plan shaping grounded in approved solution; no product changes"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "definition-review"
+      }
+    },
+    {
+      "id": "solution-architect",
+      "lane": "solution",
+      "role": "solution-architect",
+      "provider": {
+        "kind": "agent",
+        "id": "/root/solution_architect"
+      },
+      "brief_path": ".flow/runs/20260911-humanizer-modes/solution-brief.md",
+      "input_evidence": [
+        "skills/humanizer/SKILL.md",
+        "shared/agent-output-discipline.md",
+        "shared/pattern-classes.md",
+        "shared/final-gates.md",
+        ".flow/runs/20260911-humanizer-modes/requirements.md",
+        ".flow/runs/20260911-humanizer-modes/acceptance-criteria.md"
+      ],
+      "read_scopes": [
+        "skills",
+        "shared",
+        "examples",
+        "tools",
+        "scripts",
+        ".flow/runs"
+      ],
+      "read_only": true,
+      "write_scopes": [],
+      "required_capabilities": [
+        {
+          "name": "repository_read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/20260911-humanizer-modes/solution-options-architect.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "Evidence-backed options and tradeoffs; no implementation; no claim of owner acceptance"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "definition-review"
+      }
+    },
+    {
+      "id": "solution-test-engineer",
+      "lane": "solution",
+      "role": "test-engineer",
+      "provider": {
+        "kind": "agent",
+        "id": "/root/solution_test_engineer"
+      },
+      "brief_path": ".flow/runs/20260911-humanizer-modes/solution-brief.md",
+      "input_evidence": [
+        "skills/humanizer/SKILL.md",
+        "shared/agent-output-discipline.md",
+        "shared/pattern-classes.md",
+        "shared/final-gates.md",
+        ".flow/runs/20260911-humanizer-modes/requirements.md",
+        ".flow/runs/20260911-humanizer-modes/acceptance-criteria.md"
+      ],
+      "read_scopes": [
+        "skills",
+        "shared",
+        "examples",
+        "tools",
+        "scripts",
+        ".flow/runs"
+      ],
+      "read_only": true,
+      "write_scopes": [],
+      "required_capabilities": [
+        {
+          "name": "repository_read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/20260911-humanizer-modes/solution-validation-review.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "Propose falsifiable validation matrix with mechanical vs editorial boundaries and cost posture"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "definition-review"
+      }
+    },
+    {
+      "id": "plan-architect",
+      "lane": "plan",
+      "role": "architect",
+      "provider": {
+        "kind": "agent",
+        "id": "/root/plan_architect"
+      },
+      "brief_path": ".flow/runs/20260911-humanizer-modes/plan-brief.md",
+      "input_evidence": [
+        ".flow/runs/20260911-humanizer-modes/requirements.md",
+        ".flow/runs/20260911-humanizer-modes/acceptance-criteria.md",
+        ".flow/runs/20260911-humanizer-modes/solution.md"
+      ],
+      "read_scopes": [
+        "skills",
+        "shared",
+        "examples",
+        "tools",
+        "scripts",
+        ".flow/runs"
+      ],
+      "read_only": true,
+      "write_scopes": [],
+      "required_capabilities": [
+        {
+          "name": "repository_read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/20260911-humanizer-modes/plan-architect.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "Buildable plan shaping grounded in approved solution; no product changes"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "definition-review"
+      }
+    }
+  ],
+  "shared_state": [],
+  "reconciliation": {
+    "artifact_path": ".flow/runs/20260911-humanizer-modes/findings-reconciliation.md",
+    "status": "resolved",
+    "claims": []
+  },
+  "verification": {
+    "producer_assignments": [
+      "coordinator"
+    ],
+    "evidence_collector_assignment": "coordinator",
+    "verifier_assignment": "solution-architect",
+    "independent": true,
+    "artifact_path": ".flow/runs/20260911-humanizer-modes/review.md"
+  }
+}

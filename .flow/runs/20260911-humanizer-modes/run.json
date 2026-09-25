@@ -1,0 +1,35 @@
+{
+  "artifacts": {
+    "acceptance_criteria": ".flow/runs/20260911-humanizer-modes/acceptance-criteria.md",
+    "handback": ".flow/runs/20260911-humanizer-modes/HANDOFF.md",
+    "handoff": ".flow/runs/20260911-humanizer-modes/implementation-handoff.md",
+    "implementation_evidence": ".flow/runs/20260911-humanizer-modes/validation-results.md",
+    "orchestration_manifest": ".flow/runs/20260911-humanizer-modes/orchestration.json",
+    "plan": ".flow/runs/20260911-humanizer-modes/plan.md",
+    "requirements": ".flow/runs/20260911-humanizer-modes/requirements.md",
+    "solution": ".flow/runs/20260911-humanizer-modes/solution.md",
+    "validation_plan": ".flow/runs/20260911-humanizer-modes/validation-plan.md"
+  },
+  "created_at": "2026-09-12T03:24:31Z",
+  "dispositions": {
+    "risk": "owned"
+  },
+  "gates": {
+    "approve-definition": "2026-09-12T03:38:21Z",
+    "approve-plan": "2026-09-12T04:54:54Z",
+    "approve-solution": "2026-09-12T04:47:51Z",
+    "mark-handback-ready": "2026-09-14T18:09:06Z",
+    "start-definition": "2026-09-12T03:24:31Z",
+    "start-implementation": "2026-09-12T04:54:54Z",
+    "start-plan": "2026-09-12T04:49:28Z",
+    "start-solution": "2026-09-12T04:27:55Z"
+  },
+  "lane": "implement",
+  "last_event": "mark-handback-ready",
+  "phase": "handback_ready",
+  "protocol_revision": 2,
+  "schema_version": 1,
+  "state": "handback_ready",
+  "updated_at": "2026-09-14T18:09:06Z",
+  "work_id": "20260911-humanizer-modes"
+}

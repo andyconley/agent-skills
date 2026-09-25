@@ -45,6 +45,12 @@ assert_link "$TEST_ROOT/codex/humanizer" "$REPO_ROOT/skills/humanizer"
 assert_link "$TEST_ROOT/claude/humanizer" "$REPO_ROOT/skills/humanizer"
 assert_missing "$TEST_ROOT/codex/doc-flow-review"
 pass "one skill installs to both runtimes"
+for runtime in codex claude; do
+  for reference in policy agent-output-discipline final-gates pattern-classes; do
+    cmp "$REPO_ROOT/skills/humanizer/references/$reference.md" "$TEST_ROOT/$runtime/humanizer/references/$reference.md" || fail "installed $reference differs for $runtime"
+  done
+done
+pass "humanizer references are readable through both installed skill links"
 
 run_manager --skill workbreakdown >/dev/null
 assert_link "$TEST_ROOT/codex/workbreakdown" "$REPO_ROOT/skills/workbreakdown"
