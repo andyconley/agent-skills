@@ -8,7 +8,7 @@ The manifest must parse as YAML. Quote a string value in double quotes when it c
 
 - Use schema version 2 for child-only reconciliation.
 - Use schema version 3 or 4 only when the manifest must verify or update the scoped Epic.
-- Schema version 4 adds optional Draft provenance and per-child classification. Its Epic rules are the schema-3 rules, plus the `unbound` disposition and the jira-epic-v3 panel.
+- Schema version 4 adds optional Draft provenance, cross-Epic consolidation, and per-child classification. Its Epic rules are the schema-3 rules, plus the `unbound` disposition and the jira-epic-v3 panel.
 - Give the manifest a stable manifest ID and integer revision.
 - Bind approval to the exact content. For a standalone YAML file, calculate SHA-256 over its exact UTF-8 bytes after converting line endings to LF; include the final trailing newline.
 - Approval is external to the YAML. A manifest cannot authorize itself.
@@ -30,7 +30,7 @@ Reject an unknown set version or a template that does not list template_set.vers
 Reject unknown fields instead of ignoring them.
 
 - Root: schema_version, manifest_id, revision, template_set, scope, epic, children, dependencies, rank, unknowns.
-- Schema-4 root: the root fields, plus optional shaping and sources.
+- Schema-4 root: the root fields, plus optional shaping, sources, and consolidation.
 - Schema-4 child: the child fields, plus optional classification.
 - template_set: id, version.
 - scope: parent_key, epic_key.
@@ -254,7 +254,7 @@ Schema 3 does not authorize Epic creation, deletion, reparenting, retyping, rank
 
 ## Schema 4: Draft provenance and classification
 
-Schema 4 records how a Draft was shaped, which sources it read, and why each child has its classification. All three blocks are optional, and a schema-4 manifest without them is valid. The Epic block follows the schema-3 rules, plus the `unbound` disposition and the jira-epic-v3 panel described below. The example is abridged: its Epic description and child template bindings follow the schema-3 and child rules. Reject shaping, sources, or a child classification in a schema-2 or schema-3 manifest.
+Schema 4 records how a Draft was shaped, which sources it read, what it found across the Initiative's other Epics, and why each child has its classification. All four blocks are optional, and a schema-4 manifest without them is valid. The Epic block follows the schema-3 rules, plus the `unbound` disposition and the jira-epic-v3 panel described below. The example is abridged: its Epic description and child template bindings follow the schema-3 and child rules. Reject shaping, sources, consolidation, or a child classification in a schema-2 or schema-3 manifest.
 
 ~~~yaml
 schema_version: 4
@@ -329,6 +329,26 @@ children:
       placeholder:
         defined_by: choose-transport
     # bound to jira-task-placeholder-v3; its summary starts with [PLACEHOLDER]
+consolidation:
+  status: run
+  claims:
+    - claim: "State reads use the cached projection."
+      claimed_by: [EPIC-200, EPIC-201]
+      owner: EPIC-200
+      rationale: "EPIC-200 builds the projection, and EPIC-201 only reads it."
+      confirmation:
+        state: proposed
+  order:
+    source: rank
+    value: [EPIC-199, EPIC-200, EPIC-201]
+  exceptions:
+    - blocker: TASK-310
+      blocked: build-endpoint
+      blocker_epic: EPIC-201
+      blocked_epic: EPIC-200
+      reason: "The later milestone's fixture must exist before the endpoint can be tested."
+      approver: "Program lead"
+      approval_evidence: "Decision log entry, 2026-09-18"
 dependencies: []
 rank:
   mode: scoped-relative
@@ -371,6 +391,24 @@ sources records what the Draft read and how it resolved disagreements between so
   - winner equals the ref of one listed source.
   - material and stale are true or false.
 - A schema-4 manifest with jira_context absent is rejected. Schema 4 always binds a live Epic digest, so a Draft without Jira context emits schema 2.
+
+### consolidation
+
+consolidation records the Draft's cross-Epic check. Its keys are status, claims, order, and exceptions. status is required, and the other keys are optional.
+
+- status is run, skipped, or no-siblings. skipped means the invocation request opted out. no-siblings means the Initiative has no other Epic. A skipped or no-siblings block has no claims and no exceptions, and its order is omitted or unknown.
+- claims lists each decision that more than one Epic claims. A claim contains claim, claimed_by, owner, rationale, and confirmation.
+  - claim and rationale are nonempty text.
+  - claimed_by lists at least two distinct Jira keys, and owner is one of them.
+  - confirmation.state is proposed or confirmed. A confirmed owner also records confirmed_by and evidence. A proposed owner records neither.
+- order records milestone order as source and value. order.source is declared, rank, or unknown. value lists unique Epic Jira keys in milestone order, and value is empty exactly when source is unknown. A known order includes the scoped Epic and never names a child ref.
+- exceptions lists each approved later-to-earlier edge. An exception contains blocker, blocked, blocker_epic, blocked_epic, reason, approver, and approval_evidence.
+  - blocker and blocked are the edge's two tickets, each a Jira key or a child ref, and they differ.
+  - blocker_epic and blocked_epic are both in a known order, and blocker_epic comes later than blocked_epic.
+  - reason, approver, and approval_evidence are nonempty text.
+  - An exception excuses exactly that one edge. Exceptions require a known order.
+- An exception annotates a later-to-earlier edge. It never adds, removes, or reverses a Blocks link, and Apply writes only the edges named in dependencies.
+- consolidation.claims records who owns a decision. sources.conflicts records disagreement about a fact.
 
 ### classification
 

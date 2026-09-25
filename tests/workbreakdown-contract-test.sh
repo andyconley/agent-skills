@@ -41,8 +41,13 @@ require_text "$MANIFEST_FILE" "changes may contain only description"
 require_text "$MANIFEST_FILE" "Absence from dependencies means preserve the live link."
 require_text "$MANIFEST_FILE" "Never change a link between two external issues."
 require_text "$MANIFEST_FILE" "template_sha256:"
-for field in "schema_version: 4" "shaping:" "sources:" "classification:"; do require_text "$MANIFEST_FILE" "$field"; done
+for field in "schema_version: 4" "shaping:" "sources:" "consolidation:" "classification:"; do require_text "$MANIFEST_FILE" "$field"; done
 require_text "$MANIFEST_FILE" "Schema 2 and 3 manifests remain valid."
+require_text "$MANIFEST_FILE" "Schema-4 root: the root fields, plus optional shaping, sources, and consolidation."
+require_text "$MANIFEST_FILE" "An exception annotates a later-to-earlier edge. It never adds, removes, or reverses a Blocks link, and Apply writes only the edges named in dependencies."
+require_text "$MANIFEST_FILE" "An exception excuses exactly that one edge. Exceptions require a known order."
+require_text "$MANIFEST_FILE" "consolidation.claims records who owns a decision. sources.conflicts records disagreement about a fact."
+require_text "$SKILL_FILE" "cross-Epic consolidation (\`consolidation\`)"
 require_text "$MANIFEST_FILE" "Version 1.5.0 changes what a new Draft produces and leaves every approved manifest valid."
 
 for template in epic-v1 epic-v2 story-v1 story-v2 story-v3 task-v1 task-v2 spike-v1 spike-design-v2 spike-investigation-v2 spike-design-v3 spike-investigation-v3 task-placeholder-v3 epic-v3; do

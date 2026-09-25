@@ -75,7 +75,7 @@ If any condition is missing, stop before the first write and return the proposed
 
 Manifest schema 2 remains child-only. Only schema 3 or 4 can verify or update the scoped Epic. Schema 4 also binds an Epic whose live description fits no template by its digest only, with `disposition: unbound`, which never authorizes a write. Only an explicit `epic.disposition: update` with exact template binding, expected-current ADF digest, and approved description content authorizes that update. Epic creation, deletion, reparenting, retyping, ranking, and status or other omitted-field changes remain forbidden.
 
-Schema 4 adds optional Draft provenance (`shaping`, `sources`) and per-child `classification`; it keeps the schema-3 Epic rules and adds the `unbound` disposition. A `jira-epic-v3` Epic can carry a Breakdown conventions panel that records the shaping answers. Only a schema-4 Epic update writes it, through the same guarded description update.
+Schema 4 adds optional Draft provenance (`shaping`, `sources`), cross-Epic consolidation (`consolidation`), and per-child `classification`; it keeps the schema-3 Epic rules and adds the `unbound` disposition. A `jira-epic-v3` Epic can carry a Breakdown conventions panel that records the shaping answers. Only a schema-4 Epic update writes it, through the same guarded description update.
 
 Do not invent Jira keys, live state, estimates, evidence, permissions, acceptance criteria, or dependencies. State assumptions as assumptions. Ask only questions that materially change classification, scope, acceptance, or dependency direction.
 
