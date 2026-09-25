@@ -349,7 +349,10 @@ consolidation:
       reason: "The later milestone's fixture must exist before the endpoint can be tested."
       approver: "Program lead"
       approval_evidence: "Decision log entry, 2026-09-18"
-dependencies: []
+dependencies:
+  - action: ensure
+    blocker: {jira_key: TASK-310}
+    blocked: {ref: build-endpoint}
 rank:
   mode: scoped-relative
   order: [choose-transport, build-endpoint, wire-transport]
@@ -397,16 +400,17 @@ sources records what the Draft read and how it resolved disagreements between so
 consolidation records the Draft's cross-Epic check. Its keys are status, claims, order, and exceptions. status is required, and the other keys are optional.
 
 - status is run, skipped, or no-siblings. skipped means the invocation request opted out. no-siblings means the Initiative has no other Epic. A skipped or no-siblings block has no claims and no exceptions, and its order is omitted or unknown.
-- claims lists each decision that more than one Epic claims. A claim contains claim, claimed_by, owner, rationale, and confirmation.
+- claims lists each decision that more than one Epic of the Initiative claims, whether or not the scoped Epic is one of them. A claim contains claim, claimed_by, owner, rationale, and confirmation, and no two claims share the same claim text.
   - claim and rationale are nonempty text.
   - claimed_by lists at least two distinct Jira keys, and owner is one of them.
-  - confirmation.state is proposed or confirmed. A confirmed owner also records confirmed_by and evidence. A proposed owner records neither.
-- order records milestone order as source and value. order.source is declared, rank, or unknown. value lists unique Epic Jira keys in milestone order, and value is empty exactly when source is unknown. A known order includes the scoped Epic and never names a child ref.
+  - confirmation.state is proposed or confirmed. A confirmed owner also records confirmed_by and evidence as nonempty text. A proposed owner records neither.
+- order records milestone order as source and value. order.source is declared, rank, or unknown. value lists unique Epic Jira keys in milestone order, and value is empty exactly when source is unknown. A known order includes the scoped Epic.
 - exceptions lists each approved later-to-earlier edge. An exception contains blocker, blocked, blocker_epic, blocked_epic, reason, approver, and approval_evidence.
-  - blocker and blocked are the edge's two tickets, each a Jira key or a child ref, and they differ.
+  - blocker and blocked are the edge's two tickets, each a Jira key or a child ref, and they differ. A child ref is a child of the scoped Epic, so its Epic field names the scoped Epic.
+  - When blocker or blocked is a proposed child, dependencies holds an ensure entry for that exact edge, because a proposed child has no live links.
   - blocker_epic and blocked_epic are both in a known order, and blocker_epic comes later than blocked_epic.
   - reason, approver, and approval_evidence are nonempty text.
-  - An exception excuses exactly that one edge. Exceptions require a known order.
+  - An exception excuses exactly that one edge, and no two exceptions name the same edge. Exceptions require a known order.
 - An exception annotates a later-to-earlier edge. It never adds, removes, or reverses a Blocks link, and Apply writes only the edges named in dependencies.
 - consolidation.claims records who owns a decision. sources.conflicts records disagreement about a fact.
 

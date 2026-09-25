@@ -406,6 +406,34 @@ consolidation_case(consolidated, index, registry, "order exception edge is not l
 consolidation_case(consolidated, index, registry, "order exception edge is not later-to-earlier") { |c| c["exceptions"][0]["blocker_epic"] = "EPIC-1" }
 consolidation_case(consolidated, index, registry, "order exception requires reason, approver, and approval_evidence") { |c| c["exceptions"][0].delete("approver") }
 consolidation_case(consolidated, index, registry, "order exception has unknown field edge") { |c| c["exceptions"][0]["edge"] = {} }
+consolidation_case(consolidated, index, registry, "order exception blocker must be a Jira key or a child ref") { |c| c["exceptions"][0]["blocker"] = "later work" }
+consolidation_case(consolidated, index, registry, "consolidation claims must be a list") { |c| c["claims"] = "x" }
+consolidation_case(consolidated, index, registry, "consolidation exceptions must be a list") { |c| c["exceptions"] = "x" }
+consolidation_case(consolidated, index, registry, "claim requires a claim") { |c| c["claims"][0]["claim"] = " " }
+consolidation_case(consolidated, index, registry, "consolidation claim must be a map") { |c| c["claims"][0] = "x" }
+consolidation_case(consolidated, index, registry, "consolidation claim has unknown field notes") { |c| c["claims"][0]["notes"] = "x" }
+consolidation_case(consolidated, index, registry, "claim confirmation must be a map") { |c| c["claims"][0]["confirmation"] = "proposed" }
+consolidation_case(consolidated, index, registry, "claim confirmation has unknown field notes") { |c| c["claims"][1]["confirmation"]["notes"] = "x" }
+consolidation_case(consolidated, index, registry, "consolidation order must be a map") { |c| c["order"] = "rank" }
+consolidation_case(consolidated, index, registry, "consolidation order has unknown field epics") { |c| c["order"]["epics"] = [] }
+consolidation_case(consolidated, index, registry, "order exception must be a map") { |c| c["exceptions"][0] = "x" }
+consolidation_case(consolidated, index, registry, "order exception requires a known order") { |c| c.delete("order") }
+consolidation_case(consolidated, index, registry, "order exception blocked is a child of the scoped Epic") { |c| c["exceptions"][0]["blocked_epic"] = "EPIC-2" }
+consolidation_case(consolidated, index, registry, "consolidation claims must be distinct") { |c| c["claims"][1]["claim"] = " #{c["claims"][0]["claim"]} " }
+consolidation_case(consolidated, index, registry, "order exceptions must be distinct") { |c| c["exceptions"] << clone(c["exceptions"][0]) }
+consolidation_case(consolidated, index, registry, "consolidation order must be a map") { |c| c["status"] = "skipped"; c.delete("claims"); c.delete("exceptions"); c["order"] = "rank" }
+unensured = clone(consolidated)
+unensured["dependencies"] = []
+expect_error("order exception on a proposed child needs an ensure dependency") { validate_manifest(unensured, index, registry) }
+reversed_ensure = clone(consolidated)
+reversed_ensure["dependencies"][0]["blocker"], reversed_ensure["dependencies"][0]["blocked"] = {"ref" => "build-endpoint"}, {"jira_key" => "WORK-410"}
+expect_error("order exception on a proposed child needs an ensure dependency") { validate_manifest(reversed_ensure, index, registry) }
+removed_edge = clone(consolidated)
+removed_edge["dependencies"][0]["action"] = "remove"
+expect_error("order exception on a proposed child needs an ensure dependency") { validate_manifest(removed_edge, index, registry) }
+not_a_map = clone(consolidated)
+not_a_map["consolidation"] = "run"
+expect_error("consolidation must be a map") { validate_manifest(not_a_map, index, registry) }
 
 bad_granularity = clone(schema4)
 bad_granularity["shaping"]["task_granularity"]["value"] = "per-layer"
@@ -824,7 +852,7 @@ expect_error("schema-4 Spike requires classification question and precedent") { 
 # The schema-4 worked example follows the current rules: default template set, and no placeholder with a found precedent.
 example = YAML.safe_load(File.read(File.join(SKILL, "references", "manifest-contract.md"))[/^## Schema 4:.*?^~~~yaml\n(.*?)^~~~$/m, 1])
 assert(example.dig("template_set", "version") == registry["default_set_version"], "schema 4 example is not on the default template set")
-validate_consolidation(example.fetch("consolidation"), example.dig("scope", "epic_key"), example["children"].map { |child| child["ref"] })
+validate_consolidation(example.fetch("consolidation"), example.dig("scope", "epic_key"), example["children"], example["dependencies"])
 example["children"].each do |child|
   both = child.dig("classification", "placeholder") && child.dig("classification", "precedent", "verdict") == "found"
   assert(!both, "schema 4 example gives a placeholder a found precedent")

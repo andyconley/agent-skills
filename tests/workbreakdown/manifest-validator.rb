@@ -339,7 +339,7 @@ def validate_claim(claim)
   end
 end
 
-def validate_order(order, epic_key, refs)
+def validate_order(order, epic_key)
   raise ArgumentError, "consolidation order must be a map" unless order.is_a?(Hash)
   reject_unknown_keys(order, %w[source value], "consolidation order")
   raise ArgumentError, "invalid order source" unless ORDER_SOURCES.include?(order["source"])
@@ -350,12 +350,16 @@ def validate_order(order, epic_key, refs)
   return if value.empty?
 
   raise ArgumentError, "known order must include the scoped Epic" unless value.include?(epic_key)
-  raise ArgumentError, "order key matches a child ref" unless (value & refs).empty?
 end
 
 # An order exception excuses exactly one later-to-earlier edge between two milestone Epics.
 # It annotates the edge and never adds, removes or reverses a Blocks link.
-def validate_order_exception(exception, order_value, refs)
+def dependency_end(value)
+  value.is_a?(Hash) ? (value["ref"] || value["jira_key"]).to_s : ""
+end
+
+def validate_order_exception(exception, order_value, epic_key, children, dependencies)
+  refs = children.map { |child| child["ref"] }
   raise ArgumentError, "order exception must be a map" unless exception.is_a?(Hash)
   reject_unknown_keys(exception, %w[blocker blocked blocker_epic blocked_epic reason approver approval_evidence], "order exception")
   %w[blocker blocked].each do |end_name|
@@ -368,12 +372,27 @@ def validate_order_exception(exception, order_value, refs)
     order_value.index(exception[end_name]) or raise ArgumentError, "order exception endpoint is not in the order"
   end
   raise ArgumentError, "order exception edge is not later-to-earlier" unless positions[0] > positions[1]
+  # A child ref names a child of the scoped Epic, and a proposed child has no live links:
+  # its edge exists only when dependencies ensures it.
+  %w[blocker blocked].each do |end_name|
+    next unless refs.include?(exception[end_name])
+
+    raise ArgumentError, "order exception #{end_name} is a child of the scoped Epic" unless exception["#{end_name}_epic"] == epic_key
+  end
+  proposed = children.select { |child| child["disposition"] == "proposed" }.map { |child| child["ref"] }
+  if (proposed & [exception["blocker"], exception["blocked"]]).any?
+    ensured = Array(dependencies).any? do |entry|
+      entry.is_a?(Hash) && entry["action"] == "ensure" &&
+        dependency_end(entry["blocker"]) == exception["blocker"] && dependency_end(entry["blocked"]) == exception["blocked"]
+    end
+    raise ArgumentError, "order exception on a proposed child needs an ensure dependency" unless ensured
+  end
   unless %w[reason approver approval_evidence].all? { |field| nonempty_text?(exception[field]) }
     raise ArgumentError, "order exception requires reason, approver, and approval_evidence"
   end
 end
 
-def validate_consolidation(consolidation, epic_key, refs)
+def validate_consolidation(consolidation, epic_key, children, dependencies)
   raise ArgumentError, "consolidation must be a map" unless consolidation.is_a?(Hash)
   reject_unknown_keys(consolidation, CONSOLIDATION_KEYS, "consolidation")
   raise ArgumentError, "consolidation requires a status" unless consolidation.key?("status")
@@ -384,15 +403,18 @@ def validate_consolidation(consolidation, epic_key, refs)
   raise ArgumentError, "consolidation claims must be a list" unless claims.is_a?(Array)
   raise ArgumentError, "consolidation exceptions must be a list" unless exceptions.is_a?(Array)
   order = consolidation["order"]
+  validate_order(order, epic_key) unless order.nil?
   if status != "run"
     raise ArgumentError, "consolidation #{status} forbids claims" unless claims.empty?
     raise ArgumentError, "consolidation #{status} forbids exceptions" unless exceptions.empty?
     raise ArgumentError, "#{status} consolidation order must be unknown" unless order.nil? || (order.is_a?(Hash) && order["source"] == "unknown")
   end
   claims.each { |claim| validate_claim(claim) }
-  validate_order(order, epic_key, refs) unless order.nil?
+  raise ArgumentError, "consolidation claims must be distinct" unless claims.map { |claim| claim["claim"].strip }.uniq.length == claims.length
   order_value = order.nil? ? [] : order.fetch("value", [])
-  exceptions.each { |exception| validate_order_exception(exception, order_value, refs) }
+  exceptions.each { |exception| validate_order_exception(exception, order_value, epic_key, children, dependencies) }
+  edges = exceptions.map { |exception| [exception["blocker"], exception["blocked"]] }
+  raise ArgumentError, "order exceptions must be distinct" unless edges.uniq.length == edges.length
 end
 
 def validate_precedent(precedent)
@@ -620,7 +642,7 @@ def validate_manifest(manifest, templates, registry)
     # Schema 4 always binds a live Epic digest. Without Jira context, Draft falls back to schema 2.
     raise ArgumentError, "schema 4 requires Jira context" if manifest.dig("sources", "jira_context") == "absent"
   end
-  validate_consolidation(manifest["consolidation"], manifest.dig("scope", "epic_key"), refs) if manifest.key?("consolidation")
+  validate_consolidation(manifest["consolidation"], manifest.dig("scope", "epic_key"), children, manifest["dependencies"]) if manifest.key?("consolidation")
 end
 
 # The Epic's Breakdown conventions panel records the shaping answers. It exists only in

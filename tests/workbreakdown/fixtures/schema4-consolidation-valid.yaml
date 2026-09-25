@@ -142,7 +142,10 @@ children:
           - The acceptance threshold for the endpoint Task is confirmed.
         boundaries:
           - Production tuning is out of scope.
-dependencies: []
+dependencies:
+  - action: ensure
+    blocker: {jira_key: WORK-410}
+    blocked: {ref: build-endpoint}
 rank:
   mode: scoped-relative
   order: [choose-transport, measure-staleness, build-endpoint]
