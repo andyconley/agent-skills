@@ -32,6 +32,10 @@ JIRA_CONTEXTS = %w[present absent].freeze
 SOURCES_KEYS = %w[jira_context existing_children conflicts].freeze
 CLASSIFICATION_KEYS = %w[question precedent placeholder].freeze
 CONSOLIDATION_KEYS = %w[status claims order exceptions].freeze
+# Audit's semantic link findings. Link checks name an edge; the others name one ticket.
+EDGE_CHECKS = %w[contradicts-text into-closed later-to-earlier].freeze
+REF_CHECKS = %w[text-only-blocker status-vs-blockers].freeze
+AUDIT_CHECKS = (EDGE_CHECKS + REF_CHECKS).freeze
 CONSOLIDATION_STATUSES = %w[run skipped no-siblings].freeze
 ORDER_SOURCES = %w[declared rank unknown].freeze
 CONFIRMATION_STATES = %w[proposed confirmed].freeze
@@ -456,6 +460,27 @@ def validate_review_findings(findings)
     raise ArgumentError, "invalid finding category" unless FINDING_CATEGORIES.include?(finding["category"])
     raise ArgumentError, "finding requires a ref" unless finding["ref"].is_a?(String) && !finding["ref"].strip.empty?
     raise ArgumentError, "finding requires a correction" unless finding["correction"].is_a?(String) && !finding["correction"].strip.empty?
+  end
+end
+
+def validate_audit_findings(findings)
+  raise ArgumentError, "audit findings must be a list" unless findings.is_a?(Array)
+  findings.each do |finding|
+    raise ArgumentError, "audit finding must be a map" unless finding.is_a?(Hash)
+    reject_unknown_keys(finding, %w[check edge ref evidence], "audit finding")
+    check = finding["check"]
+    raise ArgumentError, "invalid audit check" unless AUDIT_CHECKS.include?(check)
+    raise ArgumentError, "audit finding takes an edge or a ref, not both" if finding.key?("edge") && finding.key?("ref")
+    if EDGE_CHECKS.include?(check)
+      edge = finding["edge"]
+      raise ArgumentError, "#{check} finding requires an edge" unless edge.is_a?(Hash)
+      reject_unknown_keys(edge, %w[blocker blocked], "audit finding edge")
+      raise ArgumentError, "edge requires blocker and blocked Jira keys" unless %w[blocker blocked].all? { |end_name| edge[end_name].to_s.match?(JIRA_KEY) }
+      raise ArgumentError, "edge blocker and blocked must differ" if edge["blocker"] == edge["blocked"]
+    else
+      raise ArgumentError, "#{check} finding requires a ref" unless finding["ref"].to_s.match?(JIRA_KEY)
+    end
+    raise ArgumentError, "audit finding requires evidence" unless nonempty_text?(finding["evidence"])
   end
 end
 

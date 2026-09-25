@@ -431,6 +431,36 @@ expect_error("order exception on a proposed child needs an ensure dependency") {
 removed_edge = clone(consolidated)
 removed_edge["dependencies"][0]["action"] = "remove"
 expect_error("order exception on a proposed child needs an ensure dependency") { validate_manifest(removed_edge, index, registry) }
+# Audit's semantic link findings: output, not manifest content.
+audit_prose = File.read(File.join(SKILL, "references", "jira-change-protocol.md"))[/^### Semantic link findings.*?(?=^## )/m]
+assert(audit_prose, "Audit protocol lost its semantic link findings section")
+audit_example = YAML.safe_load(audit_prose[/^~~~yaml\n(.*?)^~~~$/m, 1]).fetch("findings")
+validate_audit_findings(audit_example)
+assert(audit_prose.include?("check is #{AUDIT_CHECKS[0..-2].join(", ")}, or #{AUDIT_CHECKS.last}."), "Audit check prose does not match AUDIT_CHECKS")
+AUDIT_CHECKS.each { |check| assert(audit_prose.include?("  - #{check}: "), "Audit prose does not define #{check}") }
+audit_valid = [
+  {"check" => "into-closed", "edge" => {"blocker" => "WORK-1", "blocked" => "WORK-2"}, "evidence" => "WORK-2 status category: done"},
+  {"check" => "status-vs-blockers", "ref" => "WORK-3", "evidence" => "WORK-3 is ahead of open blocker WORK-4"}
+]
+validate_audit_findings(audit_valid)
+def audit_case(base, fragment)
+  findings = clone(base)
+  yield findings
+  expect_error(fragment) { validate_audit_findings(findings) }
+end
+expect_error("audit findings must be a list") { validate_audit_findings({"check" => "into-closed"}) }
+audit_case(audit_valid, "audit finding must be a map") { |f| f[0] = "into-closed" }
+audit_case(audit_valid, "invalid audit check") { |f| f[0]["check"] = "reversed-link" }
+audit_case(audit_valid, "audit finding has unknown field correction") { |f| f[0]["correction"] = "x" }
+audit_case(audit_valid, "into-closed finding requires an edge") { |f| f[0].delete("edge") }
+audit_case(audit_valid, "audit finding takes an edge or a ref, not both") { |f| f[0]["ref"] = "WORK-2" }
+audit_case(audit_valid, "edge requires blocker and blocked Jira keys") { |f| f[0]["edge"]["blocked"] = "build-endpoint" }
+audit_case(audit_valid, "edge blocker and blocked must differ") { |f| f[0]["edge"]["blocked"] = "WORK-1" }
+audit_case(audit_valid, "audit finding edge has unknown field type") { |f| f[0]["edge"]["type"] = "Blocks" }
+audit_case(audit_valid, "status-vs-blockers finding requires a ref") { |f| f[1].delete("ref") }
+audit_case(audit_valid, "text-only-blocker finding requires a ref") { |f| f[1]["check"] = "text-only-blocker"; f[1]["ref"] = "blocked work" }
+audit_case(audit_valid, "audit finding requires evidence") { |f| f[1]["evidence"] = " " }
+
 not_a_map = clone(consolidated)
 not_a_map["consolidation"] = "run"
 expect_error("consolidation must be a map") { validate_manifest(not_a_map, index, registry) }
