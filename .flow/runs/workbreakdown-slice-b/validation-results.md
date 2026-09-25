@@ -117,7 +117,12 @@ Each review ran read-only. Every Important finding was fixed before the next ste
 
 ## Private release gate
 
-**Result: green.** 131 checks pass across 15 isolated headless Opus runs on the frozen `gate-b` snapshot. The checker self-test passes on all 15 runs, with no missed mutant.
+**Result: green, with two caveats.** 131 checks pass across 15 isolated headless Opus runs on the frozen `gate-b` snapshot. The checker self-test passes on all 15 runs, with no missed mutant.
+
+1. **FX-E3 solo** passed on a single attempt after its last fix. It had earlier failed one attempt in three.
+2. **The results span two skill commits,** aed48c6 and 85b486e. `git diff --stat aed48c6 85b486e -- skills tests` shows two files changed, with 4 insertions and 3 deletions: two sentences in `manifest-contract.md` and their pins.
+
+See "Residual evidence gaps" below.
 
 ### How the gate got to green
 
@@ -129,7 +134,7 @@ Each review ran read-only. Every Important finding was fixed before the next ste
      - Two Drafts returned invalid manifests. One appended a "correction" instead of fixing the manifest, and one left a precedent's search list empty.
      - Copied acceptance was found but not labelled.
      - The FX-E3 Draft found one of three collision pairs.
-   - **Maintainer ruling (2026-09-25).** The self-check and the wording were tightened in e26c28a. B3.2 was narrowed to live evidence. The tabletop's M3/M4 batch-executor pair was dropped, because no live card holds it, and each remaining pair is checked on its own Epic's Draft.
+   - **Maintainer ruling (2026-09-25).** The self-check and the wording were tightened in e26c28a. B3.2 was narrowed to live evidence. One FX-COLLISIONS pair with no live card was dropped, and each remaining pair is checked on its own Epic's Draft.
 2. **Draft cost.** A Draft took 6 to 11 minutes and $2 to $4, mostly reading every sibling child card. **Maintainer ruling:** read sibling children in two passes (aed48c6), and run the gate 5 at a time.
 3. **Second full gate (skill aed48c6).**
    - Every check passes on 14 of 15 runs.
@@ -163,6 +168,27 @@ The superseded attempts are kept with the private evidence.
 ### Cost
 
 On the final gate, a run averaged 7.3 minutes. The 15 runs cost about $38 in total. A Draft takes 5.5 to 14 minutes. Most of its reads are now the Epic's own children, which the SOP reads in full.
+
+### Rerun rule, and what a single attempt proves
+
+- Every positive Slice B check is judged. A judged check that passes on its first attempt passes. One that fails reruns twice, and both reruns must pass.
+- The negative controls and the structural checks run once and must pass on every attempt.
+- A positive check that passed on attempt 1 therefore had no repeat. That is the rule the maintainer set, not a missing rerun.
+
+### Acceptance-review fixes, validated by the suite only
+
+**What changed.** 823abaa closes the acceptance-review gaps:
+- Review checks milestone-order edges on every manifest.
+- Claims cover only pairs that include the scoped Epic.
+- A confirmed owner needs the lead's own confirmation.
+- Exceptions come only from a record the active user supplies.
+- A request-only input can't come from ticket text.
+- Review's dependency category names the new checks.
+- Audit reads its own children in full.
+
+**How it was validated.** The suite, `validate-skills`, `install-test`, Vale, and mutants M67 to M70 all passed. The maintainer chose not to re-gate (2026-09-25), so the private gate did not rerun on this commit.
+
+**Claim scope.** Narrowing claims to pairs that include the scoped Epic matches how B3.2 is already checked, one pair on each pair's own Epic Draft.
 
 ### Residual evidence gaps
 

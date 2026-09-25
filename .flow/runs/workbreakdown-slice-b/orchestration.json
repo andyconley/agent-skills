@@ -506,11 +506,149 @@
         "mode": "concurrent",
         "group": "implement-review"
       }
+    },
+    {
+      "id": "review-quality-reviewer",
+      "lane": "review",
+      "role": "quality-reviewer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/quality-reviewer"
+      },
+      "brief_path": ".flow/runs/workbreakdown-slice-b/HANDOFF.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-slice-b/acceptance-criteria.md",
+        ".flow/runs/workbreakdown-slice-b/plan.md",
+        ".flow/runs/workbreakdown-slice-b/validation-results.md",
+        ".flow/runs/workbreakdown-slice-b/HANDOFF.md"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-slice-b/reviews/acceptance-quality.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "acceptance review of the full diff against definition, acceptance criteria, solution and plan"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "acceptance-review"
+      }
+    },
+    {
+      "id": "review-test-engineer",
+      "lane": "review",
+      "role": "test-engineer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/test-engineer"
+      },
+      "brief_path": ".flow/runs/workbreakdown-slice-b/HANDOFF.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-slice-b/acceptance-criteria.md",
+        ".flow/runs/workbreakdown-slice-b/plan.md",
+        ".flow/runs/workbreakdown-slice-b/validation-results.md",
+        ".flow/runs/workbreakdown-slice-b/HANDOFF.md"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-slice-b/reviews/acceptance-test.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "proof review: public suite, mutants and private gate evidence against each criterion"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "acceptance-review"
+      }
+    },
+    {
+      "id": "review-security-reviewer",
+      "lane": "review",
+      "role": "security-reviewer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/security-reviewer"
+      },
+      "brief_path": ".flow/runs/workbreakdown-slice-b/HANDOFF.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-slice-b/acceptance-criteria.md",
+        ".flow/runs/workbreakdown-slice-b/plan.md",
+        ".flow/runs/workbreakdown-slice-b/validation-results.md",
+        ".flow/runs/workbreakdown-slice-b/HANDOFF.md"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-slice-b/reviews/acceptance-security.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "security and privacy review: public-repo leakage, untrusted Jira text, write-path safety"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "acceptance-review"
+      }
     }
   ],
   "shared_state": [],
   "reconciliation": {
-    "artifact_path": ".flow/runs/workbreakdown-slice-b/validation-results.md",
+    "artifact_path": ".flow/runs/workbreakdown-slice-b/review.md",
     "status": "resolved",
     "claims": []
   },
@@ -519,8 +657,8 @@
       "coordinator"
     ],
     "evidence_collector_assignment": "coordinator",
-    "verifier_assignment": "coordinator",
-    "independent": false,
-    "artifact_path": ".flow/runs/workbreakdown-slice-b/validation-results.md"
+    "verifier_assignment": "review-quality-reviewer",
+    "independent": true,
+    "artifact_path": ".flow/runs/workbreakdown-slice-b/review.md"
   }
 }

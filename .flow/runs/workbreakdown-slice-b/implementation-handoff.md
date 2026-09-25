@@ -3,7 +3,7 @@
 ## Where
 
 - **Skill source:** the `agent-skills` worktree on branch `claude/workbreakdown-slice-b`. Commit only there. Pushing waits for the maintainer.
-- **Private release check:** the maintainer's private KB worktree, outside this repository. It holds the fetch script, `cases.yaml`, the checker, the fixture snapshots and the answer key. None of that content enters this repository.
+- **Private release check:** a private workspace, outside this repository. It holds the fetch script, `cases.yaml`, the checker, the fixture snapshots and the answer key. None of that content enters this repository.
 
 ## Read first
 

@@ -10,7 +10,7 @@ The "order key matches a child ref" rule turned out to be unreachable, because o
 
 ## Mutants
 
-Every named mutant from M40 to M66 was run on a committed tree, judged by the suite's exit code, and restored. All were caught. `validation-results.md` lists each mutant with the test that caught it.
+Every named mutant from M40 to M70 was run on a committed tree, judged by the suite's exit code, and restored. All were caught. `validation-results.md` lists each mutant with the test that caught it.
 
 ## Release-check self-test
 

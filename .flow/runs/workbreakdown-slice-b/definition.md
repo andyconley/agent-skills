@@ -1,7 +1,7 @@
 # Definition: workbreakdown skill improvements from a real-Initiative tabletop
 
 - Work item: workbreakdown-skill-improvements
-- Status: Approved 2026-09-24 by the maintainer (Andy Conley)
+- Status: Approved 2026-09-24 by the maintainer
 - Provenance: this was defined in a private run, which holds the evidence, the research note, the role reviews and the fixture, all maintained outside this repository. This public copy is sanitized. Project names, ticket keys, people and meeting content were removed, and fixture cases are referred to by ID only (`FX-*`). The requirements are unchanged from the approved private version.
 
 ## Problem

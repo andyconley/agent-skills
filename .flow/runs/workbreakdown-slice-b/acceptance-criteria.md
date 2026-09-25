@@ -36,3 +36,11 @@ The fixture is private, held outside this repository. It consists of six epics, 
 - [ ] **AC-R4.4** FX-STATUS is reported using status category, with no project status names in the core.
 - [ ] **AC-R4.5** FX-REV-LINKS are classified `mechanical` and FX-SCOPE-LINKS `scope-disagreement`, each citing the author and date from the link history. *Negative control:* with history removed, both are classified `unknown`.
 - [ ] **AC-B-precision** *Negative control:* FX-FORWARD-OK links are not reported.
+
+## Amendments
+
+The approved criteria above are left as written, and these dated maintainer rulings qualify how they are proven.
+
+- **2026-09-25, AC-R4.1.** Only the FX-REV-LINKS edges with quotable contradicting text are required as `contradicts-text` findings. The other FX-REV-LINKS edges are optional, and all of them stay in the AC-R4.5 classification key.
+- **2026-09-25, AC-R3.2.** One FX-COLLISIONS pair with no live card was dropped. Each remaining pair is checked on the Draft of an Epic in that pair, and claims cover only pairs that include the scoped Epic.
+- **2026-09-25, AC-R4.4.** Ready statuses come only from the invocation request. Without them, status checks use status category alone.

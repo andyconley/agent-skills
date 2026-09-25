@@ -37,7 +37,7 @@ At every step:
 - The contract suite, `validate-skills`, `install-test` and Vale passed, with Vale at 0 errors, 0 warnings and 0 suggestions.
 - The compatibility diff was empty. The only fixture added is `schema4-consolidation-valid.yaml`.
 - The public-safety grep returned no match.
-- Every named mutant from M40 to M66 was run on a committed tree, judged by exit code, and caught.
+- Every named mutant from M40 to M70 was run on a committed tree, judged by exit code, and caught.
 
 | Step | Commits | Focus |
 | --- | --- | --- |
@@ -76,7 +76,7 @@ The gate took three full passes and one rerun to reach green. `validation-result
    - The rule stays as drafted.
    - AC-R4.1 requires the two edges with quotable text.
    - Names may appear in the private key only.
-4. **B3.2 narrowed to live evidence.** The tabletop's M3/M4 pair was dropped, and each remaining pair is checked on its own Epic's Draft.
+4. **B3.2 narrowed to live evidence.** One FX-COLLISIONS pair with no live card was dropped, and each remaining pair is checked on its own Epic's Draft. After the acceptance review, claims cover only pairs that include the scoped Epic.
 5. **Draft cost.** The sibling read became two passes, and the gate runs 5 at a time instead of 3.
 6. **Three late fixes after gate failures:**
    - the self-check and fixed labels
@@ -89,6 +89,8 @@ The gate took three full passes and one rerun to reach green. `validation-result
    - The Slice A reruns keep their Slice A checks.
 
 ## Residual risks
+
+- **Acceptance-review fixes (823abaa).** They were validated by the suite and mutants only, not by a live gate rerun (maintainer decision).
 
 - **Format-rule variance.** FX-E3 solo passed once after 85b486e. Earlier, one attempt in three returned unparseable YAML, and one omitted the label.
 - **Two skill commits in the final gate,** as described above.
