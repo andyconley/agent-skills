@@ -1,7 +1,9 @@
 {
   "artifacts": {
     "acceptance_criteria": ".flow/runs/workbreakdown-skill-improvements/acceptance-criteria.md",
+    "handback": ".flow/runs/workbreakdown-slice-a-completion/HANDOFF.md",
     "handoff": ".flow/runs/workbreakdown-slice-a-completion/implementation-handoff.md",
+    "implementation_evidence": ".flow/runs/workbreakdown-slice-a-completion/validation-results.md",
     "orchestration_manifest": ".flow/runs/workbreakdown-slice-a-completion/orchestration.json",
     "plan": ".flow/runs/workbreakdown-slice-a-completion/plan.md",
     "requirements": ".flow/runs/workbreakdown-skill-improvements/definition.md",
@@ -16,17 +18,18 @@
     "approve-definition": "2026-09-24T20:46:48Z",
     "approve-plan": "2026-09-24T20:57:01Z",
     "approve-solution": "2026-09-24T20:46:49Z",
+    "mark-handback-ready": "2026-09-25T02:25:16Z",
     "start-definition": "2026-09-24T20:46:48Z",
     "start-implementation": "2026-09-24T21:13:29Z",
     "start-plan": "2026-09-24T20:46:50Z",
     "start-solution": "2026-09-24T20:46:49Z"
   },
   "lane": "implement",
-  "last_event": "start-implementation",
-  "phase": "implementing",
+  "last_event": "mark-handback-ready",
+  "phase": "handback_ready",
   "protocol_revision": 2,
   "schema_version": 1,
-  "state": "implementing",
-  "updated_at": "2026-09-24T21:13:29Z",
+  "state": "handback_ready",
+  "updated_at": "2026-09-25T02:25:16Z",
   "work_id": "workbreakdown-slice-a-completion"
 }
