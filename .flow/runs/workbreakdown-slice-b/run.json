@@ -7,6 +7,7 @@
     "orchestration_manifest": ".flow/runs/workbreakdown-slice-b/orchestration.json",
     "plan": ".flow/runs/workbreakdown-slice-b/plan.md",
     "requirements": ".flow/runs/workbreakdown-slice-b/definition.md",
+    "review": ".flow/runs/workbreakdown-slice-b/review.md",
     "solution": ".flow/runs/workbreakdown-slice-b/solution.md",
     "validation_plan": ".flow/runs/workbreakdown-slice-b/validation-plan.md"
   },
@@ -15,6 +16,7 @@
     "risk": "owned"
   },
   "gates": {
+    "accept-review": "2026-09-25T17:24:29Z",
     "approve-definition": "2026-09-25T03:08:42Z",
     "approve-plan": "2026-09-25T03:27:22Z",
     "approve-solution": "2026-09-25T03:15:09Z",
@@ -26,11 +28,11 @@
     "start-solution": "2026-09-25T03:08:42Z"
   },
   "lane": "review",
-  "last_event": "start-review",
-  "phase": "reviewing",
+  "last_event": "accept-review",
+  "phase": "review_accepted",
   "protocol_revision": 2,
   "schema_version": 1,
-  "state": "reviewing",
-  "updated_at": "2026-09-25T17:15:48Z",
+  "state": "review_accepted",
+  "updated_at": "2026-09-25T17:24:29Z",
   "work_id": "workbreakdown-slice-b"
 }
