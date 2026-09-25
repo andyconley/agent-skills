@@ -455,12 +455,12 @@ expect_error("missing template set 4") { validate_registry(no_set4) }
 %w[question precedent].each do |key|
   unclassified = clone(set4)
   schema4_child(unclassified, "choose-transport")["classification"].delete(key)
-  expect_error("v3 Spike requires classification question and precedent") { validate_manifest(unclassified, index, registry) }
+  expect_error("Spike requires classification question and precedent") { validate_manifest(unclassified, index, registry) }
 end
 
 no_classification = clone(set4)
 schema4_child(no_classification, "measure-staleness").delete("classification")
-expect_error("v3 Spike requires classification question and precedent") { validate_manifest(no_classification, index, registry) }
+expect_error("Spike requires classification question and precedent") { validate_manifest(no_classification, index, registry) }
 
 different_question = clone(set4)
 schema4_child(different_question, "measure-staleness")["fields"]["description"]["question"] = "How fresh is the cache?"
@@ -758,6 +758,24 @@ expect_error("missing current ADF digest") { validate_manifest(unbound_no_digest
 unbound_with_changes = clone(unbound)
 unbound_with_changes["epic"]["changes"] = {"description" => {}}
 expect_error("unbound Epic has unknown field changes") { validate_manifest(unbound_with_changes, index, registry) }
+
+# Every schema-4 Spike is classified, including a v2-bound or template-less existing Spike.
+unclassified_v2_spike = clone(v2_spike_in_set4)
+unclassified_v2_spike["schema_version"] = 4
+unclassified_v2_spike["epic"] = clone(schema4_minimal["epic"])
+expect_error("schema-4 Spike requires classification question and precedent") { validate_manifest(unclassified_v2_spike, index, registry) }
+unclassified_existing = clone(set4)
+unclassified_existing["children"] << {"ref" => "old-spike", "jira_key" => "WORK-406", "type" => "Spike", "disposition" => "existing",
+  "verify" => {"summary" => "Old spike", "done_when" => "Answered."}}
+expect_error("schema-4 Spike requires classification question and precedent") { validate_manifest(unclassified_existing, index, registry) }
+
+# The schema-4 worked example follows the current rules: default template set, and no placeholder with a found precedent.
+example = YAML.safe_load(File.read(File.join(SKILL, "references", "manifest-contract.md"))[/^## Schema 4:.*?^~~~yaml\n(.*?)^~~~$/m, 1])
+assert(example.dig("template_set", "version") == registry["default_set_version"], "schema 4 example is not on the default template set")
+example["children"].each do |child|
+  both = child.dig("classification", "placeholder") && child.dig("classification", "precedent", "verdict") == "found"
+  assert(!both, "schema 4 example gives a placeholder a found precedent")
+end
 
 # Schema-2/3 error precedence is unchanged: an unknown root field is reported before the schema version.
 unknown_before_schema = clone(schema3)

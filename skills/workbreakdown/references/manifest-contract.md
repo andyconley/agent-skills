@@ -8,7 +8,7 @@ The manifest must parse as YAML. Quote a string value in double quotes when it c
 
 - Use schema version 2 for child-only reconciliation.
 - Use schema version 3 or 4 only when the manifest must verify or update the scoped Epic.
-- Schema version 4 adds optional Draft provenance and per-child classification. Its Epic rules are the schema-3 rules.
+- Schema version 4 adds optional Draft provenance and per-child classification. Its Epic rules are the schema-3 rules, plus the `unbound` disposition and the jira-epic-v3 panel.
 - Give the manifest a stable manifest ID and integer revision.
 - Bind approval to the exact content. For a standalone YAML file, calculate SHA-256 over its exact UTF-8 bytes after converting line endings to LF; include the final trailing newline.
 - Approval is external to the YAML. A manifest cannot authorize itself.
@@ -17,7 +17,7 @@ The manifest must parse as YAML. Quote a string value in double quotes when it c
 
 ## Template binding
 
-template_set names the registry and version. The selected template must declare compatibility with that set version. Every nonlegacy or schema-3 description names an exact template_id and template_sha256 and contains all reviewed values needed by that template.
+template_set names the registry and version. The selected template must declare compatibility with that set version. Every nonlegacy, schema-3, or schema-4 description names an exact template_id and template_sha256 and contains all reviewed values needed by that template.
 
 New Drafts use template-set version 4. A schema-2 manifest bound to version 1 may omit template_sha256; resolve its template_id through the immutable v1 registry entry and verify the packaged asset hash. Never require a rewrite, migrate an approved manifest, or add fields to it.
 
@@ -254,7 +254,7 @@ Schema 3 does not authorize Epic creation, deletion, reparenting, retyping, rank
 
 ## Schema 4: Draft provenance and classification
 
-Schema 4 records how a Draft was shaped, which sources it read, and why each child has its classification. All three blocks are optional, and a schema-4 manifest without them is valid. The Epic block follows the schema-3 rules unchanged. The example is abridged: its Epic description and child template bindings follow the schema-3 and child rules. Reject shaping, sources, or a child classification in a schema-2 or schema-3 manifest.
+Schema 4 records how a Draft was shaped, which sources it read, and why each child has its classification. All three blocks are optional, and a schema-4 manifest without them is valid. The Epic block follows the schema-3 rules, plus the `unbound` disposition and the jira-epic-v3 panel described below. The example is abridged: its Epic description and child template bindings follow the schema-3 and child rules. Reject shaping, sources, or a child classification in a schema-2 or schema-3 manifest.
 
 ~~~yaml
 schema_version: 4
@@ -262,7 +262,7 @@ manifest_id: state-read-breakdown
 revision: 1
 template_set:
   id: jira-house-templates
-  version: 2
+  version: 4
 scope:
   parent_key: INIT-100
   epic_key: EPIC-200
@@ -321,13 +321,18 @@ children:
         searched: [src/api/handlers]
         verdict: found
         location: src/api/handlers/status.rb
+    # template binding and fields as for any proposed child
+  - ref: wire-transport
+    type: Task
+    disposition: proposed
+    classification:
       placeholder:
         defined_by: choose-transport
-    # template binding and fields as for any proposed child
+    # bound to jira-task-placeholder-v3; its summary starts with [PLACEHOLDER]
 dependencies: []
 rank:
   mode: scoped-relative
-  order: [choose-transport, build-endpoint]
+  order: [choose-transport, build-endpoint, wire-transport]
 unknowns: []
 ~~~
 
@@ -348,7 +353,7 @@ shaping records the answers that shaped the Draft. Its entries are spike_shape, 
 
 - Each entry contains value, source, and, only for a reused answer, from_epic.
 - source is asked, reused, or default.
-- from_epic is the Jira key, such as EPIC-201, of the sibling Epic the answer came from. It is required when source is reused and rejected otherwise.
+- from_epic is the Jira key, such as EPIC-201, of the Epic whose panel the answer came from: a sibling Epic, or this Epic when its own panel recorded the answer. It is required when source is reused and rejected otherwise.
 - spike_shape.value is vertical-slice or by-layer.
 - task_granularity.value is per-flow or finer.
 - reviewers.value lists at least one nonempty reviewer name, and its source is asked or reused, never default. When no reviewer is known, omit the entry and record the gap in unknowns.
@@ -369,7 +374,7 @@ sources records what the Draft read and how it resolved disagreements between so
 
 ### classification
 
-classification is an optional child key. Its keys are question, precedent, and placeholder. Reject any other key. A schema-4 Draft classifies every Spike, existing or proposed, with a question and a precedent.
+classification is an optional child key. Its keys are question, precedent, and placeholder. Reject any other key. In schema 4, every Spike, existing or proposed, requires a classification with a question and a precedent.
 
 - question is the nonempty open question the child answers.
 - precedent contains searched and verdict, and may contain location.

@@ -411,6 +411,10 @@ def validate_placeholder_task(child, payload, template_id, schema)
 end
 
 def validate_child(child, templates, set_version, schema)
+  if schema == 4 && child["type"] == "Spike"
+    classification = child["classification"].is_a?(Hash) ? child["classification"] : {}
+    raise ArgumentError, "schema-4 Spike requires classification question and precedent" unless classification.key?("question") && classification.key?("precedent")
+  end
   if child.key?("classification")
     raise ArgumentError, "classification requires schema 4" unless schema == 4
     raise ArgumentError, "unsupported child type" unless %w[Spike Task Story].include?(child["type"])

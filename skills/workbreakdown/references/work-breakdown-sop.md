@@ -16,7 +16,7 @@ Create a direct Epic child when work needs an owner, estimate, status, dependenc
 ## Breakdown procedure
 
 1. **Read existing work first.** Before proposing any child, read every existing Epic child: its description, amendments, status, links, and link history. An amendment is a dated Jira edit or comment that changes a decision. Reconcile each proposed item to an existing card, as `existing` or `update`, or mark it new. Resolve disagreements with the source-authority rules below.
-2. **Collect the shaping answers.** Follow the shaping questions below before proposing any child.
+2. **Collect the shaping answers.** Follow the shaping questions below before proposing any child. When an `asked` `source_order` changes the winner of a conflict from step 1, resolve that conflict again under the asked order.
 3. **Define the Epic outcome.** State the capability that becomes available. Target about one month or two sprints. Treat two months as the upper limit before considering another milestone Epic.
 4. **Define verifiable Stories.** Work backward from demonstrations that prove the Epic. A Story can be a delivery checkpoint, but it must package real behavior, validation, and integration evidence.
 5. **Identify implementation Tasks.** Add the code, infrastructure, configuration, packaging, and operational work needed to make each Story pass. Give every Task a clear completion state.
