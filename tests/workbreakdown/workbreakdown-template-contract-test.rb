@@ -261,7 +261,7 @@ expect_error("Spike variant mismatch") { validate_manifest(swapped_variant, inde
 # Schema 4 adds optional Draft provenance and per-child classification.
 schema4_minimal = load_yaml(File.join(FIXTURES, "schema4-minimal-valid.yaml"))
 validate_manifest(schema4_minimal, index, registry)
-assert(!schema4_minimal.key?("shaping") && !schema4_minimal.key?("sources"), "minimal schema-4 fixture carries optional blocks")
+assert(!schema4_minimal.key?("shaping") && !schema4_minimal.key?("sources") && !schema4_minimal.key?("consolidation"), "minimal schema-4 fixture carries optional blocks")
 
 schema4 = load_yaml(File.join(FIXTURES, "schema4-full-valid.yaml"))
 validate_manifest(schema4, index, registry)
@@ -354,6 +354,131 @@ expect_error("shaping requires schema 4") { validate_manifest(schema3_shaping, i
 schema3_sources = clone(schema3)
 schema3_sources["sources"] = clone(schema4["sources"])
 expect_error("sources requires schema 4") { validate_manifest(schema3_sources, index, registry) }
+
+# Cross-Epic consolidation: an optional schema-4 block with a required status.
+consolidated = load_yaml(File.join(FIXTURES, "schema4-consolidation-valid.yaml"))
+validate_manifest(consolidated, index, registry)
+assert(consolidated.dig("consolidation", "claims").map { |claim| claim.dig("confirmation", "state") }.sort == CONFIRMATION_STATES.sort, "consolidation fixture lost a confirmation state")
+
+schema3_consolidation = clone(schema3)
+schema3_consolidation["consolidation"] = {"status" => "skipped"}
+expect_error("consolidation requires schema 4") { validate_manifest(schema3_consolidation, index, registry) }
+schema2_consolidation = clone(v2_children)
+schema2_consolidation["consolidation"] = {"status" => "skipped"}
+expect_error("consolidation requires schema 4") { validate_manifest(schema2_consolidation, index, registry) }
+
+def consolidation_case(base, index, registry, fragment)
+  manifest = clone(base)
+  yield manifest["consolidation"]
+  expect_error(fragment) { validate_manifest(manifest, index, registry) }
+end
+
+consolidation_case(consolidated, index, registry, "consolidation requires a status") { |c| c.delete("status") }
+consolidation_case(consolidated, index, registry, "invalid consolidation status") { |c| c["status"] = "partial" }
+consolidation_case(consolidated, index, registry, "consolidation has unknown field owners") { |c| c["owners"] = [] }
+%w[skipped no-siblings].each do |status|
+  consolidation_case(consolidated, index, registry, "consolidation #{status} forbids claims") { |c| c["status"] = status }
+  consolidation_case(consolidated, index, registry, "consolidation #{status} forbids exceptions") { |c| c["status"] = status; c.delete("claims") }
+  consolidation_case(consolidated, index, registry, "#{status} consolidation order must be unknown") { |c| c["status"] = status; c.delete("claims"); c.delete("exceptions") }
+  quiet = clone(consolidated)
+  quiet["consolidation"] = {"status" => status, "order" => {"source" => "unknown", "value" => []}}
+  validate_manifest(quiet, index, registry)
+end
+consolidation_case(consolidated, index, registry, "claim requires a rationale") { |c| c["claims"][0]["rationale"] = " " }
+consolidation_case(consolidated, index, registry, "claimed_by must list at least two distinct Jira keys") { |c| c["claims"][0]["claimed_by"] = ["EPIC-1"] }
+consolidation_case(consolidated, index, registry, "claimed_by must list at least two distinct Jira keys") { |c| c["claims"][0]["claimed_by"] = ["EPIC-1", "EPIC-1"] }
+consolidation_case(consolidated, index, registry, "claimed_by must list at least two distinct Jira keys") { |c| c["claims"][0]["claimed_by"] = ["EPIC-1", "state-epic"] }
+consolidation_case(consolidated, index, registry, "claim owner is not a claimant") { |c| c["claims"][0]["owner"] = "EPIC-9" }
+consolidation_case(consolidated, index, registry, "invalid confirmation state") { |c| c["claims"][1]["confirmation"]["state"] = "agreed" }
+consolidation_case(consolidated, index, registry, "confirmed owner requires confirmed_by and evidence") { |c| c["claims"][0]["confirmation"].delete("evidence") }
+consolidation_case(consolidated, index, registry, "proposed owner forbids confirmed_by and evidence") { |c| c["claims"][1]["confirmation"]["confirmed_by"] = "Program lead" }
+consolidation_case(consolidated, index, registry, "invalid order source") { |c| c["order"]["source"] = "summary" }
+consolidation_case(consolidated, index, registry, "order keys must be unique") { |c| c["order"]["value"] << "EPIC-0" }
+consolidation_case(consolidated, index, registry, "order value must be empty exactly when source is unknown") { |c| c["order"]["source"] = "unknown" }
+consolidation_case(consolidated, index, registry, "order value must be empty exactly when source is unknown") { |c| c["order"]["value"] = []; c.delete("exceptions") }
+consolidation_case(consolidated, index, registry, "known order must include the scoped Epic") { |c| c["order"]["value"].delete("EPIC-1"); c.delete("exceptions") }
+consolidation_case(consolidated, index, registry, "order value must be a list of Jira keys") { |c| c["order"]["value"] << "build-endpoint" }
+consolidation_case(consolidated, index, registry, "order exception requires a known order") { |c| c["order"] = {"source" => "unknown", "value" => []} }
+consolidation_case(consolidated, index, registry, "order exception blocker and blocked must differ") { |c| c["exceptions"][0]["blocked"] = "WORK-410" }
+consolidation_case(consolidated, index, registry, "order exception blocked must be a Jira key or a child ref") { |c| c["exceptions"][0]["blocked"] = "no-such-child" }
+consolidation_case(consolidated, index, registry, "order exception endpoint is not in the order") { |c| c["exceptions"][0]["blocker_epic"] = "EPIC-7" }
+consolidation_case(consolidated, index, registry, "order exception edge is not later-to-earlier") { |c| c["exceptions"][0]["blocker_epic"], c["exceptions"][0]["blocked_epic"] = "EPIC-1", "EPIC-3" }
+consolidation_case(consolidated, index, registry, "order exception edge is not later-to-earlier") { |c| c["exceptions"][0]["blocker_epic"] = "EPIC-1" }
+consolidation_case(consolidated, index, registry, "order exception requires reason, approver, and approval_evidence") { |c| c["exceptions"][0].delete("approver") }
+consolidation_case(consolidated, index, registry, "order exception has unknown field edge") { |c| c["exceptions"][0]["edge"] = {} }
+consolidation_case(consolidated, index, registry, "order exception blocker must be a Jira key or a child ref") { |c| c["exceptions"][0]["blocker"] = "later work" }
+consolidation_case(consolidated, index, registry, "consolidation claims must be a list") { |c| c["claims"] = "x" }
+consolidation_case(consolidated, index, registry, "consolidation exceptions must be a list") { |c| c["exceptions"] = "x" }
+consolidation_case(consolidated, index, registry, "claim requires a claim") { |c| c["claims"][0]["claim"] = " " }
+consolidation_case(consolidated, index, registry, "consolidation claim must be a map") { |c| c["claims"][0] = "x" }
+consolidation_case(consolidated, index, registry, "consolidation claim has unknown field notes") { |c| c["claims"][0]["notes"] = "x" }
+consolidation_case(consolidated, index, registry, "claim confirmation must be a map") { |c| c["claims"][0]["confirmation"] = "proposed" }
+consolidation_case(consolidated, index, registry, "claim confirmation has unknown field notes") { |c| c["claims"][1]["confirmation"]["notes"] = "x" }
+consolidation_case(consolidated, index, registry, "consolidation order must be a map") { |c| c["order"] = "rank" }
+consolidation_case(consolidated, index, registry, "consolidation order has unknown field epics") { |c| c["order"]["epics"] = [] }
+consolidation_case(consolidated, index, registry, "order exception must be a map") { |c| c["exceptions"][0] = "x" }
+consolidation_case(consolidated, index, registry, "order exception requires a known order") { |c| c.delete("order") }
+consolidation_case(consolidated, index, registry, "order exception blocked is a child of the scoped Epic") { |c| c["exceptions"][0]["blocked_epic"] = "EPIC-2" }
+consolidation_case(consolidated, index, registry, "consolidation claims must be distinct") { |c| c["claims"][1]["claim"] = " #{c["claims"][0]["claim"]} " }
+consolidation_case(consolidated, index, registry, "order exceptions must be distinct") { |c| c["exceptions"] << clone(c["exceptions"][0]) }
+consolidation_case(consolidated, index, registry, "consolidation order must be a map") { |c| c["status"] = "skipped"; c.delete("claims"); c.delete("exceptions"); c["order"] = "rank" }
+unensured = clone(consolidated)
+unensured["dependencies"] = []
+expect_error("order exception on a proposed child needs an ensure dependency") { validate_manifest(unensured, index, registry) }
+reversed_ensure = clone(consolidated)
+reversed_ensure["dependencies"][0]["blocker"], reversed_ensure["dependencies"][0]["blocked"] = {"ref" => "build-endpoint"}, {"jira_key" => "WORK-410"}
+expect_error("order exception on a proposed child needs an ensure dependency") { validate_manifest(reversed_ensure, index, registry) }
+removed_edge = clone(consolidated)
+removed_edge["dependencies"][0]["action"] = "remove"
+expect_error("order exception on a proposed child needs an ensure dependency") { validate_manifest(removed_edge, index, registry) }
+# Audit's semantic link findings: output, not manifest content.
+audit_prose = File.read(File.join(SKILL, "references", "jira-change-protocol.md"))[/^### Semantic link findings.*?(?=^## )/m]
+assert(audit_prose, "Audit protocol lost its semantic link findings section")
+audit_example = YAML.safe_load(audit_prose[/^~~~yaml\n(.*?)^~~~$/m, 1]).fetch("findings")
+validate_audit_findings(audit_example)
+assert(audit_prose.include?("check is #{AUDIT_CHECKS[0..-2].join(", ")}, or #{AUDIT_CHECKS.last}."), "Audit check prose does not match AUDIT_CHECKS")
+AUDIT_CHECKS.each { |check| assert(audit_prose.include?("  - #{check}: "), "Audit prose does not define #{check}") }
+audit_valid = [
+  {"check" => "into-closed", "edge" => {"blocker" => "WORK-1", "blocked" => "WORK-2"}, "evidence" => "WORK-2 status category: done",
+   "classification" => "unknown", "history" => "none"},
+  {"check" => "status-vs-blockers", "ref" => "WORK-3", "evidence" => "WORK-3 is ahead of open blocker WORK-4"}
+]
+validate_audit_findings(audit_valid)
+def audit_case(base, fragment)
+  findings = clone(base)
+  yield findings
+  expect_error(fragment) { validate_audit_findings(findings) }
+end
+expect_error("audit findings must be a list") { validate_audit_findings({"check" => "into-closed"}) }
+audit_case(audit_valid, "audit finding must be a map") { |f| f[0] = "into-closed" }
+audit_case(audit_valid, "invalid audit check") { |f| f[0]["check"] = "reversed-link" }
+audit_case(audit_valid, "audit finding has unknown field correction") { |f| f[0]["correction"] = "x" }
+audit_case(audit_valid, "into-closed finding requires an edge") { |f| f[0].delete("edge") }
+audit_case(audit_valid, "audit finding takes an edge or a ref, not both") { |f| f[0]["ref"] = "WORK-2" }
+audit_case(audit_valid, "edge requires blocker and blocked Jira keys") { |f| f[0]["edge"]["blocked"] = "build-endpoint" }
+audit_case(audit_valid, "edge blocker and blocked must differ") { |f| f[0]["edge"]["blocked"] = "WORK-1" }
+audit_case(audit_valid, "audit finding edge has unknown field type") { |f| f[0]["edge"]["type"] = "Blocks" }
+audit_case(audit_valid, "status-vs-blockers finding requires a ref") { |f| f[1].delete("ref") }
+audit_case(audit_valid, "text-only-blocker finding requires a ref") { |f| f[1]["check"] = "text-only-blocker"; f[1]["ref"] = "blocked work" }
+audit_case(audit_valid, "audit finding requires evidence") { |f| f[1]["evidence"] = " " }
+audit_case(audit_valid, "audit findings must be distinct") { |f| f << clone(f[0]) }
+validate_audit_findings(audit_valid + [{"check" => "contradicts-text", "edge" => {"blocker" => "WORK-1", "blocked" => "WORK-2"}, "evidence" => "WORK-2 text: WORK-2 feeds WORK-1.",
+  "classification" => "scope-disagreement", "history" => {"author" => "Epic owner", "date" => "2026-09-22"}}])
+audit_case(audit_valid, "link finding requires classification and history") { |f| f[0].delete("history") }
+audit_case(audit_valid, "link finding requires classification and history") { |f| f[0].delete("classification") }
+audit_case(audit_valid, "invalid link classification") { |f| f[0]["classification"] = "reversed" }
+audit_case(audit_valid, "history must be none or author and date") { |f| f[0]["history"] = "unknown" }
+audit_case(audit_valid, "history must be none or author and date") { |f| f[0]["history"] = {"author" => " ", "date" => "2026-09-22"} }
+audit_case(audit_valid, "finding history has unknown field comment") { |f| f[0]["history"] = {"author" => "a", "date" => "2026-09-22", "comment" => "x"} }
+audit_case(audit_valid, "history date must be a valid YYYY-MM-DD date") { |f| f[0]["history"] = {"author" => "a", "date" => "2026-02-30"} }
+audit_case(audit_valid, "classification without history must be unknown") { |f| f[0]["classification"] = "mechanical" }
+audit_case(audit_valid, "status-vs-blockers finding takes no classification") { |f| f[1]["classification"] = "unknown" }
+assert(audit_prose.include?("classification is #{LINK_CLASSIFICATIONS[0..-2].join(", ")}, or #{LINK_CLASSIFICATIONS.last}. Classification defaults to unknown."), "Audit classification prose does not match LINK_CLASSIFICATIONS")
+LINK_CLASSIFICATIONS.each { |value| assert(audit_prose.include?("- #{value}: "), "Audit prose does not define #{value}") }
+
+not_a_map = clone(consolidated)
+not_a_map["consolidation"] = "run"
+expect_error("consolidation must be a map") { validate_manifest(not_a_map, index, registry) }
 
 bad_granularity = clone(schema4)
 bad_granularity["shaping"]["task_granularity"]["value"] = "per-layer"
@@ -772,6 +897,7 @@ expect_error("schema-4 Spike requires classification question and precedent") { 
 # The schema-4 worked example follows the current rules: default template set, and no placeholder with a found precedent.
 example = YAML.safe_load(File.read(File.join(SKILL, "references", "manifest-contract.md"))[/^## Schema 4:.*?^~~~yaml\n(.*?)^~~~$/m, 1])
 assert(example.dig("template_set", "version") == registry["default_set_version"], "schema 4 example is not on the default template set")
+validate_consolidation(example.fetch("consolidation"), example.dig("scope", "epic_key"), example["children"], example["dependencies"])
 example["children"].each do |child|
   both = child.dig("classification", "placeholder") && child.dig("classification", "precedent", "verdict") == "found"
   assert(!both, "schema 4 example gives a placeholder a found precedent")
@@ -792,7 +918,9 @@ assert(!schema4_prose.include?("schema_version: 4"), "schema 4 pin still scans t
 schema4_tokens = SCHEMA4_ROOT_KEYS + SHAPING_VALUES.keys + SHAPING_VALUES.values.grep(Array).flatten + SOURCES_READ +
   %w[jira_context existing_children conflicts claim winner material stale present absent] +
   %w[classification question precedent searched verdict location placeholder defined_by none found unverified] +
-  %w[value source from_epic asked reused default]
+  %w[value source from_epic asked reused default] +
+  CONSOLIDATION_KEYS + CONSOLIDATION_STATUSES + ORDER_SOURCES + CONFIRMATION_STATES +
+  %w[claimed_by owner rationale confirmed_by evidence blocker blocked blocker_epic blocked_epic reason approver approval_evidence]
 schema4_tokens.each { |token| assert(schema4_prose.match?(/\b#{Regexp.escape(token)}\b/), "schema 4 prose does not name #{token}") }
 
 # Pin each enumerated rule sentence, generated from the validator's own value sets.
@@ -806,6 +934,10 @@ schema4_rules = [
   "jira_context is #{prose_list(JIRA_CONTEXTS)}.",
   "read is a nonempty subset of #{prose_list(SOURCES_READ).sub(", or ", ", and ")}",
   "verdict is #{prose_list(PRECEDENT_VERDICTS)}.",
+  "status is #{prose_list(CONSOLIDATION_STATUSES)}.",
+  "order.source is #{prose_list(ORDER_SOURCES)}.",
+  "confirmation.state is #{prose_list(CONFIRMATION_STATES)}.",
+  "Its keys are #{prose_list(CONSOLIDATION_KEYS).sub(", or ", ", and ")}.",
   "material and stale are true or false.",
   "Its entries are #{prose_list(SHAPING_VALUES.keys).sub(", or ", ", and ")}",
   "Its keys are #{prose_list(CLASSIFICATION_KEYS).sub(", or ", ", and ")}.",

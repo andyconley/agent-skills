@@ -19,7 +19,7 @@ REGISTRY_PATH = File.join(SKILL, "assets", "jira-templates", "registry.yaml")
 ROOT_KEYS = %w[schema_version manifest_id revision template_set scope epic children dependencies rank unknowns].freeze
 CHILD_KEYS = %w[ref jira_key type variant template_id template_sha256 disposition verify changes fields].freeze
 PAYLOAD_KEYS = %w[summary done_when evidence estimate description].freeze
-SCHEMA4_ROOT_KEYS = %w[shaping sources].freeze
+SCHEMA4_ROOT_KEYS = %w[shaping sources consolidation].freeze
 SHAPING_VALUES = {
   "spike_shape" => %w[vertical-slice by-layer],
   "task_granularity" => %w[per-flow finer],
@@ -31,6 +31,15 @@ SHAPING_SOURCES = %w[asked reused default].freeze
 JIRA_CONTEXTS = %w[present absent].freeze
 SOURCES_KEYS = %w[jira_context existing_children conflicts].freeze
 CLASSIFICATION_KEYS = %w[question precedent placeholder].freeze
+CONSOLIDATION_KEYS = %w[status claims order exceptions].freeze
+# Audit's semantic link findings. Link checks name an edge; the others name one ticket.
+EDGE_CHECKS = %w[contradicts-text into-closed later-to-earlier].freeze
+REF_CHECKS = %w[text-only-blocker status-vs-blockers].freeze
+AUDIT_CHECKS = (EDGE_CHECKS + REF_CHECKS).freeze
+LINK_CLASSIFICATIONS = %w[mechanical scope-disagreement unknown].freeze
+CONSOLIDATION_STATUSES = %w[run skipped no-siblings].freeze
+ORDER_SOURCES = %w[declared rank unknown].freeze
+CONFIRMATION_STATES = %w[proposed confirmed].freeze
 PRECEDENT_VERDICTS = %w[none found unverified].freeze
 JIRA_KEY = /\A[A-Z][A-Z0-9]+-\d+\z/.freeze
 CLASSIFIED_SPIKE_TEMPLATES = %w[jira-spike-design-v3 jira-spike-investigation-v3].freeze
@@ -310,6 +319,109 @@ def validate_sources(sources)
   end
 end
 
+def nonempty_text?(value)
+  value.is_a?(String) && !value.strip.empty?
+end
+
+def validate_claim(claim)
+  raise ArgumentError, "consolidation claim must be a map" unless claim.is_a?(Hash)
+  reject_unknown_keys(claim, %w[claim claimed_by owner rationale confirmation], "consolidation claim")
+  raise ArgumentError, "claim requires a claim" unless nonempty_text?(claim["claim"])
+  raise ArgumentError, "claim requires a rationale" unless nonempty_text?(claim["rationale"])
+  claimants = claim["claimed_by"]
+  unless claimants.is_a?(Array) && claimants.length >= 2 && claimants.all? { |key| key.to_s.match?(JIRA_KEY) } && claimants.uniq.length == claimants.length
+    raise ArgumentError, "claimed_by must list at least two distinct Jira keys"
+  end
+  raise ArgumentError, "claim owner is not a claimant" unless claimants.include?(claim["owner"])
+  confirmation = claim["confirmation"]
+  raise ArgumentError, "claim confirmation must be a map" unless confirmation.is_a?(Hash)
+  reject_unknown_keys(confirmation, %w[state confirmed_by evidence], "claim confirmation")
+  raise ArgumentError, "invalid confirmation state" unless CONFIRMATION_STATES.include?(confirmation["state"])
+  if confirmation["state"] == "confirmed"
+    raise ArgumentError, "confirmed owner requires confirmed_by and evidence" unless nonempty_text?(confirmation["confirmed_by"]) && nonempty_text?(confirmation["evidence"])
+  elsif confirmation.key?("confirmed_by") || confirmation.key?("evidence")
+    raise ArgumentError, "proposed owner forbids confirmed_by and evidence"
+  end
+end
+
+def validate_order(order, epic_key)
+  raise ArgumentError, "consolidation order must be a map" unless order.is_a?(Hash)
+  reject_unknown_keys(order, %w[source value], "consolidation order")
+  raise ArgumentError, "invalid order source" unless ORDER_SOURCES.include?(order["source"])
+  value = order.fetch("value", [])
+  raise ArgumentError, "order value must be a list of Jira keys" unless value.is_a?(Array) && value.all? { |key| key.to_s.match?(JIRA_KEY) }
+  raise ArgumentError, "order keys must be unique" unless value.uniq.length == value.length
+  raise ArgumentError, "order value must be empty exactly when source is unknown" unless value.empty? == (order["source"] == "unknown")
+  return if value.empty?
+
+  raise ArgumentError, "known order must include the scoped Epic" unless value.include?(epic_key)
+end
+
+# An order exception excuses exactly one later-to-earlier edge between two milestone Epics.
+# It annotates the edge and never adds, removes or reverses a Blocks link.
+def dependency_end(value)
+  value.is_a?(Hash) ? (value["ref"] || value["jira_key"]).to_s : ""
+end
+
+def validate_order_exception(exception, order_value, epic_key, children, dependencies)
+  refs = children.map { |child| child["ref"] }
+  raise ArgumentError, "order exception must be a map" unless exception.is_a?(Hash)
+  reject_unknown_keys(exception, %w[blocker blocked blocker_epic blocked_epic reason approver approval_evidence], "order exception")
+  %w[blocker blocked].each do |end_name|
+    endpoint = exception[end_name].to_s
+    raise ArgumentError, "order exception #{end_name} must be a Jira key or a child ref" unless endpoint.match?(JIRA_KEY) || refs.include?(endpoint)
+  end
+  raise ArgumentError, "order exception blocker and blocked must differ" if exception["blocker"] == exception["blocked"]
+  raise ArgumentError, "order exception requires a known order" if order_value.empty?
+  positions = %w[blocker_epic blocked_epic].map do |end_name|
+    order_value.index(exception[end_name]) or raise ArgumentError, "order exception endpoint is not in the order"
+  end
+  raise ArgumentError, "order exception edge is not later-to-earlier" unless positions[0] > positions[1]
+  # A child ref names a child of the scoped Epic, and a proposed child has no live links:
+  # its edge exists only when dependencies ensures it.
+  %w[blocker blocked].each do |end_name|
+    next unless refs.include?(exception[end_name])
+
+    raise ArgumentError, "order exception #{end_name} is a child of the scoped Epic" unless exception["#{end_name}_epic"] == epic_key
+  end
+  proposed = children.select { |child| child["disposition"] == "proposed" }.map { |child| child["ref"] }
+  if (proposed & [exception["blocker"], exception["blocked"]]).any?
+    ensured = Array(dependencies).any? do |entry|
+      entry.is_a?(Hash) && entry["action"] == "ensure" &&
+        dependency_end(entry["blocker"]) == exception["blocker"] && dependency_end(entry["blocked"]) == exception["blocked"]
+    end
+    raise ArgumentError, "order exception on a proposed child needs an ensure dependency" unless ensured
+  end
+  unless %w[reason approver approval_evidence].all? { |field| nonempty_text?(exception[field]) }
+    raise ArgumentError, "order exception requires reason, approver, and approval_evidence"
+  end
+end
+
+def validate_consolidation(consolidation, epic_key, children, dependencies)
+  raise ArgumentError, "consolidation must be a map" unless consolidation.is_a?(Hash)
+  reject_unknown_keys(consolidation, CONSOLIDATION_KEYS, "consolidation")
+  raise ArgumentError, "consolidation requires a status" unless consolidation.key?("status")
+  status = consolidation["status"]
+  raise ArgumentError, "invalid consolidation status" unless CONSOLIDATION_STATUSES.include?(status)
+  claims = consolidation.fetch("claims", [])
+  exceptions = consolidation.fetch("exceptions", [])
+  raise ArgumentError, "consolidation claims must be a list" unless claims.is_a?(Array)
+  raise ArgumentError, "consolidation exceptions must be a list" unless exceptions.is_a?(Array)
+  order = consolidation["order"]
+  validate_order(order, epic_key) unless order.nil?
+  if status != "run"
+    raise ArgumentError, "consolidation #{status} forbids claims" unless claims.empty?
+    raise ArgumentError, "consolidation #{status} forbids exceptions" unless exceptions.empty?
+    raise ArgumentError, "#{status} consolidation order must be unknown" unless order.nil? || (order.is_a?(Hash) && order["source"] == "unknown")
+  end
+  claims.each { |claim| validate_claim(claim) }
+  raise ArgumentError, "consolidation claims must be distinct" unless claims.map { |claim| claim["claim"].strip }.uniq.length == claims.length
+  order_value = order.nil? ? [] : order.fetch("value", [])
+  exceptions.each { |exception| validate_order_exception(exception, order_value, epic_key, children, dependencies) }
+  edges = exceptions.map { |exception| [exception["blocker"], exception["blocked"]] }
+  raise ArgumentError, "order exceptions must be distinct" unless edges.uniq.length == edges.length
+end
+
 def validate_precedent(precedent)
   raise ArgumentError, "precedent must be a map" unless precedent.is_a?(Hash)
   reject_unknown_keys(precedent, %w[searched verdict location], "precedent")
@@ -350,6 +462,40 @@ def validate_review_findings(findings)
     raise ArgumentError, "finding requires a ref" unless finding["ref"].is_a?(String) && !finding["ref"].strip.empty?
     raise ArgumentError, "finding requires a correction" unless finding["correction"].is_a?(String) && !finding["correction"].strip.empty?
   end
+end
+
+def validate_audit_findings(findings)
+  raise ArgumentError, "audit findings must be a list" unless findings.is_a?(Array)
+  findings.each do |finding|
+    raise ArgumentError, "audit finding must be a map" unless finding.is_a?(Hash)
+    reject_unknown_keys(finding, %w[check edge ref evidence classification history], "audit finding")
+    check = finding["check"]
+    raise ArgumentError, "invalid audit check" unless AUDIT_CHECKS.include?(check)
+    raise ArgumentError, "audit finding takes an edge or a ref, not both" if finding.key?("edge") && finding.key?("ref")
+    if EDGE_CHECKS.include?(check)
+      edge = finding["edge"]
+      raise ArgumentError, "#{check} finding requires an edge" unless edge.is_a?(Hash)
+      reject_unknown_keys(edge, %w[blocker blocked], "audit finding edge")
+      raise ArgumentError, "edge requires blocker and blocked Jira keys" unless %w[blocker blocked].all? { |end_name| edge[end_name].to_s.match?(JIRA_KEY) }
+      raise ArgumentError, "edge blocker and blocked must differ" if edge["blocker"] == edge["blocked"]
+      raise ArgumentError, "link finding requires classification and history" unless finding.key?("classification") && finding.key?("history")
+      raise ArgumentError, "invalid link classification" unless LINK_CLASSIFICATIONS.include?(finding["classification"])
+      history = finding["history"]
+      unless history == "none"
+        raise ArgumentError, "history must be none or author and date" unless history.is_a?(Hash)
+        reject_unknown_keys(history, %w[author date], "finding history")
+        raise ArgumentError, "history must be none or author and date" unless nonempty_text?(history["author"])
+        raise ArgumentError, "history date must be a valid YYYY-MM-DD date" unless iso_date?(history["date"])
+      end
+      raise ArgumentError, "classification without history must be unknown" if history == "none" && finding["classification"] != "unknown"
+    else
+      raise ArgumentError, "#{check} finding takes no classification" if finding.key?("classification") || finding.key?("history")
+      raise ArgumentError, "#{check} finding requires a ref" unless finding["ref"].to_s.match?(JIRA_KEY)
+    end
+    raise ArgumentError, "audit finding requires evidence" unless nonempty_text?(finding["evidence"])
+  end
+  keys = findings.map { |finding| [finding["check"], finding["edge"] || finding["ref"]] }
+  raise ArgumentError, "audit findings must be distinct" unless keys.uniq.length == keys.length
 end
 
 def validate_classification(classification, child)
@@ -535,6 +681,7 @@ def validate_manifest(manifest, templates, registry)
     # Schema 4 always binds a live Epic digest. Without Jira context, Draft falls back to schema 2.
     raise ArgumentError, "schema 4 requires Jira context" if manifest.dig("sources", "jira_context") == "absent"
   end
+  validate_consolidation(manifest["consolidation"], manifest.dig("scope", "epic_key"), children, manifest["dependencies"]) if manifest.key?("consolidation")
 end
 
 # The Epic's Breakdown conventions panel records the shaping answers. It exists only in
