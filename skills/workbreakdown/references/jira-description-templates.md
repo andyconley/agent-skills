@@ -6,13 +6,16 @@ Read [ticket-quality-and-completion.md](ticket-quality-and-completion.md) before
 
 ## Selection
 
-New Drafts use template-set version 3 and the registry defaults:
+New Drafts use template-set version 4 and the registry defaults:
 
-- Epic: `jira-epic-v2`
+- Epic: `jira-epic-v3`
 - Story: `jira-story-v3`
 - Task: `jira-task-v2`
-- design Spike: `jira-spike-design-v2`
-- investigation or feasibility Spike: `jira-spike-investigation-v2`
+- placeholder Task, for work a Spike must define first: `jira-task-placeholder-v3`
+- design Spike: `jira-spike-design-v3`
+- investigation or feasibility Spike: `jira-spike-investigation-v3`
+
+Both v3 Spikes add a question and a precedent section and treat reviewers as conditional. A placeholder Task's `defined_by` renders as an `inlineCard` to the defining Spike. `jira-epic-v3` adds the optional Breakdown conventions panel. Set 4 still accepts `jira-epic-v2` and the v2 Spikes, so it can verify existing work without rewriting it. Template sets 1–3 are frozen.
 
 Choose the Spike variant from its completion state. A design Spike produces a reviewed design decision and linked artifact. An investigation Spike answers a research or feasibility question. Do not force investigation work through design fields.
 
@@ -45,6 +48,10 @@ These keys do not follow that rule. Render them exactly here:
 | Epic v2 | out_of_scope | `**Out:**` bullet under `## Scope` |
 | Epic v2 | release_quality_additions | `**Additions:**` bullet under `## Release quality` |
 | Epic v2 | approved_exceptions | `**Approved exceptions:**` bullet under `## Release quality` |
+| Epic v3 | out_of_scope | `**Out:**` bullet under `## Scope` |
+| Epic v3 | release_quality_additions | `**Additions:**` bullet under `## Release quality` |
+| Epic v3 | approved_exceptions | `**Approved exceptions:**` bullet under `## Release quality` |
+| Epic v3 | breakdown_conventions | `## Breakdown conventions`, as a native panel with one bullet per shaping answer |
 | Story v2 | scenarios | `## Acceptance scenarios` |
 | Story v2 | documentation | `### Documentation` under `## Delivery evidence plan` |
 | Story v2 | automated_tests | `### Automated tests` under `## Delivery evidence plan` |
@@ -68,6 +75,11 @@ These keys do not follow that rule. Render them exactly here:
 | Design Spike v2 | design_artifact | `**Artifact:**` bullet under `## Design artifact` |
 | Design Spike v2 | reviewers | `**Reviewers:**` bullet under `## Design artifact` |
 | Design Spike v2 | checklist_coverage | `**Checklist coverage:**` bullet under `## Design artifact` |
+| Design Spike v3 | precedent | `## Precedent`, with `searched`, `verdict`, and `location` as the matching bullets |
+| Design Spike v3 | design_artifact | `**Artifact:**` bullet under `## Design artifact` |
+| Design Spike v3 | reviewers | `**Reviewers:**` bullet under `## Design artifact` |
+| Design Spike v3 | checklist_coverage | `**Checklist coverage:**` bullet under `## Design artifact` |
+| Investigation Spike v3 | precedent | `## Precedent`, with `searched`, `verdict`, and `location` as the matching bullets |
 
 The `**Profile:**` line under `## Release quality` and `## Ticket quality` names the completion profile from [ticket-quality-and-completion.md](ticket-quality-and-completion.md). It is fixed template text with no manifest key. Keep it. It is a reference, not the copied checklist the anti-bloat rule forbids.
 
@@ -75,14 +87,14 @@ The `review_evidence.approved_exceptions` list renders under the `**Approved exc
 
 ## Authorization boundary
 
-The template controls structure. It does not authorize content. Apply renders only values in the approved manifest. Adding scenarios, assumptions, criteria, exceptions, references, or technical detail requires a new manifest revision, Review, digest, and approval.
+The template controls structure. It does not authorize content. Apply renders only values in the approved manifest. Adding scenarios, assumptions, criteria, exceptions, references, or technical detail requires a new manifest revision, Review, digest, and approval. Rendering a placeholder Task's approved `defined_by` ref as the Jira key Apply created for that Spike is key resolution, not added content.
 
 ## Review checks
 
 Flag only material defects:
 
 - missing required content
-- unresolved placeholders or empty sections
+- unresolved template tokens or empty sections
 - vague or generic evidence
 - repeated facts or criteria
 - Epic acceptance criteria copied from success measures

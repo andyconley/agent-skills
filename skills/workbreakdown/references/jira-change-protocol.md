@@ -11,7 +11,7 @@ Audit requires a live read capability or a supplied export that covers the Epic,
 Apply requires capabilities to:
 
 - read the parent, Epic, children, issue types, fields, ranks, and links
-- read and update raw Epic ADF when a schema-3 manifest authorizes an Epic description change
+- read and update raw Epic ADF when a schema-3 or schema-4 manifest authorizes an Epic description change
 - create direct Epic children
 - update only manifest-authorized fields
 - create and remove `Blocks` links by ID
@@ -57,7 +57,7 @@ Before writing:
 1. Compute or obtain the approved manifest identity and confirm it matches the user's authorization.
 2. Validate every manifest invariant.
 3. Read live parent, raw Epic ADF, all relevant Epic fields, all direct children, ranks, and links.
-4. Map each manifest reference to an existing key or planned creation.
+4. Map each manifest reference to an existing key or planned creation. Confirm that each Jira key named as a placeholder Task's `defined_by` is a Spike.
 5. Confirm the target hierarchy and required issue and link types exist.
 6. Build the intended edge list as `A -> B`.
 7. Check missing, duplicate, reversed, redundant, cyclic, and cross-Epic edges.
@@ -66,7 +66,7 @@ Before writing:
 10. Confirm that every planned mutation is authorized by `disposition`, explicit field payload, dependency action, and rank scope.
 11. Reject fields outside the manifest allowlist, descriptions without an exact approved template ID and complete section content, and any dependency action whose endpoints are both outside the manifest scope.
 12. For schema 2, reject any Epic write payload.
-13. For schema 3, verify the Epic disposition, scoped key, template-set version, template ID, packaged asset hash, and expected-current normalized ADF digest.
+13. For schema 3 or 4, verify the Epic disposition, scoped key, template-set version, template ID, packaged asset hash, and expected-current normalized ADF digest. An Epic update, including one that writes the Breakdown conventions panel, requires the Epic owner's agreement. The owner is the Epic's assignee, or its reporter when it has no assignee. Agreement is the owner's direct approval of that revision, relayed by the active user. Record it in the mutation journal, or stop before the first write. When the live Epic ADF has a Breakdown conventions panel and the approved description has no `breakdown_conventions`, stop before the first write: the update would delete the panel.
 14. Build the exact Epic delta. Reject missing required description content, unapproved conditional content, inferred custom acceptance fields, and any change outside the description.
 15. Capture a preservation projection of every observable, mutable business field not authorized for change. Build it by enumerating the editable field set the live Epic returns, then removing the fields the manifest authorizes and the server-managed metadata such as timestamps, history records, audit records, and computed fields. Do not select fields by hand. Record the projected field count in the mutation journal so a narrow or empty projection is visible rather than silently vacuous.
 
@@ -88,8 +88,8 @@ Treat the known-good live link as authoritative if the target Jira behaves diffe
 
 Keep a mutation journal with the intended operation, target, prior value or digest, requested value or digest, result, verification result, and resulting key or link ID.
 
-1. For schema 3, verify an `existing` Epic without mutation or apply only the approved description for an `update` Epic. Preserve every omitted Epic field.
-2. Create `proposed` children as direct Epic children and record each reference-to-key mapping.
+1. For schema 3 or 4, verify an `existing` Epic, or a schema-4 `unbound` Epic's digest, without mutation or apply only the approved description for an `update` Epic. Preserve every omitted Epic field.
+2. Create `proposed` children as direct Epic children and record each reference-to-key mapping. Create each defining Spike before the placeholder Tasks it defines. Render a placeholder's `defined_by` from that mapping. This is key resolution, not content added after approval.
 3. Apply explicit `changes` to `update` children. Preserve every omitted field.
 4. Verify `existing` children without changing them.
 5. Ensure dependencies one at a time.
@@ -108,9 +108,9 @@ Resume a partial operation as a new Apply attempt. Reread live state and repeat 
 After mutation:
 
 1. Read raw Epic ADF, relevant Epic fields, children, ranks, and links again.
-2. For a schema-3 Epic update, compare the normalized ADF with the approved rendered description. Remove regenerated `localId` properties only. Serialize UTF-8 JSON with sorted object keys, preserved array order, and no insignificant whitespace before hashing. Preserve text, headings, panels, tables, lists, marks, code-block language, and link targets.
+2. For a schema-3 or schema-4 Epic update, compare the normalized ADF with the approved rendered description. Remove regenerated `localId` properties only. Serialize UTF-8 JSON with sorted object keys, preserved array order, and no insignificant whitespace before hashing. Preserve text, headings, panels, tables, lists, marks, code-block language, and link targets.
 3. Compare the post-write preservation projection with preflight. Prove every unapproved observable business field remained unchanged, and prove the projected field count matches the count recorded at preflight. A projection that shrank between preflight and readback is an unresolved mismatch, not a pass. Do not compare server-managed timestamps, history, audit records, or computed fields.
-4. Compare the remaining live state with the complete approved manifest.
+4. Compare the remaining live state with the complete approved manifest. Compare a placeholder Task's `defined_by` after mapping its ref to the created key.
 5. Check missing and duplicate items, field mismatches, reversed links, cycles, unauthorized deletions, rank differences, and unrelated-order preservation.
 6. Return the complete reference-to-key mapping and Epic journal entry.
 7. Report Epic and child counts for `created`, `updated`, `unchanged`, `failed`, `restored`, `untouched`, and `verified`.

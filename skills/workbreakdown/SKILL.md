@@ -1,11 +1,11 @@
 ---
 name: workbreakdown
-description: Breaks milestone Epics into direct-child Spikes, Tasks, and Stories with observable completion states, concise versioned descriptions, a YAML manifest, hard dependency edges, and verified Jira reconciliation. Use when drafting, reviewing, auditing, or explicitly applying work below an ER or Initiative. Do not use for portfolio hierarchy or unreviewed Jira changes. Version 1.4.0.
+description: Breaks milestone Epics into direct-child Spikes, Tasks, and Stories with observable completion states, concise versioned descriptions, a YAML manifest, hard dependency edges, and verified Jira reconciliation. Use when drafting, reviewing, auditing, or explicitly applying work below an ER or Initiative. Do not use for portfolio hierarchy or unreviewed Jira changes. Version 1.5.0.
 ---
 
 # Work Breakdown
 
-**Version: 1.4.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
+**Version: 1.5.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
 
 Break milestone work into items that can be owned, estimated, sequenced, and proven complete.
 
@@ -29,7 +29,7 @@ Read [references/ticket-quality-and-completion.md](references/ticket-quality-and
 
 ## Select one mode
 
-- **Draft:** Propose a breakdown from source material and available Jira context. Do not change Jira. Read [references/manifest-contract.md](references/manifest-contract.md). Always return the Epic outcome, child table, complete YAML manifest, dependency edge list or graph, graph checks, and material questions.
+- **Draft:** Propose a breakdown from source material and available Jira context. Do not change Jira. Read existing work first: reconcile every proposed item against the Epic's existing children under the SOP's source-authority rules. Without Jira context, emit schema 2 and state that design claims are unverified. Read [references/manifest-contract.md](references/manifest-contract.md). Check every description against its template's required keys before returning the manifest. Before drafting, collect the shaping answers under the SOP's shaping questions and record each with its source. Always return the Jira context line, Epic outcome, reconciliation table, material conflicts, shaping answers and run mode, divergence list, child table, complete YAML manifest, dependency edge list or graph, graph checks, and material questions.
 - **Review:** Check an existing breakdown or manifest. Do not change Jira or redesign valid work. Read [references/manifest-contract.md](references/manifest-contract.md). Return only material defects, lifecycle eligibility, the smallest corrections, and a corrected edge list when edges change.
 - **Audit:** Inspect live Jira or a supplied export. Do not change Jira. Read [references/jira-change-protocol.md](references/jira-change-protocol.md). Return the hierarchy, item table, edge list, graph defects, ticket-quality findings, Story lifecycle eligibility, and smallest proposed change set.
 - **Apply:** Reconcile Jira to one specific approved manifest. Read both [references/manifest-contract.md](references/manifest-contract.md) and [references/jira-change-protocol.md](references/jira-change-protocol.md). Apply only after the user directly authorizes the exact manifest revision.
@@ -49,7 +49,9 @@ Ask for every child:
 
 Every Task must contribute to a Story or an explicit Epic exit condition. Every Spike must inform a Task or Story.
 
-New Drafts use the template-set-3 defaults. Keep descriptions short: fill required content, include conditional sections only when material, and omit empty sections. An explicitly older manifest stays on its approved template and still meets the current lifecycle bar.
+Classify a Spike by its one open question and a Task by a verified precedent. Draft defaults to one vertical-slice Spike and one implementation Task per user-facing flow. Review and Audit never flag a team's own Spike shape or Task granularity. Review reports a Story that is not a demoable flow as a component Story. Hold work that a Spike must define first in a placeholder Task linked to that Spike. It has no estimate, and a real Task replaces it when the Spike closes.
+
+New Drafts use the template-set-4 defaults. Keep descriptions short: fill required content, include conditional sections only when material, and omit empty sections. An explicitly older manifest stays on its approved template and still meets the current lifecycle bar.
 
 For every Story, plan contextual documentation, automated integration or functional tests that prove its scenarios, and the smallest set of operational signals and business metrics that proves the Story outcome or an operational decision. This plan is enough for `IMPLEMENTATION READY`. Before the Story enters `IN REVIEW`, require appropriate documentation evidence, passing mapped tests, implemented instrumentation, observed output from a named representative environment, and reviewable evidence. A unit test or manual demonstration cannot satisfy the automated-test obligation. Each evidence class may instead use one complete approved exception.
 
@@ -67,10 +69,13 @@ Automatic skill selection does not authorize Jira changes. Apply requires:
 2. Direct user authorization naming its immutable revision or digest.
 3. Live Jira read and write capabilities sufficient for the complete change.
 4. A preflight showing that live drift does not change the approved plan.
+5. For an Epic update, the Epic owner's agreement.
 
 If any condition is missing, stop before the first write and return the proposed delta or capability gap. An API success response is not proof. Apply finishes only after final readback matches the approved manifest.
 
-Manifest schema 2 remains child-only. Only schema 3 can verify or update the scoped Epic, and only an explicit `epic.disposition: update` with exact template binding, expected-current ADF digest, and approved description content authorizes that update. Epic creation, deletion, reparenting, retyping, ranking, and status or other omitted-field changes remain forbidden.
+Manifest schema 2 remains child-only. Only schema 3 or 4 can verify or update the scoped Epic. Schema 4 also binds an Epic whose live description fits no template by its digest only, with `disposition: unbound`, which never authorizes a write. Only an explicit `epic.disposition: update` with exact template binding, expected-current ADF digest, and approved description content authorizes that update. Epic creation, deletion, reparenting, retyping, ranking, and status or other omitted-field changes remain forbidden.
+
+Schema 4 adds optional Draft provenance (`shaping`, `sources`) and per-child `classification`; it keeps the schema-3 Epic rules and adds the `unbound` disposition. A `jira-epic-v3` Epic can carry a Breakdown conventions panel that records the shaping answers. Only a schema-4 Epic update writes it, through the same guarded description update.
 
 Do not invent Jira keys, live state, estimates, evidence, permissions, acceptance criteria, or dependencies. State assumptions as assumptions. Ask only questions that materially change classification, scope, acceptance, or dependency direction.
 

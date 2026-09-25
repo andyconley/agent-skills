@@ -2,10 +2,13 @@
 
 The manifest is the reviewed desired-state contract between planning and Jira. Every Draft includes a complete manifest, even when no Jira change is expected.
 
+The manifest must parse as YAML. Quote a string value in double quotes when it contains `: ` or ` #`, starts with a quote, bracket, brace, `*`, `&`, `!`, `%`, `@`, or a backtick, or would otherwise read as a number, date, or boolean. Escape any double quote inside it.
+
 ## Identity and approval
 
 - Use schema version 2 for child-only reconciliation.
-- Use schema version 3 only when the manifest must verify or update the scoped Epic.
+- Use schema version 3 or 4 only when the manifest must verify or update the scoped Epic.
+- Schema version 4 adds optional Draft provenance and per-child classification. Its Epic rules are the schema-3 rules, plus the `unbound` disposition and the jira-epic-v3 panel.
 - Give the manifest a stable manifest ID and integer revision.
 - Bind approval to the exact content. For a standalone YAML file, calculate SHA-256 over its exact UTF-8 bytes after converting line endings to LF; include the final trailing newline.
 - Approval is external to the YAML. A manifest cannot authorize itself.
@@ -14,11 +17,11 @@ The manifest is the reviewed desired-state contract between planning and Jira. E
 
 ## Template binding
 
-template_set names the registry and version. The selected template must declare compatibility with that set version. Every nonlegacy or schema-3 description names an exact template_id and template_sha256 and contains all reviewed values needed by that template.
+template_set names the registry and version. The selected template must declare compatibility with that set version. Every nonlegacy, schema-3, or schema-4 description names an exact template_id and template_sha256 and contains all reviewed values needed by that template.
 
-New Drafts use template-set version 3. A schema-2 manifest bound to version 1 may omit template_sha256; resolve its template_id through the immutable v1 registry entry and verify the packaged asset hash. Never require a rewrite, migrate an approved manifest, or add fields to it.
+New Drafts use template-set version 4. A schema-2 manifest bound to version 1 may omit template_sha256; resolve its template_id through the immutable v1 registry entry and verify the packaged asset hash. Never require a rewrite, migrate an approved manifest, or add fields to it.
 
-Grandfathering covers the template asset and its declared key set. It does not cover content. The quality rules in [ticket-quality-and-completion.md](ticket-quality-and-completion.md) apply to every description in every template set. A v1-bound description with an unresolved placeholder, an `N/A` or `None` filler value, or generic evidence is rejected, and it may still use only the keys its own registry entry declares.
+Grandfathering covers the template asset and its declared key set. It does not cover content. The quality rules in [ticket-quality-and-completion.md](ticket-quality-and-completion.md) apply to every description in every template set. A v1-bound description with an unresolved template token, an `N/A` or `None` filler value, or generic evidence is rejected, and it may still use only the keys its own registry entry declares.
 
 Reject an unknown set version or a template that does not list template_set.version in `compatible_set_versions`. When that metadata is absent, only the template's own `set_version` is compatible.
 
@@ -27,10 +30,14 @@ Reject an unknown set version or a template that does not list template_set.vers
 Reject unknown fields instead of ignoring them.
 
 - Root: schema_version, manifest_id, revision, template_set, scope, epic, children, dependencies, rank, unknowns.
+- Schema-4 root: the root fields, plus optional shaping and sources.
+- Schema-4 child: the child fields, plus optional classification.
 - template_set: id, version.
 - scope: parent_key, epic_key.
 - Schema-2 epic: outcome, target_duration.
 - Schema-3 existing epic: disposition, verify.
+- Schema-4 unbound epic: disposition, observed.
+- observed: description_adf_sha256.
 - Schema-3 update epic: disposition, template_id, template_sha256, expected_current, changes.
 - Epic verify: template_id, template_sha256, description_adf_sha256, description.
 - expected_current: description_adf_sha256.
@@ -232,8 +239,8 @@ unknowns: []
 For update:
 
 - scope.epic_key is the only Epic identity.
-- the selected template set must be compatible with `jira-epic-v2`.
-- template_id must be jira-epic-v2 and the asset hash must match the installed registry.
+- the selected template set must support a non-legacy Epic template: `jira-epic-v2` for sets 2 and 3, and `jira-epic-v2` or `jira-epic-v3` for set 4.
+- template_id must name one of those templates, and the asset hash must match the installed registry.
 - expected_current.description_adf_sha256 is required and must be exactly 64 lowercase hexadecimal characters. Any other value, including a template token, an empty string, or a description of how to obtain the digest, is a manifest rejection.
 - Compute it by removing only `localId` properties from raw live ADF, then serializing UTF-8 JSON with sorted object keys, preserved array order, and no insignificant whitespace, then calculating SHA-256.
 - Capture the digest from live Jira before approval. Apply never computes, fills, refreshes, or substitutes this value. A digest derived from the state Apply just read proves nothing and satisfies no gate.
@@ -244,6 +251,165 @@ For update:
 - Omitted Epic fields are preserved. They never become empty write values.
 
 Schema 3 does not authorize Epic creation, deletion, reparenting, retyping, ranking, or project, status, sprint, security, reporter, or arbitrary-field changes. It also does not authorize any non-field write on the Epic, including comments, attachments, watchers, worklogs, and labels.
+
+## Schema 4: Draft provenance and classification
+
+Schema 4 records how a Draft was shaped, which sources it read, and why each child has its classification. All three blocks are optional, and a schema-4 manifest without them is valid. The Epic block follows the schema-3 rules, plus the `unbound` disposition and the jira-epic-v3 panel described below. The example is abridged: its Epic description and child template bindings follow the schema-3 and child rules. Reject shaping, sources, or a child classification in a schema-2 or schema-3 manifest.
+
+~~~yaml
+schema_version: 4
+manifest_id: state-read-breakdown
+revision: 1
+template_set:
+  id: jira-house-templates
+  version: 4
+scope:
+  parent_key: INIT-100
+  epic_key: EPIC-200
+epic:
+  disposition: existing
+  verify:
+    template_id: jira-epic-v2
+    template_sha256: 18fefffa6ebb6fe385616ecc0dce1756a6238ce11cd5f41d972557313d42342e
+    description_adf_sha256: 9f2c4b7a1e5d8036c4a91b2e7f60d3a85c19e4b70d2f6a83915ce4d70b8a2f61
+    description: {} # the reviewed Epic description, as in schema 3
+shaping:
+  spike_shape:
+    value: vertical-slice
+    source: reused
+    from_epic: EPIC-201
+  task_granularity:
+    value: per-flow
+    source: asked
+  reviewers:
+    value: [API owner]
+    source: asked
+  source_order:
+    value: [jira-amendment, jira-description, design-page]
+    source: default
+sources:
+  jira_context: present
+  existing_children:
+    - jira_key: WORK-203
+      read: [description, status, links, link_history]
+  conflicts:
+    - claim: State reads use the cached projection.
+      sources:
+        - ref: docs/design/state.md
+          date: "2026-01-10"
+        - ref: WORK-203
+          date: "2026-02-03"
+      winner: WORK-203
+      material: true
+      stale: true
+children:
+  - ref: choose-transport
+    type: Spike
+    variant: design
+    disposition: proposed
+    classification:
+      question: Which transport carries state reads within the payload limit?
+      precedent:
+        searched: [src/transport, docs/design]
+        verdict: none
+    # template binding and fields as for any proposed child
+  - ref: build-endpoint
+    type: Task
+    disposition: proposed
+    classification:
+      precedent:
+        searched: [src/api/handlers]
+        verdict: found
+        location: src/api/handlers/status.rb
+    # template binding and fields as for any proposed child
+  - ref: wire-transport
+    type: Task
+    disposition: proposed
+    classification:
+      placeholder:
+        defined_by: choose-transport
+    # bound to jira-task-placeholder-v3; its summary starts with [PLACEHOLDER]
+dependencies: []
+rank:
+  mode: scoped-relative
+  order: [choose-transport, build-endpoint, wire-transport]
+unknowns: []
+~~~
+
+### Unbound Epic
+
+Schema 4 adds one Epic disposition, `unbound`, for a live Epic whose description fits no non-legacy Epic template, such as an Epic written before the templates existed. It contains only `observed.description_adf_sha256`, captured from live Jira by the same rules as expected_current. It never authorizes an Epic write, and schema 3 rejects it. Apply verifies the digest and treats a mismatch as drift. To change such an Epic, propose an `update` with a complete template-shaped description, which needs the Epic owner's agreement.
+
+~~~yaml
+epic:
+  disposition: unbound
+  observed:
+    description_adf_sha256: 9f2c4b7a1e5d8036c4a91b2e7f60d3a85c19e4b70d2f6a83915ce4d70b8a2f61
+~~~
+
+### shaping
+
+shaping records the answers that shaped the Draft. Its entries are spike_shape, task_granularity, reviewers, and source_order, and each is optional. Reject any other entry.
+
+- Each entry contains value, source, and, only for a reused answer, from_epic.
+- source is asked, reused, or default.
+- from_epic is the Jira key, such as EPIC-201, of the Epic whose panel the answer came from: a sibling Epic, or this Epic when its own panel recorded the answer. It is required when source is reused and rejected otherwise.
+- spike_shape.value is vertical-slice or by-layer.
+- task_granularity.value is per-flow or finer.
+- reviewers.value lists at least one nonempty reviewer name, and its source is asked or reused, never default. When no reviewer is known, omit the entry and record the gap in unknowns.
+- source_order.value lists at least one nonempty source kind, most authoritative first. The portable default is [jira-amendment, jira-description, design-page].
+
+### sources
+
+sources records what the Draft read and how it resolved disagreements between sources. Its keys are jira_context, existing_children, and conflicts, and each is optional.
+
+- jira_context is present or absent.
+- existing_children lists each existing Epic child the Draft read, as jira_key plus read. read is a nonempty subset of description, amendments, status, links, and link_history, with no repeats. existing_children must be empty or omitted when jira_context is absent.
+- conflicts lists each disagreement between sources. A conflict contains claim, sources, winner, material, and stale.
+  - claim is the nonempty statement the sources disagree on.
+  - sources lists at least two entries with distinct refs, ignoring surrounding whitespace, each a ref and a valid ISO calendar date in `YYYY-MM-DD` form. Quote the date so YAML keeps it as text.
+  - winner equals the ref of one listed source.
+  - material and stale are true or false.
+- A schema-4 manifest with jira_context absent is rejected. Schema 4 always binds a live Epic digest, so a Draft without Jira context emits schema 2.
+
+### classification
+
+classification is an optional child key. Its keys are question, precedent, and placeholder. Reject any other key. In schema 4, every Spike, existing or proposed, requires a classification with a question and a precedent.
+
+- question is the nonempty open question the child answers.
+- precedent contains searched and verdict, and may contain location.
+  - searched lists at least one nonempty location the Draft looked in.
+  - verdict is none, found, or unverified.
+  - location is the one path where the precedent lives. It is required when verdict is found and optional otherwise.
+- placeholder is allowed only on a Task bound to jira-task-placeholder-v3, and in schema 4 that template requires it. It contains only defined_by, which is either the ref of a Spike child in the same manifest or an existing Jira key.
+
+A child bound to jira-spike-design-v3 or jira-spike-investigation-v3 states its question and precedent in its description in every schema. In schema 4 it also requires classification.question and classification.precedent, and the description's question and precedent must equal them. A verdict of none is a finding, not filler, so the description quality rules do not reject it. Its reviewers name people from a source or a shaping answer. When nobody is known, omit reviewers and record the gap in unknowns.
+
+A Task bound to jira-task-placeholder-v3 holds undesigned work. Its summary starts with `[PLACEHOLDER] `, and no other template may use that prefix in a summary the manifest sets. An existing card whose live summary already carries the prefix is verified as it is. It carries no estimate. Its description's defined_by names a Spike ref in the manifest or an existing Jira key, and in schema 4 it equals classification.placeholder.defined_by. The description quality rules apply to it in full.
+
+A Task that relies on an existing pattern carries classification.precedent with verdict found and a location. Draft never converts a Spike to a Task on verdict unverified, including when it cannot read the repository.
+
+### breakdown_conventions
+
+breakdown_conventions is an optional description key of jira-epic-v3. It renders as the Epic's Breakdown conventions panel and has the same shape and rules as shaping.
+
+- It is allowed only in schema 4.
+- On an Epic update, it must equal the manifest's shaping block exactly.
+- On a verified Epic, it is the live Epic's record and may differ from this Draft's shaping.
+- It is written only through the guarded Epic description update. Schema 4 adds no other Epic write.
+- An update replaces the whole description, so an update of an Epic whose live description has a panel must carry breakdown_conventions. A schema-3 update cannot carry it, so updating such an Epic requires schema 4. Review reports a missing panel as `invalid-manifest`.
+- An unbound Epic has no description in the manifest, so it carries no panel.
+- A malformed live panel cannot be verified. Draft reports it and proposes an Epic update whose breakdown_conventions equals shaping, which needs the Epic owner's agreement like any Epic update.
+
+### Migration
+
+Version 1.5.0 changes what a new Draft produces and leaves every approved manifest valid.
+
+- Schema 2 and 3 manifests remain valid. Template sets 1–3 remain valid and frozen.
+- Schema 4 adds optional blocks only, plus the `unbound` Epic disposition for an Epic that fits no template.
+- New Drafts use template set 4. It adds jira-epic-v3 with the Breakdown conventions panel, the v3 design and investigation Spikes with question and precedent, and the jira-task-placeholder-v3 placeholder Task.
+
+A new Draft emits schema 4 when it has Jira context and schema 2 otherwise. It has Jira context when it can read the live Epic ADF and the Epic's existing children. Its output states which case applies.
 
 ## Child invariants
 
@@ -261,7 +427,7 @@ Every child defines or verifies summary and done_when. Include evidence and esti
 
 changes and fields may contain only summary, done_when, evidence, estimate, and description. A nonlegacy description requires an exact template ID and hash. A schema-2, template-set-1 manifest may omit the hash; the immutable registry entry supplies it. Description keys match the registered required and conditional keys. Apply cannot add template content after approval. Omission of a description preserves the live description.
 
-For a Story, give each scenario, documentation artifact, and instrumentation signal a stable ID. Planned fields cover observable scenarios, contextual documentation, automated integration or functional tests mapped by scenario ID, and the smallest signal set that proves the Story outcome or an operational decision. Each signal names its class, precise signal, purpose, implementation target, and expected observation. The intended suite, location, and environment are optional at plan time; supply them when known and record material gaps in `unknowns`.
+For a Story, give each scenario, documentation artifact, and instrumentation signal a stable ID. Planned fields cover observable scenarios, contextual documentation, automated integration or functional tests mapped by scenario ID, and the smallest signal set that proves the Story outcome or an operational decision. Each signal names its class, precise signal, purpose, implementation target, and expected observation. The intended test suite or location and the verification environment are optional at plan time; supply them when known and record material gaps in `unknowns`. Every documentation artifact names its artifact, audience, and intended location; only its owner is optional.
 
 For each documentation, automated-test, and instrumentation obligation, supply either a nonempty plan or one complete approved exception—not both. An exception names the obligation, reason, approver, and approval evidence.
 
@@ -293,30 +459,51 @@ If exact placement among all live children matters, use full-live-order and incl
 
 ## Draft output
 
+Before returning a Draft, check every description against its template's required keys and every manifest invariant in this contract, and fix any gap. Check that no value contains an angle-bracket token such as `<resource>`: name the actual value, or record the gap in `unknowns`. Do not return a manifest you have not checked.
+
 Return:
 
-1. Epic outcome.
-2. Proposed child table.
-3. Complete YAML manifest.
-4. Dependency edge list or graph using A -> B for A blocks B.
-5. Cycle, direction, duplicate, redundancy, missing-edge, and orphan checks.
-6. Questions that materially affect the breakdown.
+1. Jira context: `Jira context: present`, or `No Jira context: design claims are unverified`. Without Jira context, the manifest is schema 2 and each design claim it relies on is an `unknowns` entry beginning `Unverified design claim:`.
+2. Epic outcome.
+3. Reconciliation table: each proposed item, mapped to the existing Jira key it reconciles to or to `new`.
+4. Material conflicts: each with both sources, their dates, and the winner, matching `sources.conflicts`.
+5. Shaping: whether the run was interactive or non-interactive, each answer with its source, which answers used a default, and any reviewer gap.
+6. Divergence list: each shaping answer that differs from a sibling Epic's panel, naming the answer, the sibling Epic, the sibling's value, and the proposed value. Write `No divergence` when sibling panels were read and none differs, and `No sibling panels read` when there were none to read.
+7. Proposed child table: each child's ref, key or `new`, type, summary, observable completion, and the Epic exit condition or Story it serves. Name an exit condition the way the Epic names it, such as its slice ID.
+8. Complete YAML manifest.
+9. Dependency edge list or graph using A -> B for A blocks B.
+10. Cycle, direction, duplicate, redundancy, missing-edge, and orphan checks.
+11. Questions that materially affect the breakdown.
 
 Use temporary references until Jira assigns keys. Do not create placeholder Jira keys.
 
 ## Review output
 
-Report only material defects and the smallest corrections:
+Report only material defects and the smallest corrections, as a findings block. The block is Review output, not manifest content.
 
-- wrong issue type or Spike variant
-- no independently verifiable completion
-- missing implementation work
-- missing Story scenarios, contextual documentation, mapped automated tests, or instrumentation that proves the Story outcome or an operational decision
-- review-entry evidence missing for a Story entering IN REVIEW
-- vague, trivial, repeated, or unsupported content
-- work too broad to execute safely
-- assumptions presented as facts
-- invalid manifest or template binding
-- reversed, redundant, duplicate, missing, or cyclic dependencies
+~~~yaml
+findings:
+  - category: component-story
+    ref: WORK-501
+    correction: Merge the interface and API Stories into one demoable flow.
+~~~
+
+Each finding contains category, ref, and correction. ref is the child ref or Jira key the finding concerns. category is one of:
+
+- `wrong-type`: wrong issue type or Spike variant.
+- `misclassified-spike`: a Task that relies on an existing pattern whose precedent verdict is unverified or none. It stays a Spike until a precedent is found.
+- `component-story`: a Story that is not a demoable user, partner, or system flow, such as a Story for one component or layer.
+- `unverifiable-completion`: no independently verifiable completion.
+- `missing-implementation`: missing implementation work.
+- `missing-story-evidence`: missing Story scenarios, contextual documentation, mapped automated tests, or instrumentation that proves the Story outcome or an operational decision.
+- `missing-review-evidence`: review-entry evidence missing for a Story entering IN REVIEW.
+- `content-quality`: vague, trivial, repeated, or unsupported content.
+- `too-broad`: work too broad to execute safely.
+- `unsupported-assumption`: an assumption presented as fact.
+- `stale-source`: a claim built on a design source that a later dated decision contradicts.
+- `invalid-manifest`: invalid manifest or template binding.
+- `dependency`: reversed, redundant, duplicate, missing, or cyclic dependencies.
+
+Review and Audit never flag a team's own Spike shape or Task granularity. Those are Draft defaults, not defects.
 
 Return a corrected edge list only when an edge changes. Do not replace valid work.

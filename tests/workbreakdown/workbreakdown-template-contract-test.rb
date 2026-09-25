@@ -1,21 +1,9 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require "digest"
-require "json"
-require "yaml"
+require_relative "manifest-validator"
 
-# Repository text is UTF-8. Declare it so File.read does not inherit a
-# US-ASCII default from a C or POSIX locale and reject valid content.
-Encoding.default_external = Encoding::UTF_8
-
-ROOT = File.expand_path("../..", __dir__)
-SKILL = File.join(ROOT, "skills", "workbreakdown")
-REGISTRY_PATH = File.join(SKILL, "assets", "jira-templates", "registry.yaml")
 FIXTURES = File.join(__dir__, "fixtures")
-ROOT_KEYS = %w[schema_version manifest_id revision template_set scope epic children dependencies rank unknowns].freeze
-CHILD_KEYS = %w[ref jira_key type variant template_id template_sha256 disposition verify changes fields].freeze
-PAYLOAD_KEYS = %w[summary done_when evidence estimate description].freeze
 
 def fail_test(message)
   warn "FAIL: #{message}"
@@ -43,385 +31,6 @@ rescue ArgumentError => e
   assert(e.message.include?(fragment), "wrong validation error: #{e.message}")
 end
 
-def reject_unknown_keys(value, allowed, context)
-  unknown = value.keys - allowed
-  raise ArgumentError, "#{context} has unknown field #{unknown.first}" unless unknown.empty?
-end
-
-def normalize_adf(value)
-  case value
-  when Hash
-    value.keys.reject { |key| key == "localId" }.sort.each_with_object({}) do |key, normalized|
-      normalized[key] = normalize_adf(value[key])
-    end
-  when Array
-    value.map { |child| normalize_adf(child) }
-  else
-    value
-  end
-end
-
-def adf_digest(value)
-  Digest::SHA256.hexdigest(JSON.generate(normalize_adf(value)))
-end
-
-def validate_registry(registry)
-  raise ArgumentError, "registry schema must be 2" unless registry["schema_version"] == 2
-  raise ArgumentError, "default template set must be 3" unless registry["default_set_version"] == 3
-  sets = registry.fetch("template_sets")
-  raise ArgumentError, "missing template set 1" unless sets.key?(1)
-  raise ArgumentError, "missing template set 2" unless sets.key?(2)
-  raise ArgumentError, "missing template set 3" unless sets.key?(3)
-
-  templates = registry.fetch("templates")
-  ids = templates.map { |template| template.fetch("id") }
-  raise ArgumentError, "duplicate template ID" unless ids.uniq.length == ids.length
-
-  templates.each do |template|
-    raise ArgumentError, "unknown template set" unless sets.key?(template["set_version"])
-    compatible = template.fetch("compatible_set_versions", [template["set_version"]])
-    raise ArgumentError, "native template set must remain compatible" unless compatible.include?(template["set_version"])
-    raise ArgumentError, "unknown compatible template set" unless compatible.all? { |version| sets.key?(version) }
-    file = File.join(SKILL, "assets", "jira-templates", template.fetch("file"))
-    raise ArgumentError, "missing template asset" unless File.file?(file)
-    raise ArgumentError, "template hash drift" unless Digest::SHA256.file(file).hexdigest == template["sha256"]
-    overlap = template.fetch("required_keys") & template.fetch("conditional_keys")
-    raise ArgumentError, "required and conditional keys overlap" unless overlap.empty?
-  end
-
-  known = ids.each_with_object({}) { |id, memo| memo[id] = true }
-  index = templates.to_h { |template| [template["id"], template] }
-  sets.each do |version, set|
-    defaults = set.fetch("defaults")
-    defaults.each do |issue_type, value|
-      variants = value.is_a?(Hash) ? value : {nil => value}
-      variants.each do |variant, id|
-        raise ArgumentError, "unknown default template" unless known[id]
-        template = index.fetch(id)
-        compatible = template.fetch("compatible_set_versions", [template["set_version"]])
-        raise ArgumentError, "default template-set mismatch" unless compatible.include?(version)
-        raise ArgumentError, "default issue-type mismatch" unless template["issue_type"] == issue_type
-        raise ArgumentError, "default Spike variant mismatch" if variant && template["variant"] != variant
-      end
-    end
-  end
-end
-
-def template_supports_set?(template, set_version)
-  template.fetch("compatible_set_versions", [template["set_version"]]).include?(set_version)
-end
-
-def validate_exception(exception, obligation)
-  raise ArgumentError, "invalid approved exception" unless exception.is_a?(Hash)
-  required = %w[obligation reason approver approval_evidence]
-  raise ArgumentError, "invalid approved exception" unless required.all? { |key| !exception[key].to_s.empty? }
-  raise ArgumentError, "exception covers wrong obligation" unless exception["obligation"] == obligation
-end
-
-def validate_scenario_ids(description)
-  scenarios = description.fetch("scenarios")
-  ids = scenarios.map { |item| item["id"] }
-  raise ArgumentError, "Story scenarios require unique IDs" if ids.any? { |id| id.to_s.empty? } || ids.uniq.length != ids.length
-  ids
-end
-
-def validate_story_description(description, instrumentation_required: false)
-  scenario_ids = validate_scenario_ids(description)
-
-  documents = description["documentation"]
-  document_exception = description["documentation_exception"]
-  if documents && !documents.empty?
-    documents.each do |item|
-      required = %w[id artifact audience intended_location]
-      raise ArgumentError, "incomplete documentation plan" unless required.all? { |key| !item[key].to_s.empty? }
-    end
-    document_ids = documents.map { |item| item["id"] }
-    raise ArgumentError, "documentation IDs must be unique" unless document_ids.uniq.length == document_ids.length
-  else
-    validate_exception(document_exception, "documentation")
-  end
-
-  tests = description["automated_tests"]
-  test_exception = description["automated_tests_exception"]
-  if tests && !tests.empty?
-    tests.each do |item|
-      # suite_or_location and environment are optional at plan time. A Story can be
-      # IMPLEMENTATION READY before the repo or the environment exists. IN REVIEW
-      # still requires a named environment in the evidence.
-      required = %w[scenario_id level expected_evidence]
-      raise ArgumentError, "incomplete automated-test plan" unless required.all? { |key| !item[key].to_s.empty? }
-      raise ArgumentError, "manual test is not a substitute" unless %w[integration functional].include?(item["level"])
-      raise ArgumentError, "automated test is not mapped to a scenario" unless scenario_ids.include?(item["scenario_id"])
-    end
-    test_scenarios = tests.map { |item| item["scenario_id"] }
-    raise ArgumentError, "automated tests must cover every scenario exactly once" unless test_scenarios.sort == scenario_ids.sort && test_scenarios.uniq.length == test_scenarios.length
-  else
-    validate_exception(test_exception, "automated_tests")
-  end
-
-
-  if instrumentation_required
-    signals = description["instrumentation"]
-    instrumentation_exception = description["instrumentation_exception"]
-    if signals && !signals.empty?
-      signals.each do |item|
-    required = %w[id class signal purpose implementation_target expected_observation]
-        raise ArgumentError, "incomplete instrumentation plan" unless required.all? { |key| !item[key].to_s.empty? }
-        raise ArgumentError, "invalid instrumentation class" unless %w[operational business].include?(item["class"])
-      end
-      signal_ids = signals.map { |item| item["id"] }
-      raise ArgumentError, "instrumentation IDs must be unique" if signal_ids.any? { |id| id.to_s.empty? } || signal_ids.uniq.length != signal_ids.length
-    else
-      validate_exception(instrumentation_exception, "instrumentation")
-    end
-  end
-  validate_quality(description)
-end
-
-def validate_quality(value)
-  case value
-  when Hash
-    value.each_value { |child| validate_quality(child) }
-  when Array
-    value.each { |child| validate_quality(child) }
-  when String
-    normalized = value.strip.downcase
-    raise ArgumentError, "unresolved placeholder" if value.match?(/<[^>]+>/)
-    raise ArgumentError, "empty filler value" if %w[n/a none].include?(normalized)
-    raise ArgumentError, "generic evidence" if ["tests added", "documentation updated", "docs reviewed", "metrics added", "dashboard updated", "add logging"].include?(normalized)
-  end
-end
-
-def validate_description(description, template)
-  missing = template.fetch("required_keys") - description.keys
-  raise ArgumentError, "missing description key" unless missing.empty?
-  allowed = template.fetch("required_keys") + template.fetch("conditional_keys")
-  raise ArgumentError, "unapproved description key" unless (description.keys - allowed).empty?
-
-  template.fetch("required_one_of", []).each do |alternatives|
-    present = alternatives.select { |key| description.key?(key) && !description[key].nil? && description[key] != [] }
-    raise ArgumentError, "missing required obligation" if present.empty?
-    raise ArgumentError, "conflicting obligation and exception" if present.length > 1
-  end
-
-  # Content expectations apply to every template set. Only the template asset and
-  # its declared key set are grandfathered; the content bar never is. A v1-bound
-  # Story cannot declare v2 evidence keys, so its documentation and automated-test
-  # obligations are enforced as Review and Audit lifecycle judgments instead.
-  if template["issue_type"] == "Story"
-    case template["id"]
-    when "jira-story-v2"
-      validate_story_description(description)
-    when "jira-story-v3"
-      validate_story_description(description, instrumentation_required: true)
-    end
-  end
-  validate_quality(description)
-end
-
-def validate_epic_description(description, template)
-  validate_description(description, template)
-  criteria = description.fetch("acceptance_criteria")
-  raise ArgumentError, "Epic requires 3-5 acceptance criteria" unless criteria.length.between?(3, 5)
-  criteria.each do |criterion|
-    raise ArgumentError, "Epic criterion lacks evidence" if criterion["condition"].to_s.empty? || criterion["evidence"].to_s.empty?
-  end
-  success = description.fetch("success_measures").map { |item| item.to_s.downcase.strip }
-  conditions = criteria.map { |item| item["condition"].to_s.downcase.strip }
-  raise ArgumentError, "Epic acceptance duplicates success measures" unless (success & conditions).empty?
-end
-
-def validate_child(child, templates, set_version)
-  reject_unknown_keys(child, CHILD_KEYS, "child")
-  raise ArgumentError, "unsupported child type" unless %w[Spike Task Story].include?(child["type"])
-  disposition = child["disposition"]
-  raise ArgumentError, "invalid child disposition" unless %w[existing update proposed].include?(disposition)
-  payload_key = {"existing" => "verify", "update" => "changes", "proposed" => "fields"}[disposition]
-  raise ArgumentError, "wrong child disposition payload" unless child[payload_key].is_a?(Hash)
-  supplied_payloads = %w[verify changes fields].select { |key| child.key?(key) }
-  raise ArgumentError, "multiple child disposition payloads" unless supplied_payloads == [payload_key]
-  jira_key = child["jira_key"]
-  raise ArgumentError, "existing child requires Jira key" if disposition != "proposed" && jira_key.to_s.empty?
-  raise ArgumentError, "proposed child cannot have Jira key" if disposition == "proposed" && !jira_key.nil?
-
-  payload = child.fetch(payload_key)
-  reject_unknown_keys(payload, PAYLOAD_KEYS, "child payload")
-  raise ArgumentError, "child requires summary and done_when" unless %w[summary done_when].all? { |key| !payload[key].to_s.empty? }
-
-  template_id = child["template_id"]
-  if template_id.nil?
-    raise ArgumentError, "proposed child requires template" if disposition == "proposed"
-    raise ArgumentError, "description requires template" if payload.key?("description")
-    return
-  end
-
-  template = templates[template_id]
-  raise ArgumentError, "unknown child template" unless template
-  raise ArgumentError, "template-set mismatch" unless template_supports_set?(template, set_version)
-  raise ArgumentError, "child type/template mismatch" unless child["type"] == template["issue_type"]
-  if child["type"] == "Spike" && template["variant"] != "legacy"
-    raise ArgumentError, "Spike variant mismatch" unless child["variant"] == template["variant"]
-  end
-  if set_version == 1
-    raise ArgumentError, "legacy template hash mismatch" if child["template_sha256"] && child["template_sha256"] != template["sha256"]
-  else
-    raise ArgumentError, "child template hash mismatch" unless child["template_sha256"] == template["sha256"]
-  end
-  raise ArgumentError, "proposed child requires description" if disposition == "proposed" && !payload["description"].is_a?(Hash)
-  validate_description(payload["description"], template) if payload["description"]
-end
-
-def validate_manifest(manifest, templates, registry)
-  reject_unknown_keys(manifest, ROOT_KEYS, "manifest")
-  schema = manifest.fetch("schema_version")
-  raise ArgumentError, "unsupported schema" unless [2, 3].include?(schema)
-  reject_unknown_keys(manifest.fetch("template_set"), %w[id version], "template_set")
-  raise ArgumentError, "wrong registry" unless manifest.dig("template_set", "id") == "jira-house-templates"
-  set_version = manifest.dig("template_set", "version")
-  raise ArgumentError, "unknown template-set version" unless registry.fetch("template_sets").key?(set_version)
-  reject_unknown_keys(manifest.fetch("scope"), %w[parent_key epic_key], "scope")
-
-  epic = manifest.fetch("epic")
-  if schema == 2
-    reject_unknown_keys(epic, %w[outcome target_duration], "schema-2 Epic")
-  else
-    raise ArgumentError, "schema 3 requires an Epic-compatible template set" unless template_supports_set?(templates.fetch("jira-epic-v2"), set_version)
-    disposition = epic["disposition"]
-    raise ArgumentError, "missing Epic disposition" unless %w[existing update].include?(disposition)
-    if disposition == "existing"
-      reject_unknown_keys(epic, %w[disposition verify], "existing Epic")
-      verify = epic.fetch("verify")
-      reject_unknown_keys(verify, %w[template_id template_sha256 description_adf_sha256 description], "Epic verify")
-      template = templates[verify["template_id"]]
-      raise ArgumentError, "invalid Epic template" unless template && template["id"] == "jira-epic-v2"
-      raise ArgumentError, "Epic template hash mismatch" unless verify["template_sha256"] == template["sha256"]
-      digest = verify["description_adf_sha256"]
-      raise ArgumentError, "missing current ADF digest" unless digest&.match?(/\A[0-9a-f]{64}\z/)
-      validate_epic_description(verify.fetch("description"), template)
-    else
-      reject_unknown_keys(epic, %w[disposition template_id template_sha256 expected_current changes], "update Epic")
-      template = templates[epic["template_id"]]
-      raise ArgumentError, "invalid Epic template" unless template && template["id"] == "jira-epic-v2"
-      raise ArgumentError, "Epic template hash mismatch" unless epic["template_sha256"] == template["sha256"]
-      expected = epic.fetch("expected_current")
-      reject_unknown_keys(expected, %w[description_adf_sha256], "expected_current")
-      digest = expected["description_adf_sha256"]
-      raise ArgumentError, "missing current ADF digest" unless digest&.match?(/\A[0-9a-f]{64}\z/)
-      changes = epic.fetch("changes")
-      raise ArgumentError, "forbidden Epic field" unless changes.keys == ["description"]
-      validate_epic_description(changes.fetch("description"), template)
-    end
-  end
-
-  children = manifest.fetch("children")
-  refs = children.map { |child| child["ref"] }
-  raise ArgumentError, "child refs must be unique and nonempty" if refs.any? { |ref| ref.to_s.empty? } || refs.uniq.length != refs.length
-  children.each { |child| validate_child(child, templates, set_version) }
-end
-
-def validate_story_review(story)
-  description = story.fetch("description")
-  review = description.fetch("review_evidence")
-  published = review.fetch("documentation", [])
-  passing = review.fetch("automated_tests", [])
-  observed = review.fetch("instrumentation", [])
-  confirmed_exceptions = review.fetch("approved_exceptions", [])
-  planned_documents = description.fetch("documentation", []).map { |item| item["id"] }
-  planned_scenarios = description.fetch("automated_tests", []).map { |item| item["scenario_id"] }
-  planned_environments = description.fetch("automated_tests", []).to_h { |item| [item["scenario_id"], item["environment"]] }
-  planned_signals = description.fetch("instrumentation", []).map { |item| item["id"] }
-  raise ArgumentError, "missing published documentation evidence" if planned_documents.any? && published.empty?
-  raise ArgumentError, "missing passing automated-test evidence" if planned_scenarios.any? && passing.empty?
-  raise ArgumentError, "missing published documentation evidence" unless published.all? do |item|
-    valid_status = %w[published updated confirmed_current].include?(item["status"])
-    confirmed = item["status"] != "confirmed_current" || (!item["reviewer"].to_s.empty? && !item["review_record"].to_s.empty?)
-    valid_status && confirmed && !item["evidence"].to_s.empty?
-  end
-  raise ArgumentError, "missing passing automated-test evidence" unless passing.all? { |item| item["status"] == "passed" && !item["environment"].to_s.empty? && !item["evidence"].to_s.empty? }
-  raise ArgumentError, "missing instrumentation evidence" if planned_signals.any? && observed.empty?
-  raise ArgumentError, "incomplete instrumentation evidence" unless observed.all? do |item|
-    %w[signal_id environment implementation_evidence observed_output evidence].all? { |key| !item[key].to_s.empty? }
-  end
-  evidence_documents = published.map { |item| item["artifact_id"] }
-  evidence_scenarios = passing.map { |item| item["scenario_id"] }
-  evidence_signals = observed.map { |item| item["signal_id"] }
-  raise ArgumentError, "documentation evidence does not match the plan" unless evidence_documents.sort == planned_documents.sort && evidence_documents.uniq.length == evidence_documents.length
-  raise ArgumentError, "automated-test evidence does not match the plan" unless evidence_scenarios.sort == planned_scenarios.sort && evidence_scenarios.uniq.length == evidence_scenarios.length
-  raise ArgumentError, "instrumentation evidence does not match the plan" unless evidence_signals.sort == planned_signals.sort && evidence_signals.uniq.length == evidence_signals.length
-  raise ArgumentError, "automated-test evidence uses the wrong environment" unless passing.all? do |item|
-    planned = planned_environments[item["scenario_id"]]
-    planned.to_s.empty? || item["environment"] == planned
-  end
-
-  expected_exceptions = %w[documentation automated_tests instrumentation].each_with_object([]) do |obligation, memo|
-    exception = description["#{obligation}_exception"]
-    memo << [obligation, exception["approval_evidence"]] if exception
-  end
-  actual_exceptions = confirmed_exceptions.map do |item|
-    raise ArgumentError, "invalid exception confirmation" unless item["status"] == "confirmed"
-    raise ArgumentError, "invalid exception confirmation" if item["obligation"].to_s.empty? || item["approval_evidence"].to_s.empty?
-    [item["obligation"], item["approval_evidence"]]
-  end
-  raise ArgumentError, "exception confirmation does not match the plan" unless actual_exceptions.sort == expected_exceptions.sort && actual_exceptions.uniq.length == actual_exceptions.length
-end
-
-def validate_legacy_story_review(story, lifecycle_evidence)
-  description = story.fetch("description")
-  raise ArgumentError, "legacy evidence identifies the wrong Story" unless lifecycle_evidence["story_key"] == story["jira_key"]
-  raise ArgumentError, "legacy evidence identifies the wrong template" unless lifecycle_evidence["template_id"] == story["template_id"]
-
-  scenarios = description.fetch("scenarios")
-  if scenarios.all? { |item| item.is_a?(Hash) && !item["id"].to_s.empty? }
-    scenario_ids = validate_scenario_ids(description)
-  else
-    raise ArgumentError, "mixed legacy scenario shapes" unless scenarios.none? { |item| item.is_a?(Hash) }
-    bindings = lifecycle_evidence.fetch("scenario_bindings", [])
-    scenario_ids = bindings.map { |item| item["id"] }
-    source_texts = bindings.map { |item| item["source_text"] }
-    raise ArgumentError, "invalid legacy scenario binding" if scenario_ids.any? { |id| id.to_s.empty? } || scenario_ids.uniq.length != scenario_ids.length
-    raise ArgumentError, "legacy scenario binding does not match the Story" unless source_texts.sort == scenarios.map(&:to_s).sort && source_texts.uniq.length == source_texts.length
-  end
-  classes = %w[documentation automated_tests instrumentation]
-
-  classes.each do |obligation|
-    evidence = lifecycle_evidence.fetch(obligation, [])
-    exception = lifecycle_evidence["#{obligation}_exception"]
-    raise ArgumentError, "conflicting legacy evidence and exception" if !evidence.empty? && exception
-    if evidence.empty?
-      validate_exception(exception, obligation)
-    end
-  end
-
-  documents = lifecycle_evidence.fetch("documentation", [])
-  documents.each do |item|
-    allowed = %w[published updated confirmed_current]
-    raise ArgumentError, "invalid legacy documentation evidence" unless allowed.include?(item["status"]) && !item["artifact"].to_s.empty? && !item["evidence"].to_s.empty?
-    if item["status"] == "confirmed_current"
-      raise ArgumentError, "invalid legacy documentation evidence" if item["reviewer"].to_s.empty? || item["review_record"].to_s.empty?
-    end
-  end
-
-  tests = lifecycle_evidence.fetch("automated_tests", [])
-  tests.each do |item|
-    required = %w[scenario_id level status environment evidence]
-    raise ArgumentError, "invalid legacy automated-test evidence" unless required.all? { |key| !item[key].to_s.empty? }
-    raise ArgumentError, "unit or manual test is not a substitute" unless %w[integration functional].include?(item["level"])
-    raise ArgumentError, "legacy automated test is not mapped to a scenario" unless scenario_ids.include?(item["scenario_id"])
-    raise ArgumentError, "invalid legacy automated-test evidence" unless item["status"] == "passed"
-  end
-  covered_scenarios = tests.map { |item| item["scenario_id"] }
-  if tests.any?
-    raise ArgumentError, "legacy automated tests must cover every scenario exactly once" unless covered_scenarios.sort == scenario_ids.sort && covered_scenarios.uniq.length == covered_scenarios.length
-  end
-
-  lifecycle_evidence.fetch("instrumentation", []).each do |item|
-    required = %w[signal_id class purpose environment implementation_evidence observed_output evidence]
-    raise ArgumentError, "invalid legacy instrumentation evidence" unless required.all? { |key| !item[key].to_s.empty? }
-    raise ArgumentError, "invalid instrumentation class" unless %w[operational business].include?(item["class"])
-  end
-  validate_quality(lifecycle_evidence)
-end
-
 registry = load_yaml(REGISTRY_PATH)
 validate_registry(registry)
 templates = registry.fetch("templates")
@@ -441,7 +50,7 @@ expect_error("missing template asset") { validate_registry(missing_asset_registr
 
 variant_default_registry = clone(registry)
 variant_default_registry["template_sets"][2]["defaults"]["Spike"]["design"] = "jira-spike-investigation-v2"
-expect_error("default Spike variant mismatch") { validate_registry(variant_default_registry) }
+expect_error("default variant mismatch") { validate_registry(variant_default_registry) }
 
 expected_v1 = {
   "jira-epic-v1" => "e6ac1fced57839ccaca7c56fe42cd08b5907af5b15f2f050625350dfaf9c758a",
@@ -463,6 +72,37 @@ assert(v2_defaults.dig("Spike", "investigation") == "jira-spike-investigation-v2
 assert(v3_defaults["Story"] == "jira-story-v3", "Story v3 is not the new default")
 assert(v3_defaults["Epic"] == "jira-epic-v2", "template set 3 lost the compatible Epic")
 assert(index.dig("jira-story-v2", "sha256") == "ca7c5dcf753d6a0e2f432ef436801422ea81ca4c5c20bdabb358197c9c4fc6b4", "Story v2 identity changed")
+
+# Template set 4 is the default. Sets 2 and 3 are frozen: their template assets keep their exact hashes.
+assert(registry["default_set_version"] == 4, "template set 4 is not the default")
+v4_defaults = registry.dig("template_sets", 4, "defaults")
+assert(v4_defaults == {
+  "Epic" => "jira-epic-v3", "Story" => "jira-story-v3",
+  "Task" => {"artifact" => "jira-task-v2", "placeholder" => "jira-task-placeholder-v3"},
+  "Spike" => {"design" => "jira-spike-design-v3", "investigation" => "jira-spike-investigation-v3"}
+}, "template set 4 defaults changed")
+frozen = {
+  "jira-epic-v2" => "18fefffa6ebb6fe385616ecc0dce1756a6238ce11cd5f41d972557313d42342e",
+  "jira-story-v2" => "ca7c5dcf753d6a0e2f432ef436801422ea81ca4c5c20bdabb358197c9c4fc6b4",
+  "jira-task-v2" => "fedfeda541933a2a379bf7569703b138e078aa9ee730438a839977824bdd06b3",
+  "jira-spike-design-v2" => "5b936d0a1ad0bbf705e446fa921234ee9818f17a79df79e99c2a55e47491aff5",
+  "jira-spike-investigation-v2" => "988d1188e66b2afe7932b5dc6be0da2f29af51b62cff483df91855056fb7e960",
+  "jira-story-v3" => "c19201ccb6e6f59671c0d33b45df3524d9d0662b3563d133e1f6f02c2774fef4"
+}
+assert(templates.select { |template| [2, 3].include?(template["set_version"]) }.map { |template| template["id"] }.sort == frozen.keys.sort, "a template joined or left the frozen sets 2 and 3")
+frozen.each { |id, digest| assert(index.dig(id, "sha256") == digest, "#{id} is frozen but its identity changed") }
+%w[jira-epic-v2 jira-task-v2 jira-spike-design-v2 jira-spike-investigation-v2].each do |id|
+  assert(index.dig(id, "compatible_set_versions") == [2, 3, 4], "#{id} lost set-4 compatibility")
+end
+assert(index.dig("jira-story-v3", "compatible_set_versions") == [3, 4], "Story v3 lost set-4 compatibility")
+
+old_default = clone(registry)
+old_default["default_set_version"] = 3
+expect_error("default template set must be 4") { validate_registry(old_default) }
+
+swapped_task_variant = clone(registry)
+swapped_task_variant["template_sets"][4]["defaults"]["Task"]["placeholder"] = "jira-task-v2"
+expect_error("default variant mismatch") { validate_registry(swapped_task_variant) }
 assert(index.dig("jira-story-v3", "sha256") == "c19201ccb6e6f59671c0d33b45df3524d9d0662b3563d133e1f6f02c2774fef4", "Story v3 identity changed")
 
 legacy = load_yaml(File.join(FIXTURES, "schema2-v1-valid.yaml"))
@@ -484,7 +124,7 @@ validate_manifest(legacy_with_description, index, registry)
 
 legacy_placeholder = clone(legacy_with_description)
 legacy_placeholder["children"].first["verify"]["description"]["context"] = "<fill in the context>"
-expect_error("unresolved placeholder") { validate_manifest(legacy_placeholder, index, registry) }
+expect_error("unresolved template token") { validate_manifest(legacy_placeholder, index, registry) }
 
 legacy_filler = clone(legacy_with_description)
 legacy_filler["children"].first["verify"]["description"]["technical_considerations"] = "N/A"
@@ -617,6 +257,569 @@ swapped_variant = clone(v2_children)
 design_child = swapped_variant["children"].find { |child| child["ref"] == "choose-transport" }
 design_child["variant"] = "investigation"
 expect_error("Spike variant mismatch") { validate_manifest(swapped_variant, index, registry) }
+
+# Schema 4 adds optional Draft provenance and per-child classification.
+schema4_minimal = load_yaml(File.join(FIXTURES, "schema4-minimal-valid.yaml"))
+validate_manifest(schema4_minimal, index, registry)
+assert(!schema4_minimal.key?("shaping") && !schema4_minimal.key?("sources"), "minimal schema-4 fixture carries optional blocks")
+
+schema4 = load_yaml(File.join(FIXTURES, "schema4-full-valid.yaml"))
+validate_manifest(schema4, index, registry)
+assert(%w[spike_shape task_granularity reviewers source_order].all? { |key| schema4["shaping"].key?(key) }, "full schema-4 fixture lost a shaping entry")
+assert(schema4["children"].all? { |child| child.key?("classification") }, "full schema-4 fixture lost a classification")
+assert(schema4.dig("sources", "existing_children").flat_map { |item| item["read"] }.sort == SOURCES_READ.sort, "full schema-4 fixture does not read every source kind")
+
+def schema4_child(manifest, ref)
+  manifest["children"].find { |child| child["ref"] == ref }
+end
+
+unknown_shaping = clone(schema4)
+unknown_shaping["shaping"]["estimate_mode"] = {"value" => "points", "source" => "asked"}
+expect_error("shaping has unknown field") { validate_manifest(unknown_shaping, index, registry) }
+
+reused_without_epic = clone(schema4)
+reused_without_epic["shaping"]["spike_shape"].delete("from_epic")
+expect_error("reused shaping answer requires from_epic") { validate_manifest(reused_without_epic, index, registry) }
+
+epic_without_reuse = clone(schema4)
+epic_without_reuse["shaping"]["task_granularity"]["from_epic"] = "EPIC-2"
+expect_error("from_epic is only allowed on reused answers") { validate_manifest(epic_without_reuse, index, registry) }
+
+bad_spike_shape = clone(schema4)
+bad_spike_shape["shaping"]["spike_shape"]["value"] = "by-component"
+expect_error("invalid spike_shape value") { validate_manifest(bad_spike_shape, index, registry) }
+
+bad_answer_source = clone(schema4)
+bad_answer_source["shaping"]["reviewers"]["source"] = "invented"
+expect_error("invalid shaping source") { validate_manifest(bad_answer_source, index, registry) }
+
+one_source_conflict = clone(schema4)
+one_source_conflict["sources"]["conflicts"].first["sources"] = one_source_conflict["sources"]["conflicts"].first["sources"].first(1)
+expect_error("conflict requires at least two sources") { validate_manifest(one_source_conflict, index, registry) }
+
+unlisted_winner = clone(schema4)
+unlisted_winner["sources"]["conflicts"].first["winner"] = "WORK-999"
+expect_error("conflict winner is not a listed source") { validate_manifest(unlisted_winner, index, registry) }
+
+bad_conflict_date = clone(schema4)
+bad_conflict_date["sources"]["conflicts"].first["sources"].first["date"] = "last week"
+expect_error("conflict source date must be a valid YYYY-MM-DD date") { validate_manifest(bad_conflict_date, index, registry) }
+
+children_without_jira = clone(schema4)
+children_without_jira["sources"]["jira_context"] = "absent"
+expect_error("existing_children requires Jira context") { validate_manifest(children_without_jira, index, registry) }
+
+absent_context = clone(schema4)
+absent_context["sources"]["jira_context"] = "absent"
+absent_context["sources"]["existing_children"] = []
+expect_error("schema 4 requires Jira context") { validate_manifest(absent_context, index, registry) }
+
+# Without Jira context, Draft emits schema 2 and records each design claim it relied on as unverified.
+fallback = load_yaml(File.join(FIXTURES, "fallback-schema2-valid.yaml"))
+validate_manifest(fallback, index, registry)
+assert(fallback["schema_version"] == 2, "fallback fixture is not schema 2")
+assert(fallback["children"].all? { |child| child["disposition"] == "proposed" && !child.key?("jira_key") }, "fallback fixture claims live Jira keys")
+assert(fallback["unknowns"].any? && fallback["unknowns"].all? { |item| item.start_with?("Unverified design claim: ") }, "fallback fixture lost its unverified design claims")
+
+bad_read = clone(schema4)
+bad_read["sources"]["existing_children"].first["read"] = ["comments"]
+expect_error("invalid existing_children read") { validate_manifest(bad_read, index, registry) }
+
+bad_verdict = clone(schema4)
+schema4_child(bad_verdict, "choose-transport")["classification"]["precedent"]["verdict"] = "probably"
+expect_error("invalid precedent verdict") { validate_manifest(bad_verdict, index, registry) }
+
+found_without_location = clone(schema4)
+schema4_child(found_without_location, "build-endpoint")["classification"]["precedent"].delete("location")
+expect_error("found precedent requires location") { validate_manifest(found_without_location, index, registry) }
+
+spike_placeholder = clone(schema4)
+schema4_child(spike_placeholder, "choose-transport")["classification"]["placeholder"] = {"defined_by" => "measure-staleness"}
+expect_error("placeholder is only allowed on a Task") { validate_manifest(spike_placeholder, index, registry) }
+
+unknown_classification = clone(schema4)
+schema4_child(unknown_classification, "choose-transport")["classification"]["owner"] = "API owner"
+expect_error("classification has unknown field") { validate_manifest(unknown_classification, index, registry) }
+
+schema3_classification = clone(v2_children)
+schema3_classification["schema_version"] = 3
+schema3_classification["epic"] = clone(schema3["epic"])
+schema3_classification["children"].first["classification"] = {"question" => "Which transport?"}
+expect_error("classification requires schema 4") { validate_manifest(schema3_classification, index, registry) }
+
+schema3_shaping = clone(schema3)
+schema3_shaping["shaping"] = clone(schema4["shaping"])
+expect_error("shaping requires schema 4") { validate_manifest(schema3_shaping, index, registry) }
+
+schema3_sources = clone(schema3)
+schema3_sources["sources"] = clone(schema4["sources"])
+expect_error("sources requires schema 4") { validate_manifest(schema3_sources, index, registry) }
+
+bad_granularity = clone(schema4)
+bad_granularity["shaping"]["task_granularity"]["value"] = "per-layer"
+expect_error("invalid task_granularity value") { validate_manifest(bad_granularity, index, registry) }
+
+%w[reviewers source_order].each do |entry|
+  empty_name = clone(schema4)
+  empty_name["shaping"][entry]["value"] = ["  "]
+  expect_error("shaping #{entry} value must be a list of names") { validate_manifest(empty_name, index, registry) }
+end
+
+bad_context = clone(schema4)
+bad_context["sources"]["jira_context"] = "partial"
+expect_error("invalid jira_context") { validate_manifest(bad_context, index, registry) }
+
+%w[material stale].each do |flag|
+  text_flag = clone(schema4)
+  text_flag["sources"]["conflicts"].first[flag] = "yes"
+  expect_error("conflict #{flag} must be true or false") { validate_manifest(text_flag, index, registry) }
+end
+
+empty_question = clone(schema4)
+schema4_child(empty_question, "choose-transport")["classification"]["question"] = " "
+expect_error("classification question must be text") { validate_manifest(empty_question, index, registry) }
+
+empty_search = clone(schema4)
+schema4_child(empty_search, "choose-transport")["classification"]["precedent"]["searched"] = "src"
+expect_error("precedent searched must list locations") { validate_manifest(empty_search, index, registry) }
+
+unsupported_classified = clone(schema4)
+schema4_child(unsupported_classified, "build-endpoint")["type"] = "Bug"
+expect_error("unsupported child type") { validate_manifest(unsupported_classified, index, registry) }
+
+bad_from_epic = clone(schema4)
+bad_from_epic["shaping"]["spike_shape"]["from_epic"] = "sibling epic"
+expect_error("from_epic must be a Jira key") { validate_manifest(bad_from_epic, index, registry) }
+
+bad_child_key = clone(schema4)
+bad_child_key["sources"]["existing_children"].first["jira_key"] = "work 301"
+expect_error("existing_children entry requires a Jira key") { validate_manifest(bad_child_key, index, registry) }
+
+%w[2026-13-45 2026-02-29 2026-04-31].each do |impossible|
+  impossible_date = clone(schema4)
+  impossible_date["sources"]["conflicts"].first["sources"].first["date"] = impossible
+  expect_error("conflict source date must be a valid YYYY-MM-DD date") { validate_manifest(impossible_date, index, registry) }
+end
+
+# Other ISO 8601 forms parse as dates but are not the contract's YYYY-MM-DD form.
+%w[20260203 2026-W06-2 2026-034].each do |other_form|
+  other_date = clone(schema4)
+  other_date["sources"]["conflicts"].first["sources"].first["date"] = other_form
+  expect_error("conflict source date must be a valid YYYY-MM-DD date") { validate_manifest(other_date, index, registry) }
+end
+
+leap_day = clone(schema4)
+leap_day["sources"]["conflicts"].first["sources"].first["date"] = "2024-02-29"
+validate_manifest(leap_day, index, registry)
+
+same_source = clone(schema4)
+same_source["sources"]["conflicts"].first["sources"].last["ref"] = same_source["sources"]["conflicts"].first["sources"].first["ref"]
+same_source["sources"]["conflicts"].first["winner"] = same_source["sources"]["conflicts"].first["sources"].first["ref"]
+expect_error("conflict sources must be distinct") { validate_manifest(same_source, index, registry) }
+
+repeated_read = clone(schema4)
+repeated_read["sources"]["existing_children"].first["read"] = %w[status status]
+expect_error("invalid existing_children read") { validate_manifest(repeated_read, index, registry) }
+
+default_reviewers = clone(schema4)
+default_reviewers["shaping"]["reviewers"]["source"] = "default"
+expect_error("reviewers cannot come from a default") { validate_manifest(default_reviewers, index, registry) }
+
+[[], " ", 123].each do |bad|
+  bad_claim = clone(schema4)
+  bad_claim["sources"]["conflicts"].first["claim"] = bad
+  expect_error("conflict requires a claim") { validate_manifest(bad_claim, index, registry) }
+end
+
+padded_source = clone(schema4)
+padded_source["sources"]["conflicts"].first["sources"].last["ref"] = padded_source["sources"]["conflicts"].first["sources"].first["ref"] + " "
+expect_error("conflict sources must be distinct") { validate_manifest(padded_source, index, registry) }
+
+empty_reviewers = clone(schema4)
+empty_reviewers["shaping"]["reviewers"]["value"] = []
+expect_error("shaping reviewers value must be a list of names") { validate_manifest(empty_reviewers, index, registry) }
+
+empty_searched = clone(schema4)
+schema4_child(empty_searched, "choose-transport")["classification"]["precedent"]["searched"] = []
+expect_error("precedent searched must list locations") { validate_manifest(empty_searched, index, registry) }
+
+# Template set 4 binds v3 Spikes, which carry their question and precedent.
+set4 = load_yaml(File.join(FIXTURES, "schema4-set4-valid.yaml"))
+validate_manifest(set4, index, registry)
+assert(set4["children"].map { |child| child["template_id"] }.count { |id| CLASSIFIED_SPIKE_TEMPLATES.include?(id) } == 2, "set-4 fixture lost a v3 Spike")
+
+no_set4 = clone(registry)
+no_set4["template_sets"].delete(4)
+expect_error("missing template set 4") { validate_registry(no_set4) }
+
+%w[question precedent].each do |key|
+  unclassified = clone(set4)
+  schema4_child(unclassified, "choose-transport")["classification"].delete(key)
+  expect_error("Spike requires classification question and precedent") { validate_manifest(unclassified, index, registry) }
+end
+
+no_classification = clone(set4)
+schema4_child(no_classification, "measure-staleness").delete("classification")
+expect_error("Spike requires classification question and precedent") { validate_manifest(no_classification, index, registry) }
+
+different_question = clone(set4)
+schema4_child(different_question, "measure-staleness")["fields"]["description"]["question"] = "How fresh is the cache?"
+expect_error("Spike description question must match classification") { validate_manifest(different_question, index, registry) }
+
+different_precedent = clone(set4)
+schema4_child(different_precedent, "choose-transport")["fields"]["description"]["precedent"]["verdict"] = "unverified"
+expect_error("Spike description precedent must match classification") { validate_manifest(different_precedent, index, registry) }
+
+no_reviewer_names = clone(set4)
+schema4_child(no_reviewer_names, "choose-transport")["fields"]["description"]["reviewers"] = []
+expect_error("Spike reviewers must name people") { validate_manifest(no_reviewer_names, index, registry) }
+
+missing_precedent_key = clone(set4)
+schema4_child(missing_precedent_key, "measure-staleness")["fields"]["description"].delete("precedent")
+expect_error("missing description key") { validate_manifest(missing_precedent_key, index, registry) }
+
+# Only the enumerated verdict is exempt from the filler check; the rest of the precedent is free text.
+filler_search = clone(set4)
+spike = schema4_child(filler_search, "choose-transport")
+spike["classification"]["precedent"]["searched"] = ["None"]
+spike["fields"]["description"]["precedent"]["searched"] = ["None"]
+expect_error("empty filler value") { validate_manifest(filler_search, index, registry) }
+
+blank_question = clone(set4)
+schema4_child(blank_question, "measure-staleness")["fields"]["description"]["question"] = " "
+schema4_child(blank_question, "measure-staleness")["classification"]["question"] = " "
+expect_error("classification question must be text") { validate_manifest(blank_question, index, registry) }
+
+investigation_reviewers = clone(set4)
+schema4_child(investigation_reviewers, "measure-staleness")["fields"]["description"]["reviewers"] = ["  "]
+expect_error("Spike reviewers must name people") { validate_manifest(investigation_reviewers, index, registry) }
+named_investigation = clone(set4)
+schema4_child(named_investigation, "measure-staleness")["fields"]["description"]["reviewers"] = ["Alex Reviewer"]
+validate_manifest(named_investigation, index, registry)
+
+# classification applies to Tasks and Stories too; its question is checked on every type.
+blank_task_question = clone(set4)
+schema4_child(blank_task_question, "build-endpoint")["classification"]["question"] = " "
+expect_error("classification question must be text") { validate_manifest(blank_task_question, index, registry) }
+classified_story = clone(set4)
+classified_story["children"] << {
+  "ref" => "prove-read", "jira_key" => "WORK-402", "type" => "Story", "disposition" => "existing",
+  "verify" => {"summary" => "Prove current state reads", "done_when" => "Consumer scenarios pass."},
+  "classification" => {"question" => "Which consumer flow proves the Epic outcome?"}
+}
+validate_manifest(classified_story, index, registry)
+
+# A placeholder Task binds jira-task-placeholder-v3, which requires the prefix and the placeholder classification.
+placeholder_ref = "wire-transport"
+missing_definer = clone(set4)
+schema4_child(missing_definer, placeholder_ref)["classification"]["placeholder"]["defined_by"] = "no-such-spike"
+schema4_child(missing_definer, placeholder_ref)["fields"]["description"]["defined_by"] = "no-such-spike"
+expect_error("placeholder defined_by must name a Spike") { validate_manifest(missing_definer, index, registry) }
+
+non_spike_definer = clone(set4)
+schema4_child(non_spike_definer, placeholder_ref)["classification"]["placeholder"]["defined_by"] = "build-endpoint"
+schema4_child(non_spike_definer, placeholder_ref)["fields"]["description"]["defined_by"] = "build-endpoint"
+expect_error("placeholder defined_by must name a Spike") { validate_manifest(non_spike_definer, index, registry) }
+
+jira_definer = clone(set4)
+schema4_child(jira_definer, placeholder_ref)["classification"]["placeholder"]["defined_by"] = "WORK-302"
+schema4_child(jira_definer, placeholder_ref)["fields"]["description"]["defined_by"] = "WORK-302"
+validate_manifest(jira_definer, index, registry)
+
+mismatched_definer = clone(set4)
+schema4_child(mismatched_definer, placeholder_ref)["fields"]["description"]["defined_by"] = "measure-staleness"
+expect_error("placeholder description defined_by must match classification") { validate_manifest(mismatched_definer, index, registry) }
+
+unprefixed = clone(set4)
+schema4_child(unprefixed, placeholder_ref)["fields"]["summary"] = "Wire the chosen state transport"
+expect_error("placeholder Task summary requires the [PLACEHOLDER] prefix") { validate_manifest(unprefixed, index, registry) }
+
+prefix_on_task_v2 = clone(set4)
+schema4_child(prefix_on_task_v2, "build-endpoint")["fields"]["summary"] = "[PLACEHOLDER] Add the supported state endpoint"
+expect_error("placeholder prefix requires jira-task-placeholder-v3") { validate_manifest(prefix_on_task_v2, index, registry) }
+
+prefix_without_template = clone(set4)
+prefix_without_template["children"] << {
+  "ref" => "old-card", "jira_key" => "WORK-403", "type" => "Task", "disposition" => "update",
+  "changes" => {"summary" => "[PLACEHOLDER] Old card", "done_when" => "Replaced."}
+}
+expect_error("placeholder prefix requires jira-task-placeholder-v3") { validate_manifest(prefix_without_template, index, registry) }
+
+# A verified card keeps its live summary, even when the team already used the prefix by hand.
+live_prefixed = clone(set4)
+live_prefixed["children"] << {
+  "ref" => "live-card", "jira_key" => "WORK-405", "type" => "Task", "disposition" => "existing",
+  "verify" => {"summary" => "[PLACEHOLDER] Hand-marked card", "done_when" => "Replaced."}
+}
+validate_manifest(live_prefixed, index, registry)
+
+placeholder_on_task_v2 = clone(set4)
+schema4_child(placeholder_on_task_v2, "build-endpoint")["classification"]["placeholder"] = {"defined_by" => "choose-transport"}
+expect_error("classification placeholder requires jira-task-placeholder-v3") { validate_manifest(placeholder_on_task_v2, index, registry) }
+
+unclassified_placeholder = clone(set4)
+schema4_child(unclassified_placeholder, placeholder_ref).delete("classification")
+expect_error("placeholder Task requires classification placeholder") { validate_manifest(unclassified_placeholder, index, registry) }
+
+estimated_placeholder = clone(set4)
+schema4_child(estimated_placeholder, placeholder_ref)["fields"]["estimate"] = 2
+expect_error("placeholder Task carries no estimate") { validate_manifest(estimated_placeholder, index, registry) }
+
+filler_purpose = clone(set4)
+schema4_child(filler_purpose, placeholder_ref)["fields"]["description"]["purpose"] = "N/A"
+expect_error("empty filler value") { validate_manifest(filler_purpose, index, registry) }
+
+extra_placeholder_key = clone(set4)
+schema4_child(extra_placeholder_key, placeholder_ref)["fields"]["description"]["acceptance_criteria"] = ["The transport is wired."]
+expect_error("unapproved description key") { validate_manifest(extra_placeholder_key, index, registry) }
+
+# Without classification, a schema-2 placeholder still resolves its definer from the description.
+placeholder_fallback = clone(set4)
+placeholder_fallback["schema_version"] = 2
+placeholder_fallback["epic"] = {"outcome" => "Consumers retrieve current state through the supported API."}
+%w[shaping sources].each { |key| placeholder_fallback.delete(key) }
+placeholder_fallback["children"].each { |child| child.delete("classification") }
+validate_manifest(placeholder_fallback, index, registry)
+schema4_child(placeholder_fallback, placeholder_ref)["fields"]["description"]["defined_by"] = "no-such-spike"
+expect_error("placeholder defined_by must name a Spike") { validate_manifest(placeholder_fallback, index, registry) }
+
+# The placeholder rules hold for every disposition payload, not only proposed fields.
+{"update" => "changes", "existing" => "verify"}.each do |disposition, payload_key|
+  keyed = clone(set4)
+  child = schema4_child(keyed, placeholder_ref)
+  child["disposition"] = disposition
+  child["jira_key"] = "WORK-404"
+  child[payload_key] = child.delete("fields")
+  validate_manifest(keyed, index, registry)
+
+  estimated = clone(keyed)
+  schema4_child(estimated, placeholder_ref)[payload_key]["estimate"] = 1
+  expect_error("placeholder Task carries no estimate") { validate_manifest(estimated, index, registry) }
+
+  unprefixed_keyed = clone(keyed)
+  schema4_child(unprefixed_keyed, placeholder_ref)[payload_key]["summary"] = "Wire the chosen state transport"
+  expect_error("placeholder Task summary requires the [PLACEHOLDER] prefix") { validate_manifest(unprefixed_keyed, index, registry) }
+
+  unclassified_keyed = clone(keyed)
+  schema4_child(unclassified_keyed, placeholder_ref).delete("classification")
+  expect_error("placeholder Task requires classification placeholder") { validate_manifest(unclassified_keyed, index, registry) }
+end
+
+# The prefix is exact: uppercase, bracketed, and followed by one space.
+["[Placeholder] Wire the chosen state transport", "[PLACEHOLDER]Wire the chosen state transport", "PLACEHOLDER: Wire the chosen state transport"].each do |near_miss|
+  near = clone(set4)
+  schema4_child(near, placeholder_ref)["fields"]["summary"] = near_miss
+  expect_error("placeholder Task summary requires the [PLACEHOLDER] prefix") { validate_manifest(near, index, registry) }
+end
+
+placeholder_in_set3 = clone(set4)
+placeholder_in_set3["template_set"]["version"] = 3
+placeholder_in_set3["children"].select! { |child| %w[build-endpoint wire-transport].include?(child["ref"]) }
+placeholder_in_set3["dependencies"] = []
+placeholder_in_set3["rank"]["order"] = %w[build-endpoint wire-transport]
+schema4_child(placeholder_in_set3, placeholder_ref)["classification"]["placeholder"]["defined_by"] = "WORK-302"
+schema4_child(placeholder_in_set3, placeholder_ref)["fields"]["description"]["defined_by"] = "WORK-302"
+expect_error("template-set mismatch") { validate_manifest(placeholder_in_set3, index, registry) }
+
+v3_in_set3 = clone(set4)
+v3_in_set3["template_set"]["version"] = 3
+expect_error("template-set mismatch") { validate_manifest(v3_in_set3, index, registry) }
+
+# The schema-2 fallback on set 4 has no classification, so the description alone carries question and precedent.
+set4_fallback = clone(set4)
+set4_fallback["schema_version"] = 2
+set4_fallback["epic"] = {"outcome" => "Consumers retrieve current state through the supported API."}
+%w[shaping sources].each { |key| set4_fallback.delete(key) }
+set4_fallback["children"].each { |child| child.delete("classification") }
+validate_manifest(set4_fallback, index, registry)
+empty_fallback_question = clone(set4_fallback)
+schema4_child(empty_fallback_question, "choose-transport")["fields"]["description"]["question"] = "  "
+expect_error("Spike question must be text") { validate_manifest(empty_fallback_question, index, registry) }
+bad_description_precedent = clone(set4_fallback)
+schema4_child(bad_description_precedent, "choose-transport")["fields"]["description"]["precedent"]["verdict"] = "likely"
+expect_error("invalid precedent verdict") { validate_manifest(bad_description_precedent, index, registry) }
+
+# Set 4 still accepts the v2 Spikes, so older children verify without a rewrite.
+v2_spike_in_set4 = clone(v2_children)
+v2_spike_in_set4["template_set"]["version"] = 4
+validate_manifest(v2_spike_in_set4, index, registry)
+
+# Review findings carry a category. No category covers a team's own Spike shape or Task granularity.
+findings = [
+  {"category" => "component-story", "ref" => "WORK-501", "correction" => "Merge the UI and API Stories into one demoable flow."},
+  {"category" => "misclassified-spike", "ref" => "build-endpoint", "correction" => "Keep it a Spike until a precedent is found."}
+]
+validate_review_findings(findings)
+%w[layer-split granularity spike-shape].each do |category|
+  bad_finding = clone(findings)
+  bad_finding.first["category"] = category
+  expect_error("invalid finding category") { validate_review_findings(bad_finding) }
+end
+%w[ref correction].each do |key|
+  incomplete = clone(findings)
+  incomplete.first[key] = " "
+  expect_error("finding requires a #{key}") { validate_review_findings(incomplete) }
+end
+extra_field = clone(findings)
+extra_field.first["severity"] = "high"
+expect_error("finding has unknown field severity") { validate_review_findings(extra_field) }
+expect_error("findings must be a list") { validate_review_findings("component-story") }
+
+review_prose = File.read(File.join(SKILL, "references", "manifest-contract.md"))[/^## Review output.*\z/m]
+assert(review_prose, "manifest contract lost its Review output section")
+FINDING_CATEGORIES.each { |category| assert(review_prose.include?("`#{category}`"), "Review output does not define category #{category}") }
+assert(review_prose.scan(/^- `([a-z-]+)`:/).flatten.sort == FINDING_CATEGORIES.sort, "Review output lists a category the validator does not accept")
+
+# Epic v3 adds the Breakdown conventions panel, which records the shaping answers in schema 4 only.
+panel = load_yaml(File.join(FIXTURES, "schema4-epic-panel-valid.yaml"))
+validate_manifest(panel, index, registry)
+assert(panel.dig("epic", "changes", "description", "breakdown_conventions") == panel["shaping"], "panel fixture does not write its shaping")
+
+diverged_panel = clone(panel)
+diverged_panel["epic"]["changes"]["description"]["breakdown_conventions"]["task_granularity"]["value"] = "finer"
+expect_error("breakdown_conventions must equal shaping") { validate_manifest(diverged_panel, index, registry) }
+
+panel_without_shaping = clone(panel)
+panel_without_shaping.delete("shaping")
+expect_error("breakdown_conventions must equal shaping") { validate_manifest(panel_without_shaping, index, registry) }
+
+default_reviewer_panel = clone(panel)
+default_reviewer_panel["epic"]["changes"]["description"]["breakdown_conventions"]["reviewers"]["source"] = "default"
+default_reviewer_panel["shaping"]["reviewers"]["source"] = "default"
+expect_error("reviewers cannot come from a default") { validate_manifest(default_reviewer_panel, index, registry) }
+
+schema3_panel = clone(panel)
+schema3_panel["schema_version"] = 3
+%w[shaping sources].each { |key| schema3_panel.delete(key) }
+expect_error("breakdown_conventions requires schema 4") { validate_manifest(schema3_panel, index, registry) }
+
+panel_on_epic_v2 = clone(panel)
+panel_on_epic_v2["epic"]["template_id"] = "jira-epic-v2"
+panel_on_epic_v2["epic"]["template_sha256"] = index.dig("jira-epic-v2", "sha256")
+expect_error("unapproved description key") { validate_manifest(panel_on_epic_v2, index, registry) }
+
+# A verified panel is the live Epic's record, so it may differ from this Draft's shaping.
+verified_panel = clone(panel)
+description = verified_panel["epic"]["changes"]["description"]
+verified_panel["epic"] = {
+  "disposition" => "existing",
+  "verify" => {"template_id" => "jira-epic-v3", "template_sha256" => index.dig("jira-epic-v3", "sha256"),
+               "description_adf_sha256" => "c" * 64, "description" => description}
+}
+verified_panel["shaping"]["task_granularity"]["value"] = "finer"
+validate_manifest(verified_panel, index, registry)
+malformed_verified_panel = clone(verified_panel)
+malformed_verified_panel["epic"]["verify"]["description"]["breakdown_conventions"]["spike_shape"]["value"] = "by-component"
+expect_error("invalid spike_shape value") { validate_manifest(malformed_verified_panel, index, registry) }
+
+# Schema 3 can bind epic-v3 on set 4 when the description carries no panel.
+schema3_epic_v3 = clone(panel)
+schema3_epic_v3["schema_version"] = 3
+%w[shaping sources].each { |key| schema3_epic_v3.delete(key) }
+schema3_epic_v3["epic"]["changes"]["description"].delete("breakdown_conventions")
+validate_manifest(schema3_epic_v3, index, registry)
+
+epic_v3_in_set3 = clone(panel)
+epic_v3_in_set3["template_set"]["version"] = 3
+expect_error("invalid Epic template") { validate_manifest(epic_v3_in_set3, index, registry) }
+
+# Set 4 still verifies an Epic written with epic-v2, which has no panel.
+epic_v2_in_set4 = clone(schema4_minimal)
+epic_v2_in_set4["template_set"]["version"] = 4
+validate_manifest(epic_v2_in_set4, index, registry)
+
+[3, 4].each do |schema|
+  no_epic_template = clone(schema3)
+  no_epic_template["schema_version"] = schema
+  no_epic_template["template_set"]["version"] = 1
+  expect_error("schema #{schema} requires an Epic-compatible template set") { validate_manifest(no_epic_template, index, registry) }
+end
+
+legacy_epic_in_set4 = clone(panel)
+legacy_epic_in_set4["epic"]["template_id"] = "jira-epic-v1"
+legacy_epic_in_set4["epic"]["template_sha256"] = index.dig("jira-epic-v1", "sha256")
+expect_error("invalid Epic template") { validate_manifest(legacy_epic_in_set4, index, registry) }
+
+# An Epic whose live description fits no template is bound by digest only, in schema 4.
+unbound = clone(set4)
+unbound["epic"] = {"disposition" => "unbound", "observed" => {"description_adf_sha256" => "d" * 64}}
+validate_manifest(unbound, index, registry)
+
+unbound_schema3 = clone(unbound)
+unbound_schema3["schema_version"] = 3
+%w[shaping sources].each { |key| unbound_schema3.delete(key) }
+unbound_schema3["children"].each { |child| child.delete("classification") }
+expect_error("unbound Epic requires schema 4") { validate_manifest(unbound_schema3, index, registry) }
+
+unbound_no_digest = clone(unbound)
+unbound_no_digest["epic"]["observed"]["description_adf_sha256"] = "compute at apply"
+expect_error("missing current ADF digest") { validate_manifest(unbound_no_digest, index, registry) }
+
+unbound_with_changes = clone(unbound)
+unbound_with_changes["epic"]["changes"] = {"description" => {}}
+expect_error("unbound Epic has unknown field changes") { validate_manifest(unbound_with_changes, index, registry) }
+
+# Every schema-4 Spike is classified, including a v2-bound or template-less existing Spike.
+unclassified_v2_spike = clone(v2_spike_in_set4)
+unclassified_v2_spike["schema_version"] = 4
+unclassified_v2_spike["epic"] = clone(schema4_minimal["epic"])
+expect_error("schema-4 Spike requires classification question and precedent") { validate_manifest(unclassified_v2_spike, index, registry) }
+unclassified_existing = clone(set4)
+unclassified_existing["children"] << {"ref" => "old-spike", "jira_key" => "WORK-406", "type" => "Spike", "disposition" => "existing",
+  "verify" => {"summary" => "Old spike", "done_when" => "Answered."}}
+expect_error("schema-4 Spike requires classification question and precedent") { validate_manifest(unclassified_existing, index, registry) }
+
+# The schema-4 worked example follows the current rules: default template set, and no placeholder with a found precedent.
+example = YAML.safe_load(File.read(File.join(SKILL, "references", "manifest-contract.md"))[/^## Schema 4:.*?^~~~yaml\n(.*?)^~~~$/m, 1])
+assert(example.dig("template_set", "version") == registry["default_set_version"], "schema 4 example is not on the default template set")
+example["children"].each do |child|
+  both = child.dig("classification", "placeholder") && child.dig("classification", "precedent", "verdict") == "found"
+  assert(!both, "schema 4 example gives a placeholder a found precedent")
+end
+
+# Schema-2/3 error precedence is unchanged: an unknown root field is reported before the schema version.
+unknown_before_schema = clone(schema3)
+unknown_before_schema["transition"] = "Done"
+unknown_before_schema["schema_version"] = 9
+expect_error("manifest has unknown field transition") { validate_manifest(unknown_before_schema, index, registry) }
+
+# Pin the validator's schema-4 vocabulary to the prose contract, so a renamed or added key cannot drift silently.
+schema4_prose = File.read(File.join(SKILL, "references", "manifest-contract.md"))[/^## Schema 4:.*?(?=^## Child invariants)/m]
+assert(schema4_prose, "manifest contract lost its schema 4 section")
+# Scan the rule text only. The worked example repeats most tokens and would mask a deleted rule.
+schema4_prose = schema4_prose.gsub(/^~~~.*?^~~~$/m, "")
+assert(!schema4_prose.include?("schema_version: 4"), "schema 4 pin still scans the worked example")
+schema4_tokens = SCHEMA4_ROOT_KEYS + SHAPING_VALUES.keys + SHAPING_VALUES.values.grep(Array).flatten + SOURCES_READ +
+  %w[jira_context existing_children conflicts claim winner material stale present absent] +
+  %w[classification question precedent searched verdict location placeholder defined_by none found unverified] +
+  %w[value source from_epic asked reused default]
+schema4_tokens.each { |token| assert(schema4_prose.match?(/\b#{Regexp.escape(token)}\b/), "schema 4 prose does not name #{token}") }
+
+# Pin each enumerated rule sentence, generated from the validator's own value sets.
+def prose_list(values)
+  values.length == 2 ? values.join(" or ") : "#{values[0..-2].join(", ")}, or #{values.last}"
+end
+schema4_rules = [
+  "source is #{prose_list(SHAPING_SOURCES)}.",
+  "spike_shape.value is #{prose_list(SHAPING_VALUES.fetch("spike_shape"))}.",
+  "task_granularity.value is #{prose_list(SHAPING_VALUES.fetch("task_granularity"))}.",
+  "jira_context is #{prose_list(JIRA_CONTEXTS)}.",
+  "read is a nonempty subset of #{prose_list(SOURCES_READ).sub(", or ", ", and ")}",
+  "verdict is #{prose_list(PRECEDENT_VERDICTS)}.",
+  "material and stale are true or false.",
+  "Its entries are #{prose_list(SHAPING_VALUES.keys).sub(", or ", ", and ")}",
+  "Its keys are #{prose_list(CLASSIFICATION_KEYS).sub(", or ", ", and ")}.",
+  "Its keys are #{prose_list(SOURCES_KEYS).sub(", or ", ", and ")}"
+]
+schema4_rules.each { |rule| assert(schema4_prose.include?(rule), "schema 4 prose lost rule: #{rule}") }
+
+schema5 = clone(schema4_minimal)
+schema5["schema_version"] = 5
+expect_error("unsupported schema") { validate_manifest(schema5, index, registry) }
+
+schema4_epic = clone(schema4)
+schema4_epic["epic"]["changes"]["status"] = "Done"
+expect_error("forbidden Epic field") { validate_manifest(schema4_epic, index, registry) }
 
 story = load_yaml(File.join(FIXTURES, "story-lifecycle.yaml"))
 validate_story_description(story.fetch("description"))
@@ -880,7 +1083,7 @@ validate_legacy_story_review(legacy_story, legacy_instrumentation_exception)
 
 placeholder = clone(schema3)
 placeholder["epic"]["changes"]["description"]["problem"] = "<problem>"
-expect_error("unresolved placeholder") { validate_manifest(placeholder, index, registry) }
+expect_error("unresolved template token") { validate_manifest(placeholder, index, registry) }
 
 generic = clone(story["description"])
 generic["automated_tests"].first["expected_evidence"] = "tests added"
@@ -891,6 +1094,11 @@ expect_error("generic evidence") { validate_story_description(generic) }
 # mirrors the table in references/jira-description-templates.md; the two must agree.
 RENDER_EXCEPTIONS = {
   "jira-epic-v2" => {
+    "out_of_scope" => "**Out:**",
+    "release_quality_additions" => "**Additions:**",
+    "approved_exceptions" => "**Approved exceptions:**"
+  },
+  "jira-epic-v3" => {
     "out_of_scope" => "**Out:**",
     "release_quality_additions" => "**Additions:**",
     "approved_exceptions" => "**Approved exceptions:**"
@@ -925,8 +1133,26 @@ RENDER_EXCEPTIONS = {
     "design_artifact" => "**Artifact:**",
     "reviewers" => "**Reviewers:**",
     "checklist_coverage" => "**Checklist coverage:**"
+  },
+  "jira-spike-design-v3" => {
+    "design_artifact" => "**Artifact:**",
+    "reviewers" => "**Reviewers:**",
+    "checklist_coverage" => "**Checklist coverage:**"
   }
 }.freeze
+
+# The exceptions table in the template guide is the documented form of RENDER_EXCEPTIONS.
+RENDER_LABELS = {
+  "jira-epic-v2" => "Epic v2", "jira-epic-v3" => "Epic v3", "jira-story-v2" => "Story v2", "jira-story-v3" => "Story v3",
+  "jira-task-v2" => "Task v2", "jira-spike-design-v2" => "Design Spike v2", "jira-spike-design-v3" => "Design Spike v3"
+}.freeze
+guide_rows = File.read(File.join(SKILL, "references", "jira-description-templates.md")).scan(/^\| ([^|]+?) \| ([a-z_]+) \| (.+?) \|$/)
+RENDER_EXCEPTIONS.each do |id, keys|
+  keys.each do |key, target|
+    row = guide_rows.find { |label, row_key, _| label == RENDER_LABELS.fetch(id) && row_key == key }
+    assert(row && row[2].include?(target), "template guide does not document #{id} #{key} as #{target}")
+  end
+end
 
 def render_target(template_id, key)
   RENDER_EXCEPTIONS.dig(template_id, key) || "## #{key.tr("_", " ").capitalize}"

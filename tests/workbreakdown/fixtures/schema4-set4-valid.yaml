@@ -1,0 +1,144 @@
+schema_version: 4
+manifest_id: schema4-set4
+revision: 1
+template_set:
+  id: jira-house-templates
+  version: 4
+scope:
+  parent_key: INIT-1
+  epic_key: EPIC-1
+epic:
+  disposition: existing
+  verify:
+    template_id: jira-epic-v2
+    template_sha256: 18fefffa6ebb6fe385616ecc0dce1756a6238ce11cd5f41d972557313d42342e
+    description_adf_sha256: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    description:
+      milestone_outcome: Consumers retrieve current state through the supported API.
+      problem: The current interface does not expose a supported state representation.
+      acceptance_criteria:
+        - condition: A permitted consumer retrieves current state.
+          evidence: Passing functional-test report.
+          acceptor: API owner
+        - condition: Stale data is identified.
+          evidence: Passing stale-data scenario.
+          acceptor: Service owner
+        - condition: Unsupported sources return the documented error.
+          evidence: Passing error-contract scenario.
+          acceptor: Support owner
+      success_measures:
+        - Supported consumers complete state reads within the service target.
+shaping:
+  spike_shape:
+    value: vertical-slice
+    source: asked
+  task_granularity:
+    value: per-flow
+    source: default
+sources:
+  jira_context: present
+  existing_children:
+    - jira_key: WORK-401
+      read: [description, status, links]
+children:
+  - ref: choose-transport
+    type: Spike
+    variant: design
+    template_id: jira-spike-design-v3
+    template_sha256: 61c54db1a8daefa7dcd4c2c5d7c6a41475fe1af3bb87a7b122bb3251fe5c79e9
+    disposition: proposed
+    classification:
+      question: Which transport carries state reads within the payload limit?
+      precedent:
+        searched: [src/transport, docs/design]
+        verdict: none
+    fields:
+      summary: Choose the state transport
+      done_when: The transport decision is recorded and reviewed.
+      description:
+        question: Which transport carries state reads within the payload limit?
+        precedent:
+          searched: [src/transport, docs/design]
+          verdict: none
+        decision: Select the transport for state reads.
+        questions_and_constraints:
+          - Does the existing gateway support the required payload size?
+        design_artifact: docs/design/state-transport.md
+        reviewers:
+          - Alex Reviewer
+        checklist_coverage: Interface and capacity concerns apply. Storage concerns are excluded.
+        done_when:
+          - The decision is recorded with evidence and reviewer disposition.
+        downstream_updates:
+          - The endpoint Task scope is revised.
+  - ref: measure-staleness
+    type: Spike
+    variant: investigation
+    template_id: jira-spike-investigation-v3
+    template_sha256: 555f754bd4f7633a3aca70b8256fbbfcbb7ada3df29b6c45e0ede8ae58bf0786
+    disposition: proposed
+    classification:
+      question: How stale is the current state under normal load?
+      precedent:
+        searched: [src/cache]
+        verdict: unverified
+    fields:
+      summary: Measure state staleness
+      done_when: The observed staleness range is recorded.
+      description:
+        question: How stale is the current state under normal load?
+        precedent:
+          searched: [src/cache]
+          verdict: unverified
+        evidence_needed:
+          - Sampled measurement across a representative window.
+        done_when:
+          - The observed range, confidence, and recommendation are recorded.
+        downstream_updates:
+          - The acceptance threshold for the endpoint Task is confirmed.
+  - ref: build-endpoint
+    type: Task
+    template_id: jira-task-v2
+    template_sha256: fedfeda541933a2a379bf7569703b138e078aa9ee730438a839977824bdd06b3
+    disposition: proposed
+    classification:
+      precedent:
+        searched: [src/api/handlers]
+        verdict: found
+        location: src/api/handlers/status.rb
+    fields:
+      summary: Add the supported state endpoint
+      done_when: The endpoint returns current state for every supported source.
+      description:
+        result: A supported read endpoint returns current system state.
+        context: Consumers have no supported way to read current state.
+        acceptance_criteria:
+          - The endpoint returns current state for a permitted consumer.
+          - An unsupported source returns the documented error.
+        validation: Passing endpoint contract test in the representative system.
+  - ref: wire-transport
+    type: Task
+    template_id: jira-task-placeholder-v3
+    template_sha256: 7c3616d9acc68f7fa7e1b0cf05124e5abfc14cc46a04106544ec6633b7e6fd69
+    disposition: proposed
+    classification:
+      placeholder:
+        defined_by: choose-transport
+    fields:
+      summary: "[PLACEHOLDER] Wire the chosen state transport"
+      done_when: The transport decision is replaced by an implementation-ready Task.
+      description:
+        purpose: Connect state reads to the transport chosen by the design Spike.
+        defined_by: choose-transport
+dependencies:
+  - action: ensure
+    blocker: {ref: choose-transport}
+    blocked: {ref: build-endpoint}
+  - action: ensure
+    blocker: {ref: choose-transport}
+    blocked: {ref: wire-transport}
+rank:
+  mode: scoped-relative
+  order: [choose-transport, measure-staleness, build-endpoint, wire-transport]
+unknowns:
+  - No reviewer is named for the staleness investigation.

@@ -1,0 +1,496 @@
+{
+  "schema_version": 1,
+  "work_id": "workbreakdown-slice-a-completion",
+  "mode": "delegated",
+  "risk": {
+    "hard_triggers": [],
+    "aggravating_factors": [],
+    "classification": "standard",
+    "rationale": "Local skill source change on a feature branch; private fixture script in KB; no shared or external mutation."
+  },
+  "assignments": [
+    {
+      "id": "coordinator",
+      "lane": "plan",
+      "role": "architect",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/coordinator"
+      },
+      "brief_path": ".flow/runs/workbreakdown-skill-improvements/solution.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-skill-improvements/definition.md",
+        ".flow/runs/workbreakdown-skill-improvements/acceptance-criteria.md",
+        ".flow/runs/workbreakdown-skill-improvements/solution.md",
+        ".flow/runs/workbreakdown-skill-improvements/review.md",
+        ".flow/runs/workbreakdown-slice-a-completion/reviews/plan-business-analyst.md",
+        ".flow/runs/workbreakdown-slice-a-completion/reviews/plan-product-manager.md",
+        ".flow/runs/workbreakdown-slice-a-completion/reviews/plan-architect.md",
+        ".flow/runs/workbreakdown-slice-a-completion/plan.md",
+        ".flow/runs/workbreakdown-slice-a-completion/validation-plan.md",
+        ".flow/runs/workbreakdown-slice-a-completion/implementation-handoff.md"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow"
+      ],
+      "write_scopes": [
+        ".flow/runs/workbreakdown-slice-a-completion",
+        "skills/workbreakdown",
+        "tests"
+      ],
+      "read_only": false,
+      "required_capabilities": [
+        {
+          "name": "filesystem-write",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-slice-a-completion/plan.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "plan implementable without chat context"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "serialized",
+        "group": "coordinator"
+      }
+    },
+    {
+      "id": "plan-business-analyst",
+      "lane": "plan",
+      "role": "business-analyst",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/business-analyst"
+      },
+      "brief_path": ".flow/runs/workbreakdown-slice-a-completion/briefs/plan-shaping.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-skill-improvements/definition.md",
+        ".flow/runs/workbreakdown-skill-improvements/acceptance-criteria.md",
+        ".flow/runs/workbreakdown-skill-improvements/solution.md",
+        ".flow/runs/workbreakdown-skill-improvements/review.md",
+        "skills/workbreakdown/SKILL.md"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-slice-a-completion/reviews/plan-business-analyst.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "analysis of acceptance mapping: each Slice A AC to chunk, proof and negative control, citing file:line"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "plan-shaping"
+      }
+    },
+    {
+      "id": "plan-product-manager",
+      "lane": "plan",
+      "role": "product-manager",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/product-manager"
+      },
+      "brief_path": ".flow/runs/workbreakdown-slice-a-completion/briefs/plan-shaping.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-skill-improvements/definition.md",
+        ".flow/runs/workbreakdown-skill-improvements/acceptance-criteria.md",
+        ".flow/runs/workbreakdown-skill-improvements/solution.md",
+        ".flow/runs/workbreakdown-skill-improvements/review.md",
+        "skills/workbreakdown/SKILL.md"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-slice-a-completion/reviews/plan-product-manager.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "analysis of scope, sequencing and cut lines for one run, citing file:line"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "plan-shaping"
+      }
+    },
+    {
+      "id": "plan-architect",
+      "lane": "plan",
+      "role": "architect",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/architect"
+      },
+      "brief_path": ".flow/runs/workbreakdown-slice-a-completion/briefs/plan-shaping.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-skill-improvements/definition.md",
+        ".flow/runs/workbreakdown-skill-improvements/acceptance-criteria.md",
+        ".flow/runs/workbreakdown-skill-improvements/solution.md",
+        ".flow/runs/workbreakdown-skill-improvements/review.md",
+        "skills/workbreakdown/SKILL.md"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-slice-a-completion/reviews/plan-architect.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "analysis of structural fit: set 4, epic-v3, schema-2 fallback, release-script isolation, citing file:line"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "plan-shaping"
+      }
+    },
+    {
+      "id": "step-gate-quality-reviewer",
+      "lane": "implement",
+      "role": "quality-reviewer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/quality-reviewer"
+      },
+      "brief_path": ".flow/runs/workbreakdown-slice-a-completion/plan.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-slice-a-completion/plan.md",
+        ".flow/runs/workbreakdown-slice-a-completion/validation-plan.md"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-slice-a-completion/reviews/step-gates-quality.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "per-step findings with severity and file:line"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "step-gate"
+      }
+    },
+    {
+      "id": "step-gate-test-engineer",
+      "lane": "implement",
+      "role": "test-engineer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/test-engineer"
+      },
+      "brief_path": ".flow/runs/workbreakdown-slice-a-completion/plan.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-slice-a-completion/plan.md",
+        ".flow/runs/workbreakdown-slice-a-completion/validation-plan.md"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-slice-a-completion/reviews/step-gates-test.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "per-step test coverage findings with file:line"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "step-gate"
+      }
+    },
+    {
+      "id": "handback-tech-writer",
+      "lane": "implement",
+      "role": "tech-writer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/tech-writer"
+      },
+      "brief_path": ".flow/runs/workbreakdown-slice-a-completion/validation-results.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-slice-a-completion/plan.md",
+        ".flow/runs/workbreakdown-slice-a-completion/validation-results.md"
+      ],
+      "read_scopes": [
+        ".flow/runs/workbreakdown-slice-a-completion"
+      ],
+      "write_scopes": [
+        ".flow/runs/workbreakdown-slice-a-completion/HANDOFF.md"
+      ],
+      "read_only": false,
+      "required_capabilities": [
+        {
+          "name": "filesystem-write",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-slice-a-completion/HANDOFF.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "handback states what changed, proof, risks, next actions without chat context"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "serialized",
+        "group": "coordinator"
+      }
+    },
+    {
+      "id": "acceptance-quality-reviewer",
+      "lane": "review",
+      "role": "quality-reviewer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/quality-reviewer"
+      },
+      "brief_path": ".flow/runs/workbreakdown-slice-a-completion/HANDOFF.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-slice-a-completion/plan.md",
+        ".flow/runs/workbreakdown-slice-a-completion/validation-plan.md",
+        ".flow/runs/workbreakdown-slice-a-completion/validation-results.md",
+        ".flow/runs/workbreakdown-slice-a-completion/HANDOFF.md"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-slice-a-completion/reviews/acceptance-quality.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "verdict with prioritized findings against plan and ACs"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "acceptance"
+      }
+    },
+    {
+      "id": "acceptance-test-engineer",
+      "lane": "review",
+      "role": "test-engineer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/test-engineer"
+      },
+      "brief_path": ".flow/runs/workbreakdown-slice-a-completion/HANDOFF.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-slice-a-completion/plan.md",
+        ".flow/runs/workbreakdown-slice-a-completion/validation-plan.md",
+        ".flow/runs/workbreakdown-slice-a-completion/validation-results.md",
+        ".flow/runs/workbreakdown-slice-a-completion/HANDOFF.md"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-slice-a-completion/reviews/acceptance-test.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "proof assessment with prioritized findings"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "acceptance"
+      }
+    },
+    {
+      "id": "acceptance-security-reviewer",
+      "lane": "review",
+      "role": "security-reviewer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/security-reviewer"
+      },
+      "brief_path": ".flow/runs/workbreakdown-slice-a-completion/HANDOFF.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-slice-a-completion/plan.md",
+        ".flow/runs/workbreakdown-slice-a-completion/validation-plan.md",
+        ".flow/runs/workbreakdown-slice-a-completion/validation-results.md",
+        ".flow/runs/workbreakdown-slice-a-completion/HANDOFF.md"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-slice-a-completion/reviews/acceptance-security.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "public-repo leak and credential-isolation findings"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "acceptance"
+      }
+    }
+  ],
+  "shared_state": [],
+  "reconciliation": {
+    "artifact_path": ".flow/runs/workbreakdown-skill-improvements/solution.md",
+    "status": "resolved",
+    "claims": []
+  },
+  "verification": {
+    "producer_assignments": [
+      "coordinator",
+      "handback-tech-writer"
+    ],
+    "evidence_collector_assignment": "coordinator",
+    "verifier_assignment": "acceptance-quality-reviewer",
+    "independent": true,
+    "artifact_path": ".flow/runs/workbreakdown-slice-a-completion/review.md"
+  }
+}
