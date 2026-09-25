@@ -174,11 +174,11 @@ No template changes are needed, so template hashes stay put.
 
 ## Owned risks
 
-- **Classification variance repeats R1.3 FX-STALE-2.** Owner: Andy. Mitigation: a ratified answer key before any rule prose (C5a), the rule fails toward `unknown`, and the history-removed negative control is mechanical.
-- **The wider sibling read overruns context on large Initiatives.** Owner: Andy. Mitigation: read each sibling's description and children only, never grandchildren, and record any sibling that could not be read as a gap instead of guessing.
-- **The fixture lacks a case for a check.** Owner: Andy. Mitigation: C1 through C4 confirm that each FX-* case exists in the frozen snapshot before its release-check case is written. A missing case is raised to the maintainer, not substituted.
-- **Private data leaks into the public repo.** Owner: Andy. Mitigation: the answer key and fixture mappings stay in the private release check, and the diff is grepped before every commit.
-- **The later-to-earlier check misfires on edges within one Epic.** Owner: Andy. Mitigation: the check applies only to edges between two different Epics, and a synthetic test pins that.
+- **Classification variance repeats R1.3 FX-STALE-2.** Owner: the maintainer. Mitigation: a ratified answer key before any rule prose (C5a), the rule fails toward `unknown`, and the history-removed negative control is mechanical.
+- **The wider sibling read overruns context on large Initiatives.** Owner: the maintainer. Mitigation: read each sibling's description and children only, never grandchildren, and record any sibling that could not be read as a gap instead of guessing.
+- **The fixture lacks a case for a check.** Owner: the maintainer. Mitigation: C1 through C4 confirm that each FX-* case exists in the frozen snapshot before its release-check case is written. A missing case is raised to the maintainer, not substituted.
+- **Private data leaks into the public repo.** Owner: the maintainer. Mitigation: the answer key and fixture mappings stay in the private release check, and the diff is grepped before every commit.
+- **The later-to-earlier check misfires on edges within one Epic.** Owner: the maintainer. Mitigation: the check applies only to edges between two different Epics, and a synthetic test pins that.
 
 ## Next lane
 
