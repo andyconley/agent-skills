@@ -2,6 +2,12 @@
 
 All notable changes to agent-skills are generated from Conventional Commits. Longer design context belongs in the documentation changed by the release.
 
+## [1.8.0](https://github.com/andyconley/agent-skills/compare/v1.7.0...v1.8.0) (2026-09-25)
+
+### Features
+
+* **workbreakdown:** release 1.6.0 with cross-Epic consolidation and semantic Audit findings ([#21](https://github.com/andyconley/agent-skills/issues/21)) ([45eb9cf](https://github.com/andyconley/agent-skills/commit/45eb9cfec2f7ac2e75913ff9ec711b992ca7f115))
+
 ## [1.7.0](https://github.com/andyconley/agent-skills/compare/v1.6.2...v1.7.0) (2026-09-25)
 
 ### Features
