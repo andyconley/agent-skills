@@ -59,7 +59,7 @@ For every Story, plan contextual documentation, automated integration or functio
 
 Use `A -> B` to mean **A blocks B**. Add an edge only when B cannot finish safely without A. Rank controls reading and likely execution order; it does not create a dependency.
 
-Check each graph for cycles, reversed edges, duplicates, redundant transitive edges, orphaned Spikes and Tasks, Stories blocking their prerequisites, lost parallelism, implicit cross-Epic dependencies, and later-to-earlier edges between milestone Epics.
+Check each graph for cycles, reversed edges, duplicates, redundant transitive edges, orphaned Spikes and Tasks, Stories blocking their prerequisites, lost parallelism, and implicit cross-Epic dependencies. Also check for later-to-earlier edges between milestone Epics, and copied acceptance without its forward edge.
 
 ## Keep writes fail-closed
 

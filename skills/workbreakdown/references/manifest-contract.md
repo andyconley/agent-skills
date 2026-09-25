@@ -399,11 +399,11 @@ sources records what the Draft read and how it resolved disagreements between so
 
 consolidation records the Draft's cross-Epic check. Its keys are status, claims, order, and exceptions. status is required, and the other keys are optional.
 
-- status is run, skipped, or no-siblings. skipped means the invocation request opted out. no-siblings means the Initiative has no other Epic. A skipped or no-siblings block has no claims and no exceptions, and its order is omitted or unknown.
-- claims lists each decision that more than one Epic of the Initiative claims, whether or not the scoped Epic is one of them. A claim contains claim, claimed_by, owner, rationale, and confirmation, and no two claims share the same claim text.
+- status is run, skipped, or no-siblings. skipped means the invocation request opted out. no-siblings means the Initiative has no other Epic, or the Epic has no Initiative parent. A skipped or no-siblings block has no claims and no exceptions, and its order is omitted or unknown.
+- claims lists each decision that the scoped Epic and at least one sibling Epic both claim. A claim contains claim, claimed_by, owner, rationale, and confirmation, and no two claims share the same claim text.
   - claim and rationale are nonempty text.
   - claimed_by lists at least two distinct Jira keys, and owner is one of them.
-  - confirmation.state is proposed or confirmed. A confirmed owner also records confirmed_by and evidence as nonempty text. A proposed owner records neither.
+  - confirmation.state is proposed or confirmed. A confirmed owner also records confirmed_by and evidence as nonempty text. The evidence is the lead's direct confirmation to the active user, or a Jira comment or amendment by the lead's own account, cited by author and date. A proposed owner records neither.
 - order records milestone order as source and value. order.source is declared, rank, or unknown. value lists unique Epic Jira keys in milestone order, and value is empty exactly when source is unknown. A known order includes the scoped Epic.
 - exceptions lists each approved later-to-earlier edge. An exception contains blocker, blocked, blocker_epic, blocked_epic, reason, approver, and approval_evidence.
   - blocker and blocked are the edge's two tickets, each a Jira key or a child ref, and they differ. A child ref is a child of the scoped Epic, so its Epic field names the scoped Epic.
@@ -553,7 +553,7 @@ Each finding contains category, ref, and correction. ref is the child ref or Jir
 - `unsupported-assumption`: an assumption presented as fact.
 - `stale-source`: a claim built on a design source that a later dated decision contradicts.
 - `invalid-manifest`: invalid manifest or template binding.
-- `dependency`: reversed, redundant, duplicate, missing, or cyclic dependencies.
+- `dependency`: reversed, redundant, duplicate, missing, or cyclic dependencies, later-to-earlier edges between milestone Epics without a recorded exception, and copied acceptance reported as a missing forward edge or misplaced acceptance.
 
 Review and Audit never flag a team's own Spike shape or Task granularity. Those are Draft defaults, not defects.
 
