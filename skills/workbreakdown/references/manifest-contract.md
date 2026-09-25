@@ -509,7 +509,7 @@ If exact placement among all live children matters, use full-live-order and incl
 
 ## Draft output
 
-Before returning a Draft, check every description against its template's required keys and every manifest invariant in this contract, and fix any gap. Check that no value contains an angle-bracket token such as `<resource>`: name the actual value, or record the gap in `unknowns`. Do not return a manifest you have not checked. When the check finds a gap, rewrite the manifest itself. Never add a field the contract does not name, and never append a correction after the manifest. Every precedent lists at least one searched location.
+Before returning a Draft, check every description against its template's required keys and every manifest invariant in this contract, and fix any gap. Check that no value contains an angle-bracket token such as `<resource>`: name the actual value, or record the gap in `unknowns`. Do not return a manifest you have not checked. Parse the manifest as YAML, and apply the quoting rule above to every value, including values inside lists and nested maps. When the check finds a gap, rewrite the manifest itself. Never add a field the contract does not name, and never append a correction after the manifest. Every precedent lists at least one searched location.
 
 Return:
 
@@ -519,7 +519,7 @@ Return:
 4. Material conflicts: each with both sources, their dates, and the winner, matching `sources.conflicts`.
 5. Shaping: whether the run was interactive or non-interactive, each answer with its source, which answers used a default, and any reviewer gap.
 6. Divergence list: each shaping answer that differs from a sibling Epic's panel, naming the answer, the sibling Epic, the sibling's value, and the proposed value. Write `No divergence` when sibling panels were read and none differs, and `No sibling panels read` when there were none to read.
-7. Consolidation: `run` for `status: run`, `skipped by request` for `skipped`, `no sibling Epics` for `no-siblings`, or `not run, no Jira context` for a schema-2 fallback. When it ran, list each claim with its claimants, proposed owner, rationale, and confirmation state, or write `No claims`. Then state the milestone order with its source, or `Milestone order: unknown` when there is none.
+7. Consolidation: open this item with the literal line `Consolidation: <label>`. The label is `run` for `status: run`, `skipped by request` for `skipped`, `no sibling Epics` for `no-siblings`, or `not run, no Jira context` for a schema-2 fallback. When it ran, list each claim with its claimants, proposed owner, rationale, and confirmation state, or write `No claims`. Then state the milestone order with its source, or `Milestone order: unknown` when there is none.
 8. Proposed child table: each child's ref, key or `new`, type, summary, observable completion, and the Epic exit condition or Story it serves. Name an exit condition the way the Epic names it, such as its slice ID.
 9. Complete YAML manifest.
 10. Dependency edge list or graph using A -> B for A blocks B.
