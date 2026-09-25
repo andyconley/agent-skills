@@ -2,7 +2,7 @@
 
 ## Current work
 
-No Flow run is in progress. workbreakdown 1.5.0 (Slice A) is released. Its runs, `workbreakdown-skill-improvements` and `workbreakdown-slice-a-completion`, are review-accepted and not yet archived. Slice B needs its own solutioning. The Story delivery-evidence run is archived. Optional follow-ups from it remain: direct negative tests for mismatched, duplicate, and generic review evidence, and the fresh-host manual prompt matrix.
+No Flow run is in progress or awaiting archive. workbreakdown 1.5.0 (Slice A) is released, and both of its runs are archived. Slice B (cross-Epic consistency and semantic Audit checks) needs its own solutioning. The Story delivery-evidence run is archived. Optional follow-ups from it remain: direct negative tests for mismatched, duplicate, and generic review evidence, and the fresh-host manual prompt matrix.
 
 Durable facts about this repository that are not obvious from the code and have already cost time once.
 
