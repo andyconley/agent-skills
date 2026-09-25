@@ -398,7 +398,13 @@ breakdown_conventions is an optional description key of jira-epic-v3. It renders
 
 ### Migration
 
-Schema 2 and 3 manifests remain valid. Schema 4 adds optional blocks only. From the release that completes Slice A, a new Draft emits schema 4 when it has Jira context and schema 2 otherwise. It has Jira context when it can read the live Epic ADF and the Epic's existing children. Its output states which case applies.
+Version 1.5.0 changes what a new Draft produces and leaves every approved manifest valid.
+
+- Schema 2 and 3 manifests remain valid. Template sets 1–3 remain valid and frozen.
+- Schema 4 adds optional blocks only, plus the `unbound` Epic disposition for an Epic that fits no template.
+- New Drafts use template set 4. It adds jira-epic-v3 with the Breakdown conventions panel, the v3 design and investigation Spikes with question and precedent, and the jira-task-placeholder-v3 placeholder Task.
+
+A new Draft emits schema 4 when it has Jira context and schema 2 otherwise. It has Jira context when it can read the live Epic ADF and the Epic's existing children. Its output states which case applies.
 
 ## Child invariants
 
