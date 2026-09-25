@@ -7,6 +7,7 @@
     "orchestration_manifest": ".flow/runs/workbreakdown-slice-a-completion/orchestration.json",
     "plan": ".flow/runs/workbreakdown-slice-a-completion/plan.md",
     "requirements": ".flow/runs/workbreakdown-skill-improvements/definition.md",
+    "review": ".flow/runs/workbreakdown-slice-a-completion/review.md",
     "solution": ".flow/runs/workbreakdown-skill-improvements/solution.md",
     "validation_plan": ".flow/runs/workbreakdown-slice-a-completion/validation-plan.md"
   },
@@ -15,6 +16,7 @@
     "risk": "owned"
   },
   "gates": {
+    "accept-review": "2026-09-25T02:35:02Z",
     "approve-definition": "2026-09-24T20:46:48Z",
     "approve-plan": "2026-09-24T20:57:01Z",
     "approve-solution": "2026-09-24T20:46:49Z",
@@ -26,11 +28,11 @@
     "start-solution": "2026-09-24T20:46:49Z"
   },
   "lane": "review",
-  "last_event": "start-review",
-  "phase": "reviewing",
+  "last_event": "accept-review",
+  "phase": "review_accepted",
   "protocol_revision": 2,
   "schema_version": 1,
-  "state": "reviewing",
-  "updated_at": "2026-09-25T02:26:41Z",
+  "state": "review_accepted",
+  "updated_at": "2026-09-25T02:35:02Z",
   "work_id": "workbreakdown-slice-a-completion"
 }
