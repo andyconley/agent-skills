@@ -511,11 +511,11 @@ Return:
 4. Material conflicts: each with both sources, their dates, and the winner, matching `sources.conflicts`.
 5. Shaping: whether the run was interactive or non-interactive, each answer with its source, which answers used a default, and any reviewer gap.
 6. Divergence list: each shaping answer that differs from a sibling Epic's panel, naming the answer, the sibling Epic, the sibling's value, and the proposed value. Write `No divergence` when sibling panels were read and none differs, and `No sibling panels read` when there were none to read.
-7. Consolidation: `run`, `skipped by request`, `no sibling Epics`, or `not run, no Jira context`, matching `consolidation.status`. When it ran, list each claim with its claimants, proposed owner, rationale, and confirmation state, and the milestone order with its source.
+7. Consolidation: `run` for `status: run`, `skipped by request` for `skipped`, `no sibling Epics` for `no-siblings`, or `not run, no Jira context` for a schema-2 fallback. When it ran, list each claim with its claimants, proposed owner, rationale, and confirmation state, or write `No claims`. Then state the milestone order with its source, or `Milestone order: unknown` when there is none.
 8. Proposed child table: each child's ref, key or `new`, type, summary, observable completion, and the Epic exit condition or Story it serves. Name an exit condition the way the Epic names it, such as its slice ID.
 9. Complete YAML manifest.
 10. Dependency edge list or graph using A -> B for A blocks B.
-11. Cycle, direction, duplicate, redundancy, missing-edge, orphan, later-to-earlier, and copied-acceptance checks. List each later-to-earlier edge as a recorded exception or a defect, or as unordered when milestone order is unknown.
+11. Cycle, direction, duplicate, redundancy, missing-edge, orphan, later-to-earlier, and copied-acceptance checks. List each edge between milestone Epics as forward, a recorded exception, a defect, or unordered when milestone order is unknown or omits one of its Epics. When consolidation did not run, write `Later-to-earlier and copied-acceptance checks: not run`.
 12. Questions that materially affect the breakdown.
 
 Use temporary references until Jira assigns keys. Do not create placeholder Jira keys.
