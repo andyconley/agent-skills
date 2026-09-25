@@ -371,12 +371,147 @@
         "mode": "concurrent",
         "group": "plan-shaping"
       }
+    },
+    {
+      "id": "implement-quality-reviewer",
+      "lane": "implement",
+      "role": "quality-reviewer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/quality-reviewer"
+      },
+      "brief_path": ".flow/runs/workbreakdown-slice-b/implementation-handoff.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-slice-b/plan.md",
+        ".flow/runs/workbreakdown-slice-b/validation-plan.md",
+        ".flow/runs/workbreakdown-slice-b/implementation-handoff.md"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-slice-b/reviews/step-gates-quality.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "per-step correctness and structural-fit review of each chunk's diff"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "implement-review"
+      }
+    },
+    {
+      "id": "implement-test-engineer",
+      "lane": "implement",
+      "role": "test-engineer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/test-engineer"
+      },
+      "brief_path": ".flow/runs/workbreakdown-slice-b/implementation-handoff.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-slice-b/plan.md",
+        ".flow/runs/workbreakdown-slice-b/validation-plan.md",
+        ".flow/runs/workbreakdown-slice-b/implementation-handoff.md"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-slice-b/reviews/step-gates-test.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "per-step coverage and mutant review of each chunk's diff"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "implement-review"
+      }
+    },
+    {
+      "id": "implement-tech-writer",
+      "lane": "implement",
+      "role": "tech-writer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/tech-writer"
+      },
+      "brief_path": ".flow/runs/workbreakdown-slice-b/implementation-handoff.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-slice-b/plan.md",
+        ".flow/runs/workbreakdown-slice-b/validation-plan.md",
+        ".flow/runs/workbreakdown-slice-b/implementation-handoff.md"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-slice-b/HANDOFF.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "durable handback draft from validation-results.md"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "implement-review"
+      }
     }
   ],
   "shared_state": [],
   "reconciliation": {
-    "artifact_path": ".flow/runs/workbreakdown-slice-b/plan.md",
-    "status": "resolved",
+    "artifact_path": ".flow/runs/workbreakdown-slice-b/validation-results.md",
+    "status": "pending",
     "claims": []
   },
   "verification": {
@@ -386,6 +521,6 @@
     "evidence_collector_assignment": "coordinator",
     "verifier_assignment": "coordinator",
     "independent": false,
-    "artifact_path": ".flow/runs/workbreakdown-slice-b/plan.md"
+    "artifact_path": ".flow/runs/workbreakdown-slice-b/validation-results.md"
   }
 }
