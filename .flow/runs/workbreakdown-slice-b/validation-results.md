@@ -27,6 +27,7 @@ At every step:
 | C5a | private | none | Link-classification answer key, ratified by the maintainer on 2026-09-25 |
 | C5 | 94df53c | M57–M59, M59b, M59c | Link classification and history |
 | R | e765e0f | M60 | VERSION 1.6.0, migration note and decision entry |
+| Gate fixes | e26c28a, aed48c6, 85b486e | M61–M66 | Self-check and wording, two-pass sibling read, consolidation label line and YAML parse |
 
 ### Mutants
 
@@ -116,4 +117,56 @@ Each review ran read-only. Every Important finding was fixed before the next ste
 
 ## Private release gate
 
-Status: running. Results are pending.
+**Result: green.** 131 checks pass across 15 isolated headless Opus runs on the frozen `gate-b` snapshot. The checker self-test passes on all 15 runs, with no missed mutant.
+
+### How the gate got to green
+
+1. **First gate (skill e765e0f): not green.**
+   - Two checker defects were fixed, each with a self-test mutant:
+     - S1 flagged the agent reading back its own spilled tool output.
+     - The consolidation label parser rejected a heading form of the label.
+   - Four skill failures remained:
+     - Two Drafts returned invalid manifests. One appended a "correction" instead of fixing the manifest, and one left a precedent's search list empty.
+     - Copied acceptance was found but not labelled.
+     - The FX-E3 Draft found one of three collision pairs.
+   - **Maintainer ruling (2026-09-25).** The self-check and the wording were tightened in e26c28a. B3.2 was narrowed to live evidence. The tabletop's M3/M4 batch-executor pair was dropped, because no live card holds it, and each remaining pair is checked on its own Epic's Draft.
+2. **Draft cost.** A Draft took 6 to 11 minutes and $2 to $4, mostly reading every sibling child card. **Maintainer ruling:** read sibling children in two passes (aed48c6), and run the gate 5 at a time.
+3. **Second full gate (skill aed48c6).**
+   - Every check passes on 14 of 15 runs.
+   - FX-E3 solo failed:
+     - S4 on its third attempt: a YAML value with an unquoted colon.
+     - B3.1 on its first attempt: the section omitted the `run` label.
+   - **Maintainer ruling:** open the consolidation item with a literal label line, and parse the manifest as YAML before returning (85b486e). Then rerun FX-E3 solo only.
+4. **FX-E3 solo rerun (skill 85b486e):** all 7 checks passed on the first attempt.
+
+The results mix two skill commits:
+- 14 runs used aed48c6.
+- FX-E3 solo used 85b486e, which differs from aed48c6 only in two output-wording sentences.
+
+The superseded attempts are kept with the private evidence.
+
+### Checks by criterion
+
+- **AC-R3.1:** B3.1, the consolidation announced, and B3.1-control, the opt-out.
+- **AC-R3.2:** B3.2. The collision pair is claimed on its own Epic's Draft.
+- **AC-R3.3:**
+  - B3.3-order: order from rank.
+  - B3.3-control: no rank means order unknown.
+  - B3.3-recorded: supplied exceptions are not flagged.
+  - B3.3-unrecorded: both edges are flagged without the record.
+- **AC-R3.4:** B3.4, copied acceptance reported.
+- **AC-R4.1 to R4.4:** B4.1 to B4.4. All matched on each finding's check and ref.
+- **AC-R4.5:** B4.5, classification matches the ratified key, and B4.5-control, no history means unknown.
+- **AC-B-precision:** B-precision, no finding on a correct forward link.
+- **Slice A regression:** the six Slice A Epic Drafts pass their Slice A checks, including S1 to S4, R0.1, R0.2, R1.1, R2.x, R5 and P1. R1.3-FX-STALE-2 is excluded as the accepted 1.5.0 weakness.
+
+### Cost
+
+On the final gate, a run averaged 7.3 minutes. The 15 runs cost about $38 in total. A Draft takes 5.5 to 14 minutes. Most of its reads are now the Epic's own children, which the SOP reads in full.
+
+### Residual evidence gaps
+
+- **FX-E3 solo after the last fix.** It passed on one attempt after 85b486e. Its earlier failures (one broken manifest in three attempts, one missing label) show real variance in how well the model follows the format rules.
+- **Two commits.** The final results come from two skill commits, as described above.
+- **The two-pass sibling read.** It was checked by the collision and copied-acceptance cases on this fixture only. A collision described only deep in a sibling card's description could be missed.
+- **R0.2's checker.** It reads the divergence list only under a heading. One attempt wrote the list as an inline bold label and failed. It passed under the rerun rule.
