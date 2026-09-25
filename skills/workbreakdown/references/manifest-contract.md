@@ -509,7 +509,7 @@ If exact placement among all live children matters, use full-live-order and incl
 
 ## Draft output
 
-Before returning a Draft, check every description against its template's required keys and every manifest invariant in this contract, and fix any gap. Check that no value contains an angle-bracket token such as `<resource>`: name the actual value, or record the gap in `unknowns`. Do not return a manifest you have not checked.
+Before returning a Draft, check every description against its template's required keys and every manifest invariant in this contract, and fix any gap. Check that no value contains an angle-bracket token such as `<resource>`: name the actual value, or record the gap in `unknowns`. Do not return a manifest you have not checked. When the check finds a gap, rewrite the manifest itself. Never add a field the contract does not name, and never append a correction after the manifest. Every precedent lists at least one searched location.
 
 Return:
 
@@ -523,7 +523,7 @@ Return:
 8. Proposed child table: each child's ref, key or `new`, type, summary, observable completion, and the Epic exit condition or Story it serves. Name an exit condition the way the Epic names it, such as its slice ID.
 9. Complete YAML manifest.
 10. Dependency edge list or graph using A -> B for A blocks B.
-11. Cycle, direction, duplicate, redundancy, missing-edge, orphan, later-to-earlier, and copied-acceptance checks. List each edge between milestone Epics as forward, a recorded exception, a defect, or unordered when milestone order is unknown or omits one of its Epics. When consolidation did not run, write `Later-to-earlier and copied-acceptance checks: not run`.
+11. Cycle, direction, duplicate, redundancy, missing-edge, orphan, later-to-earlier, and copied-acceptance checks. Report each copied-acceptance problem as `missing forward edge` or `misplaced acceptance`, naming the cards. List each edge between milestone Epics as forward, a recorded exception, a defect, or unordered when milestone order is unknown or omits one of its Epics. When consolidation did not run, write `Later-to-earlier and copied-acceptance checks: not run`.
 12. Questions that materially affect the breakdown.
 
 Use temporary references until Jira assigns keys. Do not create placeholder Jira keys.
