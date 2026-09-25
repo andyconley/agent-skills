@@ -24,7 +24,7 @@ Create a direct Epic child when work needs an owner, estimate, status, dependenc
 7. **Isolate uncertainty as Spikes.** Start from one vertical-slice Spike per user-facing flow, as described under Classification and precedent. Keep each Spike's question narrow, and split a Spike only when it holds independent questions.
 8. **Connect the work.** Use `Spike -> Task -> Story` as the normal flow. One Spike can block several Tasks. Several Tasks can block one Story. A Spike can block a Story directly when no implementation Task is needed.
 9. **Rank the children.** Rank items in reading and likely execution order: Spikes, Tasks, Stories. Rank communicates priority and presentation order, not dependency.
-10. **Review the graph.** Make every edge point from prerequisite to consumer and eventually reach a verifiable Story or explicit Epic exit condition.
+10. **Review the graph.** Make every edge point from prerequisite to consumer and eventually reach a verifiable Story or explicit Epic exit condition. Check edges between milestone Epics against milestone order, as described under Dependency rules.
 
 ## Cross-Epic consolidation
 
@@ -102,6 +102,17 @@ Every graph must satisfy these checks:
 - Parallel work remains parallel.
 - Cross-Epic dependencies are explicit.
 - Completed work does not depend on unfinished downstream work.
+
+### Edges between milestone Epics
+
+When cross-Epic consolidation ran, check every edge whose two tickets belong to different Epics of the Initiative, whether the edge is live or proposed.
+
+- An edge from a later milestone's Epic to an earlier one matches a recorded exception, or it is a defect. An exception matches only when its blocker, blocked, blocker_epic, and blocked_epic name that exact edge.
+- The later-to-earlier check applies only to edges between two different Epics.
+- When milestone order is unknown, list cross-Epic edges as unordered, not as defects. When a declared order omits an Epic, list its edges as unordered.
+- Acceptance copied from another Epic needs the matching forward edge. When an Epic's acceptance, or a child's completion, depends on work another Epic owns and no edge from that work exists, report a missing forward edge or misplaced acceptance.
+- Take recorded exceptions only from an approved manifest or decision record supplied with the request. Never invent an approval. Propose an exception for the lead to approve instead.
+- Report these findings and never fix them. Apply writes only the edges named in `dependencies`.
 
 ## Sizing and refinement
 

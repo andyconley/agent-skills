@@ -30,7 +30,7 @@ Read [references/ticket-quality-and-completion.md](references/ticket-quality-and
 ## Select one mode
 
 - **Draft:** Propose a breakdown from source material and available Jira context. Do not change Jira. Read existing work first: reconcile every proposed item against the Epic's existing children under the SOP's source-authority rules. Without Jira context, emit schema 2 and state that design claims are unverified. Read [references/manifest-contract.md](references/manifest-contract.md). Check every description against its template's required keys before returning the manifest. Run the SOP's cross-Epic consolidation check unless the request opts out. Before drafting, collect the shaping answers under the SOP's shaping questions and record each with its source. Always return the Jira context line, Epic outcome, reconciliation table, material conflicts, shaping answers and run mode, divergence list, consolidation result, child table, complete YAML manifest, dependency edge list or graph, graph checks, and material questions.
-- **Review:** Check an existing breakdown or manifest. Do not change Jira or redesign valid work. Read [references/manifest-contract.md](references/manifest-contract.md). Return only material defects, lifecycle eligibility, the smallest corrections, and a corrected edge list when edges change.
+- **Review:** Check an existing breakdown or manifest. Do not change Jira or redesign valid work. Read [references/manifest-contract.md](references/manifest-contract.md). Return only material defects, lifecycle eligibility, the smallest corrections, and a corrected edge list when edges change. When the manifest carries a `consolidation` block, check edges between milestone Epics against its order and exceptions.
 - **Audit:** Inspect live Jira or a supplied export. Do not change Jira. Read [references/jira-change-protocol.md](references/jira-change-protocol.md). Return the hierarchy, item table, edge list, graph defects, ticket-quality findings, Story lifecycle eligibility, and smallest proposed change set.
 - **Apply:** Reconcile Jira to one specific approved manifest. Read both [references/manifest-contract.md](references/manifest-contract.md) and [references/jira-change-protocol.md](references/jira-change-protocol.md). Apply only after the user directly authorizes the exact manifest revision.
 
@@ -59,7 +59,7 @@ For every Story, plan contextual documentation, automated integration or functio
 
 Use `A -> B` to mean **A blocks B**. Add an edge only when B cannot finish safely without A. Rank controls reading and likely execution order; it does not create a dependency.
 
-Check each graph for cycles, reversed edges, duplicates, redundant transitive edges, orphaned Spikes and Tasks, Stories blocking their prerequisites, lost parallelism, and implicit cross-Epic dependencies.
+Check each graph for cycles, reversed edges, duplicates, redundant transitive edges, orphaned Spikes and Tasks, Stories blocking their prerequisites, lost parallelism, implicit cross-Epic dependencies, and later-to-earlier edges between milestone Epics.
 
 ## Keep writes fail-closed
 

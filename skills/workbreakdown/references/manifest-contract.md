@@ -515,7 +515,7 @@ Return:
 8. Proposed child table: each child's ref, key or `new`, type, summary, observable completion, and the Epic exit condition or Story it serves. Name an exit condition the way the Epic names it, such as its slice ID.
 9. Complete YAML manifest.
 10. Dependency edge list or graph using A -> B for A blocks B.
-11. Cycle, direction, duplicate, redundancy, missing-edge, and orphan checks.
+11. Cycle, direction, duplicate, redundancy, missing-edge, orphan, later-to-earlier, and copied-acceptance checks. List each later-to-earlier edge as a recorded exception or a defect, or as unordered when milestone order is unknown.
 12. Questions that materially affect the breakdown.
 
 Use temporary references until Jira assigns keys. Do not create placeholder Jira keys.
