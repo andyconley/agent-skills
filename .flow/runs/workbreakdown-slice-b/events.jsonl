@@ -4,3 +4,5 @@
 {"artifacts": {"solution": ".flow/runs/workbreakdown-slice-b/solution.md"}, "at": "2026-09-25T03:15:09Z", "dispositions": {"risk": "owned"}, "event": "approve-solution", "from": "solutioning", "to": "solution_approved"}
 {"artifacts": {}, "at": "2026-09-25T03:20:23Z", "dispositions": {}, "event": "start-plan", "from": "solution_approved", "to": "planning"}
 {"artifacts": {"handoff": ".flow/runs/workbreakdown-slice-b/implementation-handoff.md", "plan": ".flow/runs/workbreakdown-slice-b/plan.md", "validation_plan": ".flow/runs/workbreakdown-slice-b/validation-plan.md"}, "at": "2026-09-25T03:27:22Z", "dispositions": {}, "event": "approve-plan", "from": "planning", "to": "plan_approved"}
+{"artifacts": {}, "at": "2026-09-25T03:29:13Z", "dispositions": {}, "event": "start-implementation", "from": "plan_approved", "to": "implementing"}
+{"artifacts": {"handback": ".flow/runs/workbreakdown-slice-b/HANDOFF.md", "implementation_evidence": ".flow/runs/workbreakdown-slice-b/validation-results.md"}, "at": "2026-09-25T16:55:06Z", "dispositions": {}, "event": "mark-handback-ready", "from": "implementing", "to": "handback_ready"}
