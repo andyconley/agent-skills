@@ -22,7 +22,7 @@ If any required operation or verification read is unavailable, stop before the f
 
 ## Audit
 
-Read the Epic, all direct children, ranks, and dependency links. Also read the Initiative's other Epics, their direct children, and link changelogs when available. Audit stays read-only. Do not change Jira.
+Read the Epic, all direct children, ranks, and dependency links. Also read the Initiative's other Epics, their direct children, and link changelogs when available. Audit stays read-only. List sibling children with one search per sibling, and open a sibling child's full card and changelog only when it has a link to or from this Epic's children. Do not change Jira.
 
 Return:
 
