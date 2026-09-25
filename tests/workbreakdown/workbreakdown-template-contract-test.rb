@@ -439,7 +439,8 @@ validate_audit_findings(audit_example)
 assert(audit_prose.include?("check is #{AUDIT_CHECKS[0..-2].join(", ")}, or #{AUDIT_CHECKS.last}."), "Audit check prose does not match AUDIT_CHECKS")
 AUDIT_CHECKS.each { |check| assert(audit_prose.include?("  - #{check}: "), "Audit prose does not define #{check}") }
 audit_valid = [
-  {"check" => "into-closed", "edge" => {"blocker" => "WORK-1", "blocked" => "WORK-2"}, "evidence" => "WORK-2 status category: done"},
+  {"check" => "into-closed", "edge" => {"blocker" => "WORK-1", "blocked" => "WORK-2"}, "evidence" => "WORK-2 status category: done",
+   "classification" => "unknown", "history" => "none"},
   {"check" => "status-vs-blockers", "ref" => "WORK-3", "evidence" => "WORK-3 is ahead of open blocker WORK-4"}
 ]
 validate_audit_findings(audit_valid)
@@ -461,7 +462,19 @@ audit_case(audit_valid, "status-vs-blockers finding requires a ref") { |f| f[1].
 audit_case(audit_valid, "text-only-blocker finding requires a ref") { |f| f[1]["check"] = "text-only-blocker"; f[1]["ref"] = "blocked work" }
 audit_case(audit_valid, "audit finding requires evidence") { |f| f[1]["evidence"] = " " }
 audit_case(audit_valid, "audit findings must be distinct") { |f| f << clone(f[0]) }
-validate_audit_findings(audit_valid + [{"check" => "contradicts-text", "edge" => {"blocker" => "WORK-1", "blocked" => "WORK-2"}, "evidence" => "WORK-2 text: WORK-2 feeds WORK-1."}])
+validate_audit_findings(audit_valid + [{"check" => "contradicts-text", "edge" => {"blocker" => "WORK-1", "blocked" => "WORK-2"}, "evidence" => "WORK-2 text: WORK-2 feeds WORK-1.",
+  "classification" => "scope-disagreement", "history" => {"author" => "Epic owner", "date" => "2026-09-22"}}])
+audit_case(audit_valid, "link finding requires classification and history") { |f| f[0].delete("history") }
+audit_case(audit_valid, "link finding requires classification and history") { |f| f[0].delete("classification") }
+audit_case(audit_valid, "invalid link classification") { |f| f[0]["classification"] = "reversed" }
+audit_case(audit_valid, "history must be none or author and date") { |f| f[0]["history"] = "unknown" }
+audit_case(audit_valid, "history must be none or author and date") { |f| f[0]["history"] = {"author" => " ", "date" => "2026-09-22"} }
+audit_case(audit_valid, "finding history has unknown field comment") { |f| f[0]["history"] = {"author" => "a", "date" => "2026-09-22", "comment" => "x"} }
+audit_case(audit_valid, "history date must be a valid YYYY-MM-DD date") { |f| f[0]["history"] = {"author" => "a", "date" => "2026-02-30"} }
+audit_case(audit_valid, "classification without history must be unknown") { |f| f[0]["classification"] = "mechanical" }
+audit_case(audit_valid, "status-vs-blockers finding takes no classification") { |f| f[1]["classification"] = "unknown" }
+assert(audit_prose.include?("classification is #{LINK_CLASSIFICATIONS[0..-2].join(", ")}, or #{LINK_CLASSIFICATIONS.last}. Classification defaults to unknown."), "Audit classification prose does not match LINK_CLASSIFICATIONS")
+LINK_CLASSIFICATIONS.each { |value| assert(audit_prose.include?("- #{value}: "), "Audit prose does not define #{value}") }
 
 not_a_map = clone(consolidated)
 not_a_map["consolidation"] = "run"

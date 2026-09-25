@@ -36,6 +36,7 @@ CONSOLIDATION_KEYS = %w[status claims order exceptions].freeze
 EDGE_CHECKS = %w[contradicts-text into-closed later-to-earlier].freeze
 REF_CHECKS = %w[text-only-blocker status-vs-blockers].freeze
 AUDIT_CHECKS = (EDGE_CHECKS + REF_CHECKS).freeze
+LINK_CLASSIFICATIONS = %w[mechanical scope-disagreement unknown].freeze
 CONSOLIDATION_STATUSES = %w[run skipped no-siblings].freeze
 ORDER_SOURCES = %w[declared rank unknown].freeze
 CONFIRMATION_STATES = %w[proposed confirmed].freeze
@@ -467,7 +468,7 @@ def validate_audit_findings(findings)
   raise ArgumentError, "audit findings must be a list" unless findings.is_a?(Array)
   findings.each do |finding|
     raise ArgumentError, "audit finding must be a map" unless finding.is_a?(Hash)
-    reject_unknown_keys(finding, %w[check edge ref evidence], "audit finding")
+    reject_unknown_keys(finding, %w[check edge ref evidence classification history], "audit finding")
     check = finding["check"]
     raise ArgumentError, "invalid audit check" unless AUDIT_CHECKS.include?(check)
     raise ArgumentError, "audit finding takes an edge or a ref, not both" if finding.key?("edge") && finding.key?("ref")
@@ -477,7 +478,18 @@ def validate_audit_findings(findings)
       reject_unknown_keys(edge, %w[blocker blocked], "audit finding edge")
       raise ArgumentError, "edge requires blocker and blocked Jira keys" unless %w[blocker blocked].all? { |end_name| edge[end_name].to_s.match?(JIRA_KEY) }
       raise ArgumentError, "edge blocker and blocked must differ" if edge["blocker"] == edge["blocked"]
+      raise ArgumentError, "link finding requires classification and history" unless finding.key?("classification") && finding.key?("history")
+      raise ArgumentError, "invalid link classification" unless LINK_CLASSIFICATIONS.include?(finding["classification"])
+      history = finding["history"]
+      unless history == "none"
+        raise ArgumentError, "history must be none or author and date" unless history.is_a?(Hash)
+        reject_unknown_keys(history, %w[author date], "finding history")
+        raise ArgumentError, "history must be none or author and date" unless nonempty_text?(history["author"])
+        raise ArgumentError, "history date must be a valid YYYY-MM-DD date" unless iso_date?(history["date"])
+      end
+      raise ArgumentError, "classification without history must be unknown" if history == "none" && finding["classification"] != "unknown"
     else
+      raise ArgumentError, "#{check} finding takes no classification" if finding.key?("classification") || finding.key?("history")
       raise ArgumentError, "#{check} finding requires a ref" unless finding["ref"].to_s.match?(JIRA_KEY)
     end
     raise ArgumentError, "audit finding requires evidence" unless nonempty_text?(finding["evidence"])
