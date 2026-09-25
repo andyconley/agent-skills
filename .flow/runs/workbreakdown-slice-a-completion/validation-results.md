@@ -126,3 +126,9 @@ Each gate ran `bash tests/workbreakdown-contract-test.sh`, `bash scripts/validat
   - HANDOFF.md
   - `mark-handback-ready`
   - `flow-review`
+
+#### Step 5 maintainer rulings (2026-09-24)
+
+- **Option A, template-less Epics:** schema 4 gains `epic.disposition: unbound`. It binds only the observed ADF digest of a live Epic whose description fits no template, and it never authorizes a write (38aa866). Draft also self-checks every description against its template's required keys and the manifest invariants before returning.
+- **R2.5:** relaxed. Review must flag at least one rev1 Story as `component-story` and never the demoable flow Story. Review consistently flagged a different pair of rev1 Stories from the tabletop's pair.
+- **R2.2:** FX-PATTERN is narrowed to the list-read card. The delete, reverse-lookup and save-and-apply cards now hold genuinely open questions in live Jira, which supersedes the tabletop expectation. FX-BOUNDS and the negative control are unchanged.
