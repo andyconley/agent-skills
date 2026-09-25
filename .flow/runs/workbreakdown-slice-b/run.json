@@ -2,21 +2,25 @@
   "artifacts": {
     "acceptance_criteria": ".flow/runs/workbreakdown-slice-b/acceptance-criteria.md",
     "orchestration_manifest": ".flow/runs/workbreakdown-slice-b/orchestration.json",
-    "requirements": ".flow/runs/workbreakdown-slice-b/definition.md"
+    "requirements": ".flow/runs/workbreakdown-slice-b/definition.md",
+    "solution": ".flow/runs/workbreakdown-slice-b/solution.md"
   },
   "created_at": "2026-09-25T03:07:24Z",
-  "dispositions": {},
+  "dispositions": {
+    "risk": "owned"
+  },
   "gates": {
     "approve-definition": "2026-09-25T03:08:42Z",
+    "approve-solution": "2026-09-25T03:15:09Z",
     "start-definition": "2026-09-25T03:07:24Z",
     "start-solution": "2026-09-25T03:08:42Z"
   },
   "lane": "solution",
-  "last_event": "start-solution",
-  "phase": "solutioning",
+  "last_event": "approve-solution",
+  "phase": "solution_approved",
   "protocol_revision": 2,
   "schema_version": 1,
-  "state": "solutioning",
-  "updated_at": "2026-09-25T03:08:42Z",
+  "state": "solution_approved",
+  "updated_at": "2026-09-25T03:15:09Z",
   "work_id": "workbreakdown-slice-b"
 }

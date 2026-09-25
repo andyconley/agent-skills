@@ -1,3 +1,4 @@
 {"artifacts": {}, "at": "2026-09-25T03:07:24Z", "dispositions": {}, "event": "start-definition", "from": null, "to": "defining"}
 {"artifacts": {"acceptance_criteria": ".flow/runs/workbreakdown-slice-b/acceptance-criteria.md", "orchestration_manifest": ".flow/runs/workbreakdown-slice-b/orchestration.json", "requirements": ".flow/runs/workbreakdown-slice-b/definition.md"}, "at": "2026-09-25T03:08:42Z", "dispositions": {}, "event": "approve-definition", "from": "defining", "to": "definition_approved"}
 {"artifacts": {}, "at": "2026-09-25T03:08:42Z", "dispositions": {}, "event": "start-solution", "from": "definition_approved", "to": "solutioning"}
+{"artifacts": {"solution": ".flow/runs/workbreakdown-slice-b/solution.md"}, "at": "2026-09-25T03:15:09Z", "dispositions": {"risk": "owned"}, "event": "approve-solution", "from": "solutioning", "to": "solution_approved"}
