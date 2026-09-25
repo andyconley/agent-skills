@@ -460,6 +460,8 @@ audit_case(audit_valid, "audit finding edge has unknown field type") { |f| f[0][
 audit_case(audit_valid, "status-vs-blockers finding requires a ref") { |f| f[1].delete("ref") }
 audit_case(audit_valid, "text-only-blocker finding requires a ref") { |f| f[1]["check"] = "text-only-blocker"; f[1]["ref"] = "blocked work" }
 audit_case(audit_valid, "audit finding requires evidence") { |f| f[1]["evidence"] = " " }
+audit_case(audit_valid, "audit findings must be distinct") { |f| f << clone(f[0]) }
+validate_audit_findings(audit_valid + [{"check" => "contradicts-text", "edge" => {"blocker" => "WORK-1", "blocked" => "WORK-2"}, "evidence" => "WORK-2 text: WORK-2 feeds WORK-1."}])
 
 not_a_map = clone(consolidated)
 not_a_map["consolidation"] = "run"

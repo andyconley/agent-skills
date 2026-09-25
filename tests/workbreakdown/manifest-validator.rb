@@ -482,6 +482,8 @@ def validate_audit_findings(findings)
     end
     raise ArgumentError, "audit finding requires evidence" unless nonempty_text?(finding["evidence"])
   end
+  keys = findings.map { |finding| [finding["check"], finding["edge"] || finding["ref"]] }
+  raise ArgumentError, "audit findings must be distinct" unless keys.uniq.length == keys.length
 end
 
 def validate_classification(classification, child)
