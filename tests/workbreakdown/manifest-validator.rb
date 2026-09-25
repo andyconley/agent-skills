@@ -483,8 +483,15 @@ def validate_manifest(manifest, templates, registry)
     end
     raise ArgumentError, "schema #{schema} requires an Epic-compatible template set" if epic_templates.empty?
     disposition = epic["disposition"]
-    raise ArgumentError, "missing Epic disposition" unless %w[existing update].include?(disposition)
-    if disposition == "existing"
+    raise ArgumentError, "missing Epic disposition" unless %w[existing update unbound].include?(disposition)
+    if disposition == "unbound"
+      # A live Epic whose description fits no template: schema 4 binds only its digest and never writes it.
+      raise ArgumentError, "unbound Epic requires schema 4" unless schema == 4
+      reject_unknown_keys(epic, %w[disposition observed], "unbound Epic")
+      observed = epic.fetch("observed")
+      reject_unknown_keys(observed, %w[description_adf_sha256], "Epic observed")
+      raise ArgumentError, "missing current ADF digest" unless observed["description_adf_sha256"]&.match?(/\A[0-9a-f]{64}\z/)
+    elsif disposition == "existing"
       reject_unknown_keys(epic, %w[disposition verify], "existing Epic")
       verify = epic.fetch("verify")
       reject_unknown_keys(verify, %w[template_id template_sha256 description_adf_sha256 description], "Epic verify")

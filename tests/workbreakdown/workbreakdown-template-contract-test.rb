@@ -740,6 +740,25 @@ legacy_epic_in_set4["epic"]["template_id"] = "jira-epic-v1"
 legacy_epic_in_set4["epic"]["template_sha256"] = index.dig("jira-epic-v1", "sha256")
 expect_error("invalid Epic template") { validate_manifest(legacy_epic_in_set4, index, registry) }
 
+# An Epic whose live description fits no template is bound by digest only, in schema 4.
+unbound = clone(set4)
+unbound["epic"] = {"disposition" => "unbound", "observed" => {"description_adf_sha256" => "d" * 64}}
+validate_manifest(unbound, index, registry)
+
+unbound_schema3 = clone(unbound)
+unbound_schema3["schema_version"] = 3
+%w[shaping sources].each { |key| unbound_schema3.delete(key) }
+unbound_schema3["children"].each { |child| child.delete("classification") }
+expect_error("unbound Epic requires schema 4") { validate_manifest(unbound_schema3, index, registry) }
+
+unbound_no_digest = clone(unbound)
+unbound_no_digest["epic"]["observed"]["description_adf_sha256"] = "compute at apply"
+expect_error("missing current ADF digest") { validate_manifest(unbound_no_digest, index, registry) }
+
+unbound_with_changes = clone(unbound)
+unbound_with_changes["epic"]["changes"] = {"description" => {}}
+expect_error("unbound Epic has unknown field changes") { validate_manifest(unbound_with_changes, index, registry) }
+
 # Schema-2/3 error precedence is unchanged: an unknown root field is reported before the schema version.
 unknown_before_schema = clone(schema3)
 unknown_before_schema["transition"] = "Done"

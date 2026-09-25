@@ -88,7 +88,7 @@ Treat the known-good live link as authoritative if the target Jira behaves diffe
 
 Keep a mutation journal with the intended operation, target, prior value or digest, requested value or digest, result, verification result, and resulting key or link ID.
 
-1. For schema 3 or 4, verify an `existing` Epic without mutation or apply only the approved description for an `update` Epic. Preserve every omitted Epic field.
+1. For schema 3 or 4, verify an `existing` Epic, or a schema-4 `unbound` Epic's digest, without mutation or apply only the approved description for an `update` Epic. Preserve every omitted Epic field.
 2. Create `proposed` children as direct Epic children and record each reference-to-key mapping. Create each defining Spike before the placeholder Tasks it defines. Render a placeholder's `defined_by` from that mapping. This is key resolution, not content added after approval.
 3. Apply explicit `changes` to `update` children. Preserve every omitted field.
 4. Verify `existing` children without changing them.

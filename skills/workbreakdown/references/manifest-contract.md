@@ -36,6 +36,8 @@ Reject unknown fields instead of ignoring them.
 - scope: parent_key, epic_key.
 - Schema-2 epic: outcome, target_duration.
 - Schema-3 existing epic: disposition, verify.
+- Schema-4 unbound epic: disposition, observed.
+- observed: description_adf_sha256.
 - Schema-3 update epic: disposition, template_id, template_sha256, expected_current, changes.
 - Epic verify: template_id, template_sha256, description_adf_sha256, description.
 - expected_current: description_adf_sha256.
@@ -329,6 +331,17 @@ rank:
 unknowns: []
 ~~~
 
+### Unbound Epic
+
+Schema 4 adds one Epic disposition, `unbound`, for a live Epic whose description fits no non-legacy Epic template, such as an Epic written before the templates existed. It contains only `observed.description_adf_sha256`, captured from live Jira by the same rules as expected_current. It never authorizes an Epic write, and schema 3 rejects it. Apply verifies the digest and treats a mismatch as drift. To change such an Epic, propose an `update` with a complete template-shaped description, which needs the Epic owner's agreement.
+
+~~~yaml
+epic:
+  disposition: unbound
+  observed:
+    description_adf_sha256: 9f2c4b7a1e5d8036c4a91b2e7f60d3a85c19e4b70d2f6a83915ce4d70b8a2f61
+~~~
+
 ### shaping
 
 shaping records the answers that shaped the Draft. Its entries are spike_shape, task_granularity, reviewers, and source_order, and each is optional. Reject any other entry.
@@ -380,6 +393,7 @@ breakdown_conventions is an optional description key of jira-epic-v3. It renders
 - On a verified Epic, it is the live Epic's record and may differ from this Draft's shaping.
 - It is written only through the guarded Epic description update. Schema 4 adds no other Epic write.
 - An update replaces the whole description, so an update of an Epic whose live description has a panel must carry breakdown_conventions. A schema-3 update cannot carry it, so updating such an Epic requires schema 4. Review reports a missing panel as `invalid-manifest`.
+- An unbound Epic has no description in the manifest, so it carries no panel.
 - A malformed live panel cannot be verified. Draft reports it and proposes an Epic update whose breakdown_conventions equals shaping, which needs the Epic owner's agreement like any Epic update.
 
 ### Migration
@@ -433,6 +447,8 @@ scoped-relative orders only manifest children relative to one another. It must p
 If exact placement among all live children matters, use full-live-order and include every live direct child. Any live mismatch is material drift and requires a new manifest revision.
 
 ## Draft output
+
+Before returning a Draft, check every description against its template's required keys and every manifest invariant in this contract, and fix any gap. Do not return a manifest you have not checked.
 
 Return:
 
