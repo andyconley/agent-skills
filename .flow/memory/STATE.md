@@ -2,7 +2,7 @@
 
 ## Current work
 
-No Flow run is in progress or awaiting archive. workbreakdown 1.5.0 (Slice A) is released, and both of its runs are archived. Slice B (cross-Epic consistency and semantic Audit checks) needs its own solutioning. The Story delivery-evidence run is archived. Optional follow-ups from it remain: direct negative tests for mismatched, duplicate, and generic review evidence, and the fresh-host manual prompt matrix.
+No Flow run is in progress or awaiting archive. workbreakdown 1.6.0 (Slice B: cross-Epic consolidation and semantic Audit findings) is merged and its run is archived, after 1.5.0 (Slice A). Open workbreakdown follow-ups: the release check's divergence-list parser should accept an inline label; Draft cost (5.5 to 14 minutes on Opus) could drop further; non-interactive Drafts still take reviewers from sibling panels; and the stale-design detection weakness carried from 1.5.0. The Story delivery-evidence run is archived. Optional follow-ups from it remain: direct negative tests for mismatched, duplicate, and generic review evidence, and the fresh-host manual prompt matrix.
 
 Durable facts about this repository that are not obvious from the code and have already cost time once.
 
