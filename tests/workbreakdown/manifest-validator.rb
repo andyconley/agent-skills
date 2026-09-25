@@ -333,8 +333,8 @@ def validate_classified_spike(child, payload, schema)
   end
   return unless schema == 4
 
-  classification = child["classification"] || {}
-  raise ArgumentError, "v3 Spike requires classification question and precedent" unless classification.key?("question") && classification.key?("precedent")
+  # validate_child already requires classification question and precedent on every schema-4 Spike.
+  classification = child["classification"]
   return unless description
 
   raise ArgumentError, "Spike description question must match classification" unless description["question"] == classification["question"]

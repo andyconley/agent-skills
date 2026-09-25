@@ -93,7 +93,7 @@ Each gate ran `bash tests/workbreakdown-contract-test.sh`, `bash scripts/validat
   - M28: drop epic-v2's set-4 compatibility
   - M29: allow the panel in schema 3
   - M31: skip panel shape validation on a verified Epic
-- **Choice the plan left open:** the portable `source_order` default is `[jira-amendment, jira-description, design-page]`. The default uses it only to break ties between sources with the same date. An asked or reused order replaces recency. Commit 09ca879 later narrowed this: a default or reused order only breaks ties, and only an asked order replaces recency.
+- **Choice the plan left open:** the portable `source_order` default is `[jira-amendment, jira-description, design-page]`. A default or reused order only breaks ties between sources with the same date or no date, and only an asked order replaces recency. Commit 09ca879 set this final rule after the step-4 re-check; e13a868 had briefly let a reused order replace recency.
 - **Quality gate:** requested changes, with six Important prose findings, all fixed in e13a868:
   - non-interactive runs were not defined or stated
   - the order of reading existing work and collecting shaping was inconsistent
