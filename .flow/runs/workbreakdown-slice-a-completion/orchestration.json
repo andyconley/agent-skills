@@ -337,6 +337,144 @@
         "mode": "serialized",
         "group": "coordinator"
       }
+    },
+    {
+      "id": "acceptance-quality-reviewer",
+      "lane": "review",
+      "role": "quality-reviewer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/quality-reviewer"
+      },
+      "brief_path": ".flow/runs/workbreakdown-slice-a-completion/HANDOFF.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-slice-a-completion/plan.md",
+        ".flow/runs/workbreakdown-slice-a-completion/validation-plan.md",
+        ".flow/runs/workbreakdown-slice-a-completion/validation-results.md",
+        ".flow/runs/workbreakdown-slice-a-completion/HANDOFF.md"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-slice-a-completion/reviews/acceptance-quality.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "verdict with prioritized findings against plan and ACs"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "acceptance"
+      }
+    },
+    {
+      "id": "acceptance-test-engineer",
+      "lane": "review",
+      "role": "test-engineer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/test-engineer"
+      },
+      "brief_path": ".flow/runs/workbreakdown-slice-a-completion/HANDOFF.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-slice-a-completion/plan.md",
+        ".flow/runs/workbreakdown-slice-a-completion/validation-plan.md",
+        ".flow/runs/workbreakdown-slice-a-completion/validation-results.md",
+        ".flow/runs/workbreakdown-slice-a-completion/HANDOFF.md"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-slice-a-completion/reviews/acceptance-test.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "proof assessment with prioritized findings"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "acceptance"
+      }
+    },
+    {
+      "id": "acceptance-security-reviewer",
+      "lane": "review",
+      "role": "security-reviewer",
+      "provider": {
+        "kind": "agent",
+        "id": "claude-code/security-reviewer"
+      },
+      "brief_path": ".flow/runs/workbreakdown-slice-a-completion/HANDOFF.md",
+      "input_evidence": [
+        ".flow/runs/workbreakdown-slice-a-completion/plan.md",
+        ".flow/runs/workbreakdown-slice-a-completion/validation-plan.md",
+        ".flow/runs/workbreakdown-slice-a-completion/validation-results.md",
+        ".flow/runs/workbreakdown-slice-a-completion/HANDOFF.md"
+      ],
+      "read_scopes": [
+        "skills/workbreakdown",
+        "tests",
+        ".flow/runs"
+      ],
+      "write_scopes": [],
+      "read_only": true,
+      "required_capabilities": [
+        {
+          "name": "filesystem-read",
+          "status": "confirmed"
+        }
+      ],
+      "output": {
+        "path": ".flow/runs/workbreakdown-slice-a-completion/reviews/acceptance-security.md",
+        "format": "markdown"
+      },
+      "success_criteria": [
+        "public-repo leak and credential-isolation findings"
+      ],
+      "claim_statuses": [
+        "observed",
+        "inferred",
+        "recommended",
+        "unverified"
+      ],
+      "coordination": {
+        "mode": "concurrent",
+        "group": "acceptance"
+      }
     }
   ],
   "shared_state": [],
@@ -351,8 +489,8 @@
       "handback-tech-writer"
     ],
     "evidence_collector_assignment": "coordinator",
-    "verifier_assignment": "coordinator",
-    "independent": false,
-    "artifact_path": ".flow/runs/workbreakdown-skill-improvements/solution.md"
+    "verifier_assignment": "acceptance-quality-reviewer",
+    "independent": true,
+    "artifact_path": ".flow/runs/workbreakdown-slice-a-completion/review.md"
   }
 }

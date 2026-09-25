@@ -22,14 +22,15 @@
     "start-definition": "2026-09-24T20:46:48Z",
     "start-implementation": "2026-09-24T21:13:29Z",
     "start-plan": "2026-09-24T20:46:50Z",
+    "start-review": "2026-09-25T02:26:41Z",
     "start-solution": "2026-09-24T20:46:49Z"
   },
-  "lane": "implement",
-  "last_event": "mark-handback-ready",
-  "phase": "handback_ready",
+  "lane": "review",
+  "last_event": "start-review",
+  "phase": "reviewing",
   "protocol_revision": 2,
   "schema_version": 1,
-  "state": "handback_ready",
-  "updated_at": "2026-09-25T02:25:16Z",
+  "state": "reviewing",
+  "updated_at": "2026-09-25T02:26:41Z",
   "work_id": "workbreakdown-slice-a-completion"
 }

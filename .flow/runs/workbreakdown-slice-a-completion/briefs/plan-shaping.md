@@ -15,7 +15,7 @@ You are one of three planning roles. The work is read-only: don't edit any file.
 
 ## Evidence inventory
 
-Paths are relative to `/Users/andyconley/agent-skills-worktrees/workbreakdown-slice-a`.
+Paths are relative to `~/agent-skills-worktrees/workbreakdown-slice-a`.
 
 - **Approved requirements:** `.flow/runs/workbreakdown-skill-improvements/definition.md`, R0, R1, R2 and R5.
 - **Acceptance criteria:** `.flow/runs/workbreakdown-skill-improvements/acceptance-criteria.md`, Slice A: AC-R0.1–R0.3, AC-R1.1–R1.4, AC-R2.1–R2.8, AC-R5 and AC-A-regression.
@@ -46,7 +46,7 @@ Paths are relative to `/Users/andyconley/agent-skills-worktrees/workbreakdown-sl
   - Fixtures are in `tests/workbreakdown/fixtures/`.
   - The suite asserts that the public skill folder contains no `AE-`/`ER-` keys.
 - **Installed skill:** `~/.claude/skills/workbreakdown` is a symlink to `~/agent-skills/skills/workbreakdown`, the main checkout at 1.4.0, not this worktree. Headless `claude` 2.1.282 is available at `~/.local/bin/claude`.
-- **Private fixture:** `/Users/andyconley/KB/.claude/worktrees/nostalgic-kapitsa-82d9e6/.flow/runs/workbreakdown-skill-improvements/`. It holds `evidence/tabletop/` (team snapshot, drafts, comparison) and `fixture-cases.md`, which maps FX-* IDs to real evidence. This location is private, so never copy real keys or names into public text.
+- **Private fixture:** `the maintainer's private knowledge base, .flow/runs/workbreakdown-skill-improvements/`. It holds `evidence/tabletop/` (team snapshot, drafts, comparison) and `fixture-cases.md`, which maps FX-* IDs to real evidence. This location is private, so never copy real keys or names into public text.
 - **Constraints:**
   - `agent-skills` is a public repository.
   - Commits are local only and use conventional messages. semantic-release generates the root CHANGELOG, but the skill CHANGELOG, if one exists, is hand-written.

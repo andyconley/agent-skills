@@ -3,7 +3,7 @@
 - **Where:**
   - **Public skill:** the `~/agent-skills-worktrees/workbreakdown-slice-a` worktree, branch `claude/workbreakdown-slice-a`, in the public repo `andyconley/agent-skills`.
   - **Private script:** `~/KB/utilities/workbreakdown-release-check/` on a new `claude/*` branch in KB.
-  - **Private fixture and results:** the KB run folder `.flow/runs/workbreakdown-skill-improvements/` in the `nostalgic-kapitsa-82d9e6` worktree, or wherever the maintainer points.
+  - **Private fixture and results:** a run folder in the maintainer's private knowledge base.
   - Leave the `~/agent-skills` main checkout alone. It holds another run's uncommitted work.
 - **Spec:** `plan.md` is complete. Build steps 0–6 in order, and don't start a step until the previous step's gate in `validation-plan.md` passes.
 - **Stop points:** stopping is safe after step 0, 1, 2 or 3, while set 3 is still the default. Never stop partway through step 4. If step 4 can't finish, revert the default flip. VERSION changes only in step 6, after the release gate is green.

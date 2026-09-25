@@ -93,7 +93,7 @@ Each gate ran `bash tests/workbreakdown-contract-test.sh`, `bash scripts/validat
   - M28: drop epic-v2's set-4 compatibility
   - M29: allow the panel in schema 3
   - M31: skip panel shape validation on a verified Epic
-- **Choice the plan left open:** the portable `source_order` default is `[jira-amendment, jira-description, design-page]`. The default uses it only to break ties between sources with the same date. An asked or reused order replaces recency.
+- **Choice the plan left open:** the portable `source_order` default is `[jira-amendment, jira-description, design-page]`. The default uses it only to break ties between sources with the same date. An asked or reused order replaces recency. Commit 09ca879 later narrowed this: a default or reused order only breaks ties, and only an asked order replaces recency.
 - **Quality gate:** requested changes, with six Important prose findings, all fixed in e13a868:
   - non-interactive runs were not defined or stated
   - the order of reading existing work and collecting shaping was inconsistent
@@ -144,7 +144,7 @@ Each gate ran `bash tests/workbreakdown-contract-test.sh`, `bash scripts/validat
 - **Criteria that pass:**
   - R0.1 and R0.2, including sibling reuse
   - R1.1, and R1.2 across two runs
-  - R1.3 FX-STALE-3
+  - R1.3, partial: FX-STALE-3 passes, and FX-STALE-2 is the accepted weakness below
   - R2.1–R2.5 and R2.7
   - R5
   - R2.8 and the unchanged public tests
@@ -168,3 +168,16 @@ Each gate ran `bash tests/workbreakdown-contract-test.sh`, `bash scripts/validat
   - Vale at 0/0/0
   - an empty diff for the `schema2-*` and `schema3-*` fixtures and the set-1 to set-3 assets
   - an empty public-safety grep
+
+### After acceptance review (7d1b83b)
+
+- These fix coherence gaps the acceptance review found. They came after the release gate, which ran on 0d85152.
+  - The schema-4 example now uses template set 4 and a separate placeholder Task, and a test loads it.
+  - Every schema-4 Spike requires classification. The validator enforces this, mutant M34 is caught, and the final gate's R2.1 already showed Drafts classify every Spike.
+  - Final verification and template binding now cover schema 4.
+  - The Apply preflight stops an update that would delete a live panel.
+  - An asked `source_order` re-resolves earlier conflicts.
+  - `from_epic` may name the Epic's own panel.
+  - The stale "schema-3 Epic rules unchanged" wording is fixed.
+- The changes are validated by the per-step gate: the suite, `validate-skills`, `install-test`, and Vale at 0/0/0. They were not re-run through the live release gate.
+- Private local paths were scrubbed from the public run records.

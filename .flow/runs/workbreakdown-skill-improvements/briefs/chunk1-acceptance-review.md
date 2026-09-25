@@ -14,7 +14,7 @@ This is an independent acceptance review of chunk 1 (manifest schema 4 foundatio
 
 ## Evidence inventory
 
-- **Full diff against main**, for skills and tests: `/private/tmp/claude-501/-Users-andyconley-KB--claude-worktrees-nostalgic-kapitsa-82d9e6/33de6dc8-7228-45b7-b85e-137d6359f144/scratchpad/chunk1-full.diff`. The files themselves live under `/Users/andyconley/agent-skills-worktrees/workbreakdown-slice-a/`.
+- **Full diff against main**, for skills and tests: `(a local scratch folder)`. The files themselves live under `~/agent-skills-worktrees/workbreakdown-slice-a/`.
 - **Review-fix diff** `a6b9eb4..7b58289`, same scratchpad folder: `chunk1-fixes.diff`. Review these fixes as closely as the original; a fix can add its own defects.
 - **Implement-lane reviews and their dispositions:** `.flow/runs/workbreakdown-skill-improvements/reviews/chunk1-*.md`.
 - **Validation evidence:** `.flow/runs/workbreakdown-skill-improvements/validation-results.md`, which includes 5 mutation checks.
