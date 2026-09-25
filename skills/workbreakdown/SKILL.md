@@ -1,11 +1,11 @@
 ---
 name: workbreakdown
-description: Breaks milestone Epics into direct-child Spikes, Tasks, and Stories with observable completion states, concise versioned descriptions, a YAML manifest, hard dependency edges, and verified Jira reconciliation. Use when drafting, reviewing, auditing, or explicitly applying work below an ER or Initiative. Do not use for portfolio hierarchy or unreviewed Jira changes. Version 1.5.0.
+description: Breaks milestone Epics into direct-child Spikes, Tasks, and Stories with observable completion states, concise versioned descriptions, a YAML manifest, hard dependency edges, and verified Jira reconciliation. Use when drafting, reviewing, auditing, or explicitly applying work below an ER or Initiative. Do not use for portfolio hierarchy or unreviewed Jira changes. Version 1.6.0.
 ---
 
 # Work Breakdown
 
-**Version: 1.5.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
+**Version: 1.6.0.** When asked which version is running, report this value exactly. Do not infer a version from Git history or the host application.
 
 Break milestone work into items that can be owned, estimated, sequenced, and proven complete.
 

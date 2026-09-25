@@ -51,6 +51,8 @@ require_text "$MANIFEST_FILE" "dependencies holds an ensure entry for that exact
 require_text "$MANIFEST_FILE" "consolidation.claims records who owns a decision. sources.conflicts records disagreement about a fact."
 require_text "$SKILL_FILE" "cross-Epic consolidation (\`consolidation\`)"
 require_text "$MANIFEST_FILE" "Version 1.5.0 changes what a new Draft produces and leaves every approved manifest valid."
+require_text "$MANIFEST_FILE" "Version 1.6.0 adds the optional consolidation block and Audit's semantic link findings, and leaves every approved manifest valid."
+require_text "$SKILL_FILE" "Do not use for portfolio hierarchy or unreviewed Jira changes. Version $(cat "$REPO_ROOT/skills/workbreakdown/VERSION")."
 
 for template in epic-v1 epic-v2 story-v1 story-v2 story-v3 task-v1 task-v2 spike-v1 spike-design-v2 spike-investigation-v2 spike-design-v3 spike-investigation-v3 task-placeholder-v3 epic-v3; do
   [ -f "$REPO_ROOT/skills/workbreakdown/assets/jira-templates/$template.md" ] || fail "missing bundled $template template"

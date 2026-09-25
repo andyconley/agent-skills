@@ -453,6 +453,14 @@ Version 1.5.0 changes what a new Draft produces and leaves every approved manife
 
 A new Draft emits schema 4 when it has Jira context and schema 2 otherwise. It has Jira context when it can read the live Epic ADF and the Epic's existing children. Its output states which case applies.
 
+Version 1.6.0 adds the optional consolidation block and Audit's semantic link findings, and leaves every approved manifest valid.
+
+- A new Draft checks its Epic against the Initiative's other Epics, unless the request opts out, and records the result in `consolidation`.
+- Graph review checks edges between milestone Epics against milestone order and recorded exceptions.
+- Audit returns a findings block for semantic link defects and classifies each link's history.
+
+Decision: cross-Epic ownership, milestone order, and order exceptions share one optional schema-4 key, following the sources precedent. Three alternatives were rejected. Reusing `sources.conflicts` would give a winning source a second meaning as an owning Epic. Two root keys would add a second acceptance surface for one Draft step. Recording exceptions on dependency entries would leave live links that are outside `dependencies` unable to carry one.
+
 ## Child invariants
 
 Each child uses a unique stable ref and exactly one disposition:
