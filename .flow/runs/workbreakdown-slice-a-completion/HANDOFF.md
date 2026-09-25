@@ -39,9 +39,9 @@ Run on 2026-09-24 against the frozen private snapshot (skill commit 0d85152, whi
 
 **Criteria:**
 - R0 (shaping answers): R0.1 asked answers, R0.2 reused with sibling, R0.3 defaults with reviewer gap all pass
-- R1 (source authority): R1.1 existing-children inventory, R1.2 multi-source conflicts with dated winner, and R1.3 FX-STALE-3 stale design conflict pass; R1.3 FX-STALE-2 is the accepted weakness (see Residual risks)
+- R1 (source authority): R1.1 existing-children inventory passes. R1.2 multi-source conflicts with a dated winner pass. R1.3 FX-STALE-3 stale design conflict passes. R1.3 FX-STALE-2 is the accepted weakness (see Residual risks).
 - R1.4 schema-2 fallback: pass with `Unverified design claim:` unknowns
-- R2 (classification): R2.1 Spike question and precedent, R2.2 precedent verdicts (FX-BOUNDS stays a Spike without a found precedent; the FX-PATTERN card gets verdict found with a traced location), R2.3 vertical-slice default, R2.4 task-granularity declaration, R2.5 component-story findings, R2.6 placeholder schema validity, R2.7 reviewers from snapshot or answer all pass
+- R2 (classification): all pass. R2.1 covers the Spike question and precedent. R2.2 covers precedent verdicts: FX-BOUNDS stays a Spike without a found precedent, and the FX-PATTERN card gets verdict found with a traced location. R2.3 covers the vertical-slice default, R2.4 the task-granularity declaration, R2.5 component-story findings, R2.6 placeholder schema validity, and R2.7 reviewers from the snapshot or an answer.
 - R5 (coverage): exit conditions and user-facing surfaces mapped, public graph and apply tests unchanged
 - R2.8 and public tests: `require_text` and `reject_text` pins pass unchanged
 
@@ -51,7 +51,7 @@ Run on 2026-09-24 against the frozen private snapshot (skill commit 0d85152, whi
 
 ## Deviations from plan and maintainer rulings
 
-1. **R2.2 FX-PATTERN narrowed (decision in step 5).** The delete, reverse-lookup and save-and-apply fixture cards now hold genuinely open questions in live Jira, superseding tabletop expectations. Only the list-read card remains in FX-PATTERN. FX-BOUNDS and the negative control unchanged.
+1. **R2.2 FX-PATTERN narrowed (decision in step 5).** The delete, reverse-lookup and save-and-apply fixture cards now hold open design questions in live Jira, superseding tabletop expectations. Only the list-read card remains in FX-PATTERN. FX-BOUNDS and the negative control unchanged.
 
 2. **R2.5 relaxed (decision in step 5).** Review flags at least one rev1 Story as `component-story` but never the demoable flow Story. The gate observed a different pair of rev1 Stories from the tabletop fixture pair; both behaviors are correct.
 
@@ -69,11 +69,11 @@ Run on 2026-09-24 against the frozen private snapshot (skill commit 0d85152, whi
 
 ## Residual risks
 
-**R1.3 FX-STALE-2 accepted weakness.** Detecting whether a design-page deferral contradicts the Epic's scope passed on about half of its attempts across the three full gates on the same frozen snapshot, and failed the 2-of-3 rule in the final gate (fail, fail, pass). The maintainer accepted this on 2026-09-24 as a documented limitation instead of another skill cycle. The variance is model judgment, not fixture drift. Follow-up: strengthen how Draft compares design-page deferrals against the Epic's current scope.
+**R1.3 FX-STALE-2 accepted weakness.** Detecting whether a design-page deferral contradicts the Epic's scope passed on about half of its attempts across the three full gates on the same frozen snapshot. It failed the 2-of-3 rule in the final gate (fail, fail, pass). The maintainer accepted this on 2026-09-24 as a documented limitation instead of another skill cycle. The variance is model judgment, not fixture drift. Follow-up: strengthen how Draft compares design-page deferrals against the Epic's current scope.
 
 **Reference validator is a reimplementation, not the skill.** The script uses `manifest-validator.rb` extracted from the contract suite; it is not a third-party verifier. A reimplemented check can hide a common bug in both versions.
 
-**Judged checks rely on pattern detection in prose.** The FX-FE-SPLIT pattern for front-end-only Spikes and the FX-COMP-STORY pattern for non-demoable Stories are denylist regexps matched against summaries and descriptions. They succeed when the actual Jira state follows the expected pattern; they can miss or misidentify if Jira wording drifts.
+**Judged checks rely on pattern detection in prose.** The FX-FE-SPLIT pattern for frontend-only Spikes and the FX-COMP-STORY pattern for non-demoable Stories are denylist regexps matched against summaries and descriptions. They succeed when the actual Jira state follows the expected pattern; they can miss or misidentify if Jira wording drifts.
 
 **Prose rules are pinned only by text.** The SOP rewrites at lines 21 and 51, and the `require_text` pins on the new wording, are checked by exact substring match. Synonymous rewording that doesn't trigger the pins will pass CI but violate the intent.
 
