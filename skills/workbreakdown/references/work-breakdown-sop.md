@@ -144,7 +144,7 @@ Each Story must include:
 - the smallest set of operational signals and business metrics that proves the Story outcome or an operational decision, including where each signal will be implemented
 - packaging or deployment evidence
 
-At `IMPLEMENTATION READY`, the documentation, test, and instrumentation plans must be specific enough to execute. The artifacts do not need to exist, pass, or emit yet. The intended environment may remain unknown when the gap is recorded.
+At `SOLUTION READY`, the documentation, test, and instrumentation plans must be specific enough to execute. The artifacts do not need to exist, pass, or emit yet. The intended environment may remain unknown when the gap is recorded.
 
 Before `IN REVIEW`, each mapped automated integration or functional test must pass, instrumentation must be implemented and produce observed output in a named representative environment, and appropriate documentation must be published, updated, or reviewed and confirmed current. Evidence must be linked. Unit tests and manual demonstrations are supplemental; neither replaces automated integration or functional tests.
 

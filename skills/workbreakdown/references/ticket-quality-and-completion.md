@@ -49,7 +49,7 @@ Reference the applicable profile. Do not copy the checklist into the ticket. Ren
 
 ## Story lifecycle gates
 
-### IMPLEMENTATION READY
+### SOLUTION READY
 
 The team can start when the Story defines:
 
