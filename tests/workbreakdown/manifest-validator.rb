@@ -157,7 +157,7 @@ def validate_story_description(description, instrumentation_required: false)
   if tests && !tests.empty?
     tests.each do |item|
       # suite_or_location and environment are optional at plan time. A Story can be
-      # IMPLEMENTATION READY before the repo or the environment exists. IN REVIEW
+      # SOLUTION READY before the repo or the environment exists. IN REVIEW
       # still requires a named environment in the evidence.
       required = %w[scenario_id level expected_evidence]
       raise ArgumentError, "incomplete automated-test plan" unless required.all? { |key| !item[key].to_s.empty? }

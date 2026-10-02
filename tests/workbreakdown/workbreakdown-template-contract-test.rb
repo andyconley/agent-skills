@@ -958,7 +958,7 @@ validate_story_description(story.fetch("description"))
 validate_story_review(story)
 assert(!story.dig("description", "documentation", 0).key?("owner"), "unknown owner must not render an empty field")
 
-# A Story can be IMPLEMENTATION READY before the repo or the environment exists.
+# A Story can be SOLUTION READY before the repo or the environment exists.
 unsited_plan = clone(story)
 unsited_plan["description"]["automated_tests"].first.delete("suite_or_location")
 unsited_plan["description"]["automated_tests"].first.delete("environment")

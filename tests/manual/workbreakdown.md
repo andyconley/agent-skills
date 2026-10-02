@@ -63,7 +63,7 @@ Pass when the skill preserves the v2 binding, accepts a separate lifecycle-evide
 Prompt 1:
 
 ~~~text
-Review this Story for IMPLEMENTATION READY. Its scenarios, operator SOP plan,
+Review this Story for SOLUTION READY. Its scenarios, operator SOP plan,
 mapped integration suite, and one meaningful operational signal are specific.
 The documentation, tests, and instrumentation do not exist yet.
 ~~~
