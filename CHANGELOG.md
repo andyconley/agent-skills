@@ -2,6 +2,12 @@
 
 All notable changes to agent-skills are generated from Conventional Commits. Longer design context belongs in the documentation changed by the release.
 
+## [1.8.1](https://github.com/andyconley/agent-skills/compare/v1.8.0...v1.8.1) (2026-10-02)
+
+### Documentation
+
+* **workbreakdown:** rename the Story lifecycle gate to SOLUTION READY ([#23](https://github.com/andyconley/agent-skills/issues/23)) ([5afff2a](https://github.com/andyconley/agent-skills/commit/5afff2a256f1842bc7c75aab658c88a97987f9cb))
+
 ## [1.8.0](https://github.com/andyconley/agent-skills/compare/v1.7.0...v1.8.0) (2026-09-25)
 
 ### Features
