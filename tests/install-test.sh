@@ -52,6 +52,18 @@ for runtime in codex claude; do
 done
 pass "humanizer references are readable through both installed skill links"
 
+run_manager --skill reasoning-critique --no-vale >/dev/null
+for runtime in codex claude; do
+  assert_link "$TEST_ROOT/$runtime/reasoning-critique" "$REPO_ROOT/skills/reasoning-critique"
+  for artifact in SKILL.md VERSION; do
+    cmp "$REPO_ROOT/skills/reasoning-critique/$artifact" "$TEST_ROOT/$runtime/reasoning-critique/$artifact" || fail "reasoning-critique $artifact differs for $runtime"
+  done
+done
+run_manager --uninstall --skill reasoning-critique >/dev/null
+assert_missing "$TEST_ROOT/codex/reasoning-critique"
+assert_missing "$TEST_ROOT/claude/reasoning-critique"
+pass "reasoning-critique installs matching content and uninstalls on both runtimes"
+
 run_manager --skill workbreakdown >/dev/null
 assert_link "$TEST_ROOT/codex/workbreakdown" "$REPO_ROOT/skills/workbreakdown"
 assert_link "$TEST_ROOT/claude/workbreakdown" "$REPO_ROOT/skills/workbreakdown"
@@ -78,6 +90,8 @@ assert_link "$TEST_ROOT/codex/doc-flow-review" "$REPO_ROOT/skills/doc-flow-revie
 assert_link "$TEST_ROOT/claude/doc-flow-review" "$REPO_ROOT/skills/doc-flow-review"
 assert_link "$TEST_ROOT/codex/workbreakdown" "$REPO_ROOT/skills/workbreakdown"
 assert_link "$TEST_ROOT/claude/workbreakdown" "$REPO_ROOT/skills/workbreakdown"
+assert_link "$TEST_ROOT/codex/reasoning-critique" "$REPO_ROOT/skills/reasoning-critique"
+assert_link "$TEST_ROOT/claude/reasoning-critique" "$REPO_ROOT/skills/reasoning-critique"
 pass "all installs every declared skill"
 
 touch "$TEST_ROOT/codex/unrelated"
@@ -122,6 +136,9 @@ pass "uninstall preflight prevents partial removal"
 rmdir "$TEST_ROOT/claude/humanizer"
 
 run_manager --uninstall --all >/dev/null
+assert_missing "$TEST_ROOT/codex/reasoning-critique"
+assert_missing "$TEST_ROOT/claude/reasoning-critique"
+pass "all uninstall removes reasoning-critique from both runtimes"
 missing_vale_path="/usr/bin:/bin:/usr/sbin:/sbin"
 run_manager_path "$missing_vale_path" --all --no-vale >"$TEST_ROOT/no-vale.out" 2>&1
 assert_link "$TEST_ROOT/codex/humanizer" "$REPO_ROOT/skills/humanizer"

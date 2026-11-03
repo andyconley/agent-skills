@@ -14,6 +14,7 @@ For the deeper strategy, theory, and repo map, see [docs/README.md](docs/README.
 | --- | --- | --- |
 | `doc-flow-review` | Structure, information order, progressive disclosure, argument, and depth | Copyediting, fact-checking, or rewriting prose |
 | `humanizer` | Engineering rewrites, personal edits, and pattern audits | Structural review or changing protected requirements |
+| `reasoning-critique` | Decisions, counter-cases, assumptions, alternatives, and pivot evidence | Document structure review, prose editing, or factual audits |
 | `workbreakdown` | Direct Epic-child work, concise versioned Jira descriptions, YAML manifests, hard dependencies, and Jira reconciliation | Portfolio hierarchy or unreviewed Jira changes |
 
 When a document needs both, run `doc-flow-review` first. Apply the structural decisions, then run `humanizer` on the prose.
