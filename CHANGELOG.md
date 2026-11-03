@@ -2,6 +2,12 @@
 
 All notable changes to agent-skills are generated from Conventional Commits. Longer design context belongs in the documentation changed by the release.
 
+## [1.9.0](https://github.com/andyconley/agent-skills/compare/v1.8.1...v1.9.0) (2026-11-03)
+
+### Features
+
+* **reasoning-critique:** add portable decision review skill ([#24](https://github.com/andyconley/agent-skills/issues/24)) ([6da7ebf](https://github.com/andyconley/agent-skills/commit/6da7ebf161e2bd0e30ae975d8594a3c2d553bd34))
+
 ## [1.8.1](https://github.com/andyconley/agent-skills/compare/v1.8.0...v1.8.1) (2026-10-02)
 
 ### Documentation
