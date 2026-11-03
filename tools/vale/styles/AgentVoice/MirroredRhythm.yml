@@ -2,6 +2,9 @@ extends: existence
 message: "Avoid mirrored rhythm '%s'. Remove it unless plain prose loses a specific technical relationship."
 level: error
 ignorecase: true
+# Preserve the causal-explanation versus decision distinction in reasoning-critique.
+exceptions:
+  - 'what happened from a choice about what to do'
 tokens:
   - '\bnot\s+[^.;:]+[,;]\s+but\b'
   - '\bnot\s+just\s+[^.]+also\b'
