@@ -19,6 +19,23 @@ Reject:
 - unsupported owners, paths, environments, dependencies, or evidence
 - criteria that describe activity instead of an observable result
 
+## Card writing
+
+Write each card so someone who was not in the room can identify its outcome, verification, and boundary.
+
+- Use a plain action-and-object title. Keep ticket numbers and writer-only codes out of titles. Preserve required type-specific markers such as `[PLACEHOLDER]`.
+- Write short, plain sentences for readers who use English as a second language. Avoid em dashes and semicolons in authored prose. Preserve exact code, quoted evidence, and published identifiers when their syntax requires them.
+- Keep context to one or two sentences explaining why the card exists and where it fits. Put implementation rules in the design artifact rather than repeating them in context.
+- Before citing a design section, read the published version and verify that the section exists and supports the claim. If it cannot be checked, record the gap rather than inventing an anchor or presenting the claim as verified. A published design does not override the SOP's source-authority rules.
+- Put testable outcomes in acceptance conditions. Name responses, state changes, failure behavior, or validation results rather than activities. Retain the Task rule of 2–5 binary conditions. Do not pad a two-condition Task to reach three.
+- Limit technical considerations to three short, ticket-specific points a developer could otherwise miss. Keep essential additional detail in the linked design. Do not hide a necessary acceptance condition there to meet a count.
+- Name nearby excluded work when a reader could reasonably expect it in this card. Use its purpose or a verified Jira key, never a made-up card ID.
+- Do not use meeting citations, requirement-row labels understood only by the writer, or local machine paths in the card. Use published design sections and repository references. Keep provenance and stable scenario/evidence IDs where the manifest or selected template requires them.
+
+Aim for 150–250 words for an ordinary implementation Task, not a mandatory minimum or maximum. A shorter complete card is valid. Spikes, integrated acceptance Stories, and Epics may need more space to retain their required content and evidence. Link supporting artifacts where practical, but keep the card's own acceptance explicit. Do not remove lifecycle obligations or add fields to an approved template to satisfy this guidance.
+
+Before handing over newly drafted or materially revised descriptions, count their words and acceptance conditions. Count visible title and description prose, including table text, but not URL targets or attached artifacts. Report counts and any material sizing concern in the review output, not as new manifest keys or Jira rows. Treat a long card as a prompt to inspect independent outcomes, not a reason to split valid work mechanically. Review and Audit retain their smallest-material-correction rule and do not reformat valid existing cards for style alone.
+
 ## Completion profiles
 
 Reference the applicable profile. Do not copy the checklist into the ticket. Render only ticket-specific additions, approved exceptions, and evidence.

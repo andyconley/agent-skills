@@ -30,6 +30,7 @@ Every proposed issue names its `template_id` and includes its complete required 
 - Omit unused conditional sections. Do not render empty headings or placeholder rows.
 - Use `N/A` only when an immutable table shape requires a cell.
 - Do not invent owners, locations, environments, evidence, constraints, or acceptance criteria.
+- Apply the card-writing guidance in `ticket-quality-and-completion.md` within the selected template. Do not force every issue type into one table shape or silently migrate an approved description.
 
 For Story documentation, render the owner only when known. Do not leave an empty owner cell. Documentation, automated-test, and instrumentation obligations may each use a complete approved exception instead of a plan; never render both for the same obligation.
 

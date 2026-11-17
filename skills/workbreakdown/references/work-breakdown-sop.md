@@ -118,7 +118,7 @@ In a Draft where cross-Epic consolidation ran, and in every Review, check every 
 ## Sizing and refinement
 
 - Create known work early so the milestone can be forecast. Mark estimates as provisional while blocking Spikes remain open.
-- Size each Spike or Task so its completion can be forecast and it finishes with verifiable evidence. Split an item when its completion cannot be observed.
+- Size each Spike or Task so its completion can be forecast and it finishes with verifiable evidence. Use one independently verifiable outcome per card: a functionality, artifact, bounded decision, or operational result. A few developer-days is a useful implementation sizing target, not a requirement to split a coherent outcome into procedural sub-steps. Split an item when its completion cannot be observed.
 - Treat five points as a review trigger. Check whether the item contains multiple outcomes or decisions.
 - Do not split work only to reduce an estimate. Each resulting item needs its own completion state.
 - Estimate enough work to forecast the milestone.

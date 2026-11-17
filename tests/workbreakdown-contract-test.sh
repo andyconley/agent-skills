@@ -251,3 +251,12 @@ fi
 "$REPO_ROOT/tests/workbreakdown/workbreakdown-template-contract-test.sh"
 
 printf 'Workbreakdown contract checks passed.\n'
+
+# Card-writing guidance preserves type-specific completion and approved formats.
+require_text "$QUALITY_FILE" "Retain the Task rule of 2–5 binary conditions."
+require_text "$QUALITY_FILE" "Before citing a design section, read the published version"
+require_text "$QUALITY_FILE" "not as new manifest keys or Jira rows"
+require_text "$QUALITY_FILE" "Preserve required type-specific markers"
+require_text "$QUALITY_FILE" "do not reformat valid existing cards for style alone"
+require_text "$SOP_FILE" "one independently verifiable outcome per card"
+require_text "$TEMPLATE_GUIDE" "Do not force every issue type into one table shape"
