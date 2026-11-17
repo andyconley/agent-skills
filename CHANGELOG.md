@@ -2,6 +2,12 @@
 
 All notable changes to agent-skills are generated from Conventional Commits. Longer design context belongs in the documentation changed by the release.
 
+## [1.9.1](https://github.com/andyconley/agent-skills/compare/v1.9.0...v1.9.1) (2026-11-17)
+
+### Documentation
+
+* **workbreakdown:** improve card writing and sizing guidance ([8afc840](https://github.com/andyconley/agent-skills/commit/8afc840b66deda6ce70b1a50bc9e292c8c144583))
+
 ## [1.9.0](https://github.com/andyconley/agent-skills/compare/v1.8.1...v1.9.0) (2026-11-03)
 
 ### Features
