@@ -1,0 +1,102 @@
+{
+  "type": "object",
+  "properties": {
+    "coverage": {
+      "type": "string",
+      "enum": [
+        "complete",
+        "incomplete"
+      ]
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "engineering",
+        "personal"
+      ]
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "rule": {
+            "type": "string",
+            "enum": [
+              "FILLER",
+              "PLAIN_SPEECH",
+              "COMPRESSION",
+              "STOCK_STRUCTURE",
+              "UNSUPPORTED_TRADEOFF",
+              "VAGUE_ATTRIBUTION",
+              "INFLATED_SIGNIFICANCE",
+              "BURIED_ASK",
+              "TERM_DRIFT",
+              "DRAFT_PATTERN"
+            ]
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "phrase",
+              "sentence",
+              "draft"
+            ]
+          },
+          "disposition": {
+            "type": "string",
+            "enum": [
+              "fix",
+              "review",
+              "keep"
+            ]
+          },
+          "anchors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "line": {
+                  "type": "integer"
+                },
+                "quote": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "line",
+                "quote"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "reason": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "preserve": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "rule",
+          "scope",
+          "disposition",
+          "anchors",
+          "reason",
+          "direction",
+          "preserve"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "coverage",
+    "mode",
+    "findings"
+  ],
+  "additionalProperties": false
+}
